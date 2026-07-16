@@ -1,0 +1,3218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>★ jayus calculator ★ Where Winds Meet Damage Calculator ★</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  cursor: url('media/momonga.gif'), auto;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255,0,255,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(0,255,255,0.05) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px);
+  color: #00ff00;
+  min-height: 100vh;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes rainbow {
+  0% { color: #ff0000; }
+  16% { color: #ff8800; }
+  33% { color: #ffff00; }
+  50% { color: #00ff00; }
+  66% { color: #0088ff; }
+  83% { color: #ff00ff; }
+  100% { color: #ff0000; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes sparkle {
+  0%, 100% { text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff; }
+  50% { text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff; }
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: #ff00ff; }
+  25% { border-color: #00ffff; }
+  50% { border-color: #ffff00; }
+  75% { border-color: #00ff00; }
+}
+
+@keyframes star-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.blink { animation: blink 1s step-end infinite; }
+.rainbow-text { animation: rainbow 3s linear infinite; }
+.sparkle-text { animation: sparkle 2s ease-in-out infinite; }
+
+.top-bar {
+  background: linear-gradient(180deg, #333399 0%, #000066 100%);
+  border-bottom: 3px outset #6666cc;
+  padding: 5px 0;
+  overflow: hidden;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 20s linear infinite;
+  font-size: 14px;
+  color: #ffff00;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.header {
+  background: linear-gradient(180deg, #1a0033 0%, #330066 30%, #660099 60%, #330066 100%);
+  border: 4px outset #9966cc;
+  margin: 10px;
+  padding: 15px;
+  text-align: center;
+}
+
+.header h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px;
+  color: #ff66ff;
+  text-shadow: 3px 3px 0px #000, -1px -1px 0px #6600cc,
+    0 0 10px #ff00ff, 0 0 20px #ff00ff;
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+}
+
+.header .subtitle {
+  font-size: 16px;
+  color: #00ffff;
+  text-shadow: 0 0 8px #00ffff;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.header .stars {
+  color: #ffff00;
+  font-size: 20px;
+  animation: star-rotate 4s linear infinite;
+  display: inline-block;
+}
+
+.guestbook {
+  text-align: center;
+  margin: 5px;
+  font-size: 11px;
+  color: #aaaaaa;
+}
+
+.guestbook a {
+  color: #00ccff;
+  text-decoration: underline;
+}
+
+.main-container {
+  display: flex;
+  gap: 10px;
+  padding: 0 10px 10px 10px;
+  flex-wrap: wrap;
+}
+
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.sidebar-box {
+  background: linear-gradient(180deg, #1a1a4a 0%, #0d0d2a 100%);
+  border: 3px outset #4444aa;
+  margin-bottom: 10px;
+}
+
+.sidebar-title {
+  background: linear-gradient(180deg, #6633cc 0%, #330099 100%);
+  border-bottom: 2px outset #9966ff;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 1px 1px 0px #000;
+}
+
+.sidebar-content {
+  padding: 8px;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.sidebar-content a {
+  color: #00ff88;
+  text-decoration: none;
+  display: block;
+  padding: 2px 5px;
+}
+
+.sidebar-content a:hover {
+  background: #222266;
+  color: #ffff00;
+}
+
+.sidebar-content a::before {
+  content: '► ';
+  color: #ff66ff;
+}
+
+.content-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.calc-box {
+  background: linear-gradient(180deg, #111133 0%, #0a0a22 100%);
+  border: 3px outset #5555aa;
+  margin-bottom: 10px;
+}
+
+.calc-title {
+  background: linear-gradient(180deg, #cc3300 0%, #993300 50%, #663300 100%);
+  border-bottom: 2px outset #ff6633;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  text-align: center;
+}
+
+.calc-body {
+  padding: 15px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-row label {
+  flex: 1;
+  font-size: 12px;
+  color: #ccccff;
+  text-shadow: 1px 1px 0px #000;
+}
+
+.stat-row input {
+  width: 110px;
+  background: #000033;
+  border: 2px inset #6666cc;
+  color: #00ff00;
+  padding: 3px 5px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  text-align: right;
+}
+
+.stat-row input:focus {
+  outline: none;
+  border-color: #ff00ff;
+  background: #001144;
+  box-shadow: 0 0 5px #ff00ff;
+}
+
+.stat-row .stat-unit {
+  color: #ffcc00;
+  font-size: 11px;
+  width: 15px;
+}
+
+.section-label {
+  grid-column: 1 / -1;
+  background: linear-gradient(90deg, transparent, #333366, transparent);
+  border-top: 1px solid #555588;
+  border-bottom: 1px solid #555588;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #ff9900;
+  text-shadow: 1px 1px 0px #000;
+  margin-top: 5px;
+}
+
+.btn-row {
+  text-align: center;
+  margin: 15px 0;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-calc {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  padding: 12px 30px;
+  border: 4px outset #66cc66;
+  background: linear-gradient(180deg, #33cc33 0%, #228822 50%, #116611 100%);
+  color: #ffffff;
+  cursor: pointer;
+  text-shadow: 2px 2px 0px #000;
+  transition: all 0.1s;
+}
+
+.btn-calc:hover {
+  background: linear-gradient(180deg, #44dd44 0%, #339933 50%, #227722 100%);
+}
+
+.btn-calc:active {
+  border-style: inset;
+  transform: translate(2px, 2px);
+}
+
+.btn-reset {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  padding: 12px 30px;
+  border: 4px outset #cc6666;
+  background: linear-gradient(180deg, #cc3333 0%, #992222 50%, #661111 100%);
+  color: #ffffff;
+  cursor: pointer;
+  text-shadow: 2px 2px 0px #000;
+  transition: all 0.1s;
+}
+
+.btn-reset:active {
+  border-style: inset;
+  transform: translate(2px, 2px);
+}
+
+.results-box {
+  background: linear-gradient(180deg, #0d1a0d 0%, #0a110a 100%);
+  border: 3px outset #33aa33;
+  margin-top: 15px;
+}
+
+.results-title {
+  background: linear-gradient(180deg, #006600 0%, #004400 100%);
+  border-bottom: 2px outset #00aa00;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #00ff00;
+  text-shadow: 2px 2px 0px #000;
+  text-align: center;
+  text-shadow: 0 0 10px #00ff00;
+}
+
+.results-body {
+  padding: 15px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.result-item {
+  background: #001100;
+  border: 1px inset #003300;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-item .label {
+  color: #88cc88;
+  font-size: 12px;
+}
+
+.result-item .value {
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0 0 5px #00ff00;
+}
+
+.result-item.highlight {
+  background: #110011;
+  border-color: #660066;
+}
+
+.result-item.highlight .label {
+  color: #ff88ff;
+}
+
+.result-item.highlight .value {
+  color: #ff00ff;
+  text-shadow: 0 0 8px #ff00ff;
+  font-size: 16px;
+}
+
+.result-item.crit {
+  background: #110800;
+  border-color: #aa4400;
+}
+
+.result-item.crit .label {
+  color: #ffaa44;
+}
+
+.result-item.crit .value {
+  color: #ffcc00;
+  text-shadow: 0 0 8px #ffcc00;
+  font-size: 16px;
+}
+
+.result-item.affinity {
+  background: #000811;
+  border-color: #0044aa;
+}
+
+.result-item.affinity .label {
+  color: #44aaff;
+}
+
+.result-item.affinity .value {
+  color: #00ccff;
+  text-shadow: 0 0 8px #00ccff;
+  font-size: 16px;
+}
+
+.dps-highlight {
+  grid-column: 1 / -1;
+  background: linear-gradient(180deg, #1a0a2a 0%, #0d0515 100%);
+  border: 3px outset #9933cc;
+  padding: 15px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.dps-highlight .label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: #ff66ff;
+  text-shadow: 0 0 10px #ff00ff;
+  margin-bottom: 8px;
+}
+
+.dps-highlight .value {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px;
+  color: #ff00ff;
+  text-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff, 3px 3px 0 #660099;
+  animation: rainbow 3s linear infinite;
+}
+
+.separator {
+  text-align: center;
+  color: #ff66ff;
+  font-size: 12px;
+  margin: 5px 0;
+  letter-spacing: 3px;
+}
+
+.footer {
+  background: linear-gradient(180deg, #333399 0%, #1a1a66 100%);
+  border-top: 3px outset #6666cc;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #8888cc;
+}
+
+.footer .hearts {
+  color: #ff0066;
+  font-size: 14px;
+  animation: blink 1.5s step-end infinite;
+}
+
+.hit-counter {
+  display: inline-block;
+  background: #000;
+  border: 2px inset #666;
+  padding: 3px 10px;
+  font-family: 'Courier New', monospace;
+  color: #00ff00;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.tooltip-icon {
+  cursor: help;
+  color: #ffff00;
+  font-size: 11px;
+  margin-left: 3px;
+}
+
+.skill-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.skill-tab {
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  padding: 8px 15px;
+  border: 2px outset #5555aa;
+  border-bottom: none;
+  background: linear-gradient(180deg, #333366 0%, #222244 100%);
+  color: #aaaacc;
+  cursor: pointer;
+}
+
+.skill-tab.active {
+  background: linear-gradient(180deg, #5533aa 0%, #332288 100%);
+  color: #ffffff;
+  border-color: #9966ff;
+  text-shadow: 0 0 5px #ff00ff;
+}
+
+.skill-tab:hover {
+  background: linear-gradient(180deg, #444488 0%, #333366 100%);
+}
+
+.welcome-banner {
+  background: #000;
+  border: 2px inset #444;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.welcome-banner span {
+  color: #ff0000;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge {
+  display: inline-block;
+  background: linear-gradient(180deg, #cc9900, #996600);
+  border: 2px outset #ffcc33;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  margin: 0 3px;
+}
+
+.reviews-box {
+  background: linear-gradient(180deg, #1a1a00 0%, #111100 100%);
+  border: 3px outset #aaaa00;
+  margin-bottom: 10px;
+}
+
+.reviews-title {
+  background: linear-gradient(180deg, #cc9900 0%, #996600 50%, #664400 100%);
+  border-bottom: 2px outset #ffcc33;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  text-align: center;
+}
+
+.reviews-body {
+  padding: 15px;
+}
+
+.review-entry {
+  background: #0a0a00;
+  border: 2px inset #555500;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+}
+
+.review-entry:last-child {
+  margin-bottom: 0;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.review-user {
+  color: #ffcc00;
+  font-weight: bold;
+  font-size: 13px;
+  text-shadow: 0 0 5px #ffcc00;
+}
+
+.review-user::before {
+  content: '★ ';
+  color: #ff6600;
+}
+
+.review-stars {
+  color: #ff6600;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px #ff6600;
+}
+
+.review-date {
+  color: #666633;
+  font-size: 10px;
+  margin-left: 8px;
+}
+
+.review-text {
+  color: #cccc88;
+  font-size: 12px;
+  line-height: 1.6;
+  padding-left: 10px;
+  border-left: 2px solid #444400;
+}
+
+.review-text .shout {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.review-text .heart {
+  color: #ff0066;
+}
+
+.review-text .wow {
+  color: #ff66ff;
+  font-weight: bold;
+}
+
+.review-entry:nth-child(odd) {
+  border-color: #666622;
+}
+
+.review-entry:nth-child(even) {
+  border-color: #334455;
+  background: #000a0a;
+}
+
+.review-entry:nth-child(even) .review-user {
+  color: #66ccff;
+  text-shadow: 0 0 5px #00ccff;
+}
+
+.review-entry:nth-child(even) .review-user::before {
+  content: '★ ';
+  color: #00ccff;
+}
+
+.review-entry:nth-child(even) .review-stars {
+  color: #00aaff;
+  text-shadow: 0 0 5px #00aaff;
+}
+
+.review-entry:nth-child(even) .review-text {
+  border-left-color: #224466;
+  color: #aaccdd;
+}
+
+.review-entry:nth-child(3n) {
+  border-color: #662266;
+  background: #0a000a;
+}
+
+.review-entry:nth-child(3n) .review-user {
+  color: #ff88ff;
+  text-shadow: 0 0 5px #ff00ff;
+}
+
+.review-entry:nth-child(3n) .review-user::before {
+  content: '★ ';
+  color: #ff00ff;
+}
+
+.review-entry:nth-child(3n) .review-stars {
+  color: #ff66ff;
+  text-shadow: 0 0 5px #ff00ff;
+}
+
+.review-entry:nth-child(3n) .review-text {
+  border-left-color: #662266;
+  color: #ddaacc;
+}
+
+.review-entry:nth-child(3n+1) {
+  border-color: #226622;
+  background: #000a00;
+}
+
+.review-entry:nth-child(3n+1) .review-user {
+  color: #66ff66;
+  text-shadow: 0 0 5px #00ff00;
+}
+
+.review-entry:nth-child(3n+1) .review-user::before {
+  content: '★ ';
+  color: #00ff00;
+}
+
+.review-entry:nth-child(3n+1) .review-stars {
+  color: #44ff44;
+  text-shadow: 0 0 5px #00ff00;
+}
+
+.review-entry:nth-child(3n+1) .review-text {
+  border-left-color: #226622;
+  color: #aaddaa;
+}
+
+@keyframes glow-review {
+  0%, 100% { box-shadow: 0 0 5px rgba(255,204,0,0.2); }
+  50% { box-shadow: 0 0 15px rgba(255,204,0,0.4); }
+}
+
+.review-entry:nth-child(1) {
+  animation: glow-review 3s ease-in-out infinite;
+}
+
+.info-box {
+  background: linear-gradient(180deg, #0a0a33 0%, #060622 100%);
+  border: 3px outset #5555cc;
+  margin-bottom: 12px;
+}
+
+.info-box-title {
+  background: linear-gradient(180deg, #3333aa 0%, #222288 100%);
+  border-bottom: 2px outset #6666dd;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #aaaaff;
+  text-shadow: 1px 1px 0px #000;
+  text-align: center;
+}
+
+.info-box-body {
+  padding: 10px 15px;
+}
+
+.ladder-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dotted #333366;
+}
+
+.ladder-step:last-child { border-bottom: none; }
+
+.ladder-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 2px outset #6666aa;
+  background: linear-gradient(180deg, #4444aa, #222266);
+  color: #ffffff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.ladder-desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #aaaadd;
+}
+
+.ladder-desc strong {
+  color: #ffff00;
+}
+
+.ladder-desc .hit-type-aff {
+  color: #00ccff;
+  font-weight: bold;
+}
+
+.ladder-desc .hit-type-prec {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.ladder-desc .hit-type-abr {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+.ladder-desc .hit-type-crit {
+  color: #ffcc00;
+  font-weight: bold;
+}
+
+.pipeline-box {
+  background: #0a0a22;
+  border: 2px inset #444488;
+  padding: 10px;
+  margin: 8px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #88aacc;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pipeline-box .eq { color: #ff66ff; }
+.pipeline-box .op { color: #ffff00; }
+.pipeline-box .var { color: #00ffff; }
+.pipeline-box .num { color: #ff8844; }
+
+.result-item.abrasion {
+  background: #110000;
+  border-color: #660000;
+}
+
+.result-item.abrasion .label {
+  color: #ff6666;
+}
+
+.result-item.abrasion .value {
+  color: #ff4444;
+  text-shadow: 0 0 8px #ff0000;
+  font-size: 16px;
+}
+
+.myspace-btn {
+  display: inline-block;
+  background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+  border: 3px outset #336699;
+  padding: 6px 14px;
+  color: #99ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  margin-top: 5px;
+}
+
+.myspace-btn:hover { background: linear-gradient(180deg, #004488 0%, #002244 100%); color: #ffffff; }
+
+.myspace-popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+}
+
+.myspace-popup-overlay.show { display: flex; }
+
+.myspace-popup {
+  background: linear-gradient(180deg, #336699 0%, #1a3355 100%);
+  border: 4px outset #6699cc;
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 5px 5px 0 #000;
+}
+
+.myspace-popup-title {
+  background: linear-gradient(180deg, #003366, #001a33);
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px outset #336699;
+}
+
+.myspace-popup-title span { color: #99ccff; font-size: 13px; font-weight: bold; }
+
+.myspace-popup-close {
+  background: #cc3333;
+  border: 2px outset #ff6666;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.myspace-popup-body {
+  padding: 20px;
+  text-align: center;
+  color: #cce0ff;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.myspace-popup-body .big-text {
+  font-size: 18px;
+  color: #ff6666;
+  font-weight: bold;
+  margin: 10px 0;
+  animation: blink 0.8s step-end infinite;
+}
+
+.myspace-popup-body .skull { font-size: 40px; margin: 10px 0; }
+
+.popup-ad-overlay {
+  display: none;
+  position: fixed;
+  z-index: 99998;
+  width: 320px;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.popup-ad-overlay.show { display: block; }
+
+.popup-ad-titlebar {
+  background: linear-gradient(180deg, #000080, #000044);
+  padding: 3px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px outset #0000aa;
+}
+
+.popup-ad-titlebar span { color: white; font-size: 11px; font-weight: bold; }
+
+.popup-ad-close {
+  background: #c0c0c0;
+  border: 2px outset #ffffff;
+  color: black;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0 5px;
+  font-weight: bold;
+}
+
+.popup-ad-body {
+  background: #ffffcc;
+  border: 2px outset #cccc88;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #333;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.popup-ad-body .ad-big { font-size: 16px; color: #cc0000; font-weight: bold; }
+.popup-ad-body .ad-link { color: #0000ff; text-decoration: underline; cursor: pointer; }
+.popup-ad-body img { max-width: 100%; }
+
+.captcha-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 999999;
+  justify-content: center;
+  align-items: center;
+}
+
+.captcha-overlay.show { display: flex; }
+
+.captcha-box {
+  background: #ffffff;
+  border: 3px solid #333;
+  width: 480px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(255,0,0,0.3);
+  font-family: Arial, sans-serif;
+}
+
+.captcha-header {
+  background: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.captcha-header h3 { margin: 0; font-size: 16px; color: #333; }
+.captcha-header .close { cursor: pointer; font-size: 20px; color: #999; }
+.captcha-header .close:hover { color: #000; }
+
+.captcha-body { padding: 20px; }
+
+.captcha-step {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #ddd;
+}
+
+.captcha-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+.captcha-step label { font-size: 13px; color: #333; display: block; margin-bottom: 8px; font-weight: bold; }
+
+.captcha-step .captcha-options { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.captcha-step .captcha-opt {
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+}
+
+.captcha-step .captcha-opt:hover { border-color: #0066cc; background: #e8f0ff; }
+.captcha-step .captcha-opt.selected { border-color: #006600; background: #e0ffe0; }
+
+.captcha-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: #0066cc;
+  color: white;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.captcha-btn:hover { background: #0055aa; }
+.captcha-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+.captcha-result {
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.captcha-result.fail { color: #cc0000; }
+.captcha-result.pass { color: #006600; }
+
+.spam-67 {
+  position: fixed;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 30px;
+  color: #ff0000;
+  text-shadow: 2px 2px 0 #000, 0 0 10px #ff0000;
+  z-index: 9999999;
+  pointer-events: none;
+  animation: spamFade 2s forwards;
+}
+
+@keyframes spamFade {
+  0% { opacity: 1; transform: scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: scale(2) rotate(45deg) translateY(-50px); }
+}
+
+.countdown-box {
+  display: inline-block;
+  background: #000;
+  border: 2px inset #666;
+  padding: 3px 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #ff3333;
+  margin-top: 5px;
+}
+
+.countdown-box .label { color: #999; }
+
+.hidden-67-btn {
+  position: fixed;
+  bottom: 3px;
+  left: 3px;
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.15;
+}
+
+.hidden-67-btn:hover { opacity: 0.6; background: rgba(255,255,255,0.05); }
+
+.shape-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9990;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(180deg, #cc3333, #992222);
+  border: 3px outset #ff6666;
+  color: white;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 9px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+  transition: border-radius 0.3s;
+  border-radius: 0;
+}
+
+.shape-btn.circle {
+  border-radius: 50%;
+  background: linear-gradient(180deg, #3333cc, #222299);
+  border-color: #6666ff;
+}
+
+.music-player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9990;
+  width: 260px;
+  background: linear-gradient(180deg, #3a3a5c 0%, #1e1e32 100%);
+  border: 3px outset #7777aa;
+  box-shadow: 3px 3px 0 #000, inset 0 0 20px rgba(0,0,0,0.3);
+  font-family: 'Courier New', monospace;
+  user-select: none;
+}
+
+.music-titlebar {
+  background: linear-gradient(180deg, #000080, #000044, #000066);
+  padding: 3px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px outset #4444aa;
+  cursor: move;
+}
+
+.music-titlebar .title-text {
+  color: #aaaaff;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.music-titlebar .win-btns {
+  display: flex;
+  gap: 2px;
+}
+
+.music-titlebar .win-btn {
+  width: 16px;
+  height: 14px;
+  background: #c0c0c0;
+  border: 2px outset #ffffff;
+  color: #000;
+  font-size: 8px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.music-titlebar .win-btn:active { border-style: inset; }
+
+.music-display {
+  background: #000;
+  margin: 5px;
+  padding: 4px 8px;
+  border: 2px inset #333;
+  height: 20px;
+  overflow: hidden;
+}
+
+.music-display .scroll-text {
+  color: #00ff00;
+  font-size: 10px;
+  white-space: nowrap;
+  animation: musicScroll 10s linear infinite;
+  display: inline-block;
+}
+
+@keyframes musicScroll {
+  0% { transform: translateX(260px); }
+  100% { transform: translateX(-200%); }
+}
+
+.music-viz {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  margin: 2px 5px;
+  height: 25px;
+  align-items: flex-end;
+}
+
+.music-viz .bar {
+  width: 4px;
+  background: #00ff00;
+  min-height: 2px;
+  transition: height 0.15s;
+}
+
+.music-viz .bar.playing { animation: vizBounce 0.4s ease-in-out infinite alternate; }
+
+@keyframes vizBounce {
+  0% { height: 3px; background: #00ff00; }
+  100% { height: var(--max-h, 20px); background: var(--bar-color, #00ff00); }
+}
+
+.music-controls {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px;
+  border-top: 1px solid #333;
+}
+
+.music-controls .ctrl-btn {
+  width: 30px;
+  height: 24px;
+  background: linear-gradient(180deg, #555577, #333355);
+  border: 2px outset #7777aa;
+  color: #ccccee;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.music-controls .ctrl-btn:hover { background: linear-gradient(180deg, #666688, #444466); }
+.music-controls .ctrl-btn:active { border-style: inset; }
+.music-controls .ctrl-btn.active { background: linear-gradient(180deg, #444466, #222244); border-style: inset; }
+
+.music-volume {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 6px;
+}
+
+.music-volume .vol-label { color: #8888aa; font-size: 9px; }
+
+.music-volume .vol-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, #00aa00, #00ff00);
+  border: 1px inset #333;
+  outline: none;
+}
+
+.music-volume .vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 14px;
+  background: #c0c0c0;
+  border: 2px outset #ffffff;
+  cursor: pointer;
+}
+
+.music-status {
+  text-align: center;
+  padding: 2px;
+  font-size: 8px;
+  color: #666688;
+  border-top: 1px solid #222;
+}
+
+.achievements-box {
+  background: linear-gradient(180deg, #1a1a00 0%, #111100 100%);
+  border: 3px outset #aaaa00;
+  margin-bottom: 10px;
+}
+
+.achievements-title {
+  background: linear-gradient(180deg, #cc9900 0%, #996600 50%, #664400 100%);
+  border-bottom: 2px outset #ffcc33;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  text-align: center;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+  padding: 15px;
+}
+
+.achievement-item {
+  background: #0a0a00;
+  border: 2px inset #555500;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.achievement-item:hover { border-color: #ffff00; background: #1a1a00; }
+
+.achievement-item.unlocked { border-color: #ffcc00; background: #1a1a00; }
+
+.achievement-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 40px;
+  text-align: center;
+  filter: grayscale(100%) opacity(0.3);
+}
+
+.achievement-item.unlocked .achievement-icon { filter: none; }
+
+.achievement-info .name { font-size: 12px; font-weight: bold; color: #888; }
+
+.achievement-item.unlocked .achievement-info .name { color: #ffcc00; text-shadow: 0 0 5px #ffcc00; }
+
+.achievement-info .desc { font-size: 10px; color: #666; margin-top: 2px; }
+
+.achievement-item.unlocked .achievement-info .desc { color: #888866; }
+
+.codes-box {
+  background: linear-gradient(180deg, #0a0a2a 0%, #050515 100%);
+  border: 3px outset #4444aa;
+  margin-bottom: 10px;
+}
+
+.codes-title {
+  background: linear-gradient(180deg, #3333cc 0%, #222288 50%, #111155 100%);
+  border-bottom: 2px outset #6666ff;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  text-align: center;
+}
+
+.codes-grid {
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.code-entry {
+  background: #000022;
+  border: 2px inset #333366;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-entry .code-text {
+  font-family: 'Courier New', monospace;
+  color: #00ff00;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.code-entry .code-date {
+  font-size: 9px;
+  color: #666688;
+}
+
+.code-entry .claim-btn {
+  background: linear-gradient(180deg, #006600, #004400);
+  border: 2px outset #00aa00;
+  color: #00ff00;
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.code-entry .claim-btn:hover { background: linear-gradient(180deg, #008800, #006600); }
+.code-entry .claim-btn.claimed { background: #333; border-color: #555; color: #999; cursor: default; }
+
+.code-entry .code-info { display: flex; flex-direction: column; gap: 2px; }
+
+.fake-stats-box {
+  background: linear-gradient(180deg, #2a0a2a 0%, #1a051a 100%);
+  border: 3px outset #aa44aa;
+  margin-bottom: 10px;
+}
+
+.fake-stats-title {
+  background: linear-gradient(180deg, #cc44cc 0%, #993399 50%, #662266 100%);
+  border-bottom: 2px outset #ff66ff;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  text-align: center;
+}
+
+.fake-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  padding: 15px;
+}
+
+.fake-stat-item {
+  background: #1a001a;
+  border: 1px inset #440044;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fake-stat-item .fs-label { color: #cc88cc; font-size: 12px; }
+.fake-stat-item .fs-value {
+  color: #ff66ff;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0 0 5px #ff00ff;
+}
+
+.tips-box {
+  background: linear-gradient(180deg, #0a2a0a 0%, #051505 100%);
+  border: 3px outset #44aa44;
+  margin-bottom: 10px;
+}
+
+.tips-title {
+  background: linear-gradient(180deg, #33aa33 0%, #228822 50%, #115511 100%);
+  border-bottom: 2px outset #66ff66;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  text-align: center;
+}
+
+.tips-list { padding: 15px; }
+
+.tip-entry {
+  background: #001a00;
+  border: 1px inset #003300;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  color: #88cc88;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.tip-entry:last-child { margin-bottom: 0; }
+
+.tip-entry::before {
+  content: '💡 ';
+}
+
+.codes-note {
+  text-align: center;
+  padding: 8px;
+  font-size: 10px;
+  color: #666688;
+  border-top: 1px solid #222244;
+}
+
+@keyframes popupSlideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.popup-ad-overlay.show { animation: popupSlideIn 0.3s ease-out; }
+
+@media (max-width: 900px) {
+  .main-container { flex-direction: column; }
+  .sidebar { width: 100%; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .codes-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 500px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .header h1 { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Marquee Bar -->
+<div class="top-bar">
+  <div class="marquee-text">
+    ★ ★ ★ Welcome to jayus calculator — The ULTIMATE Where Winds Meet Damage Calculator!! ★ ★ ★ Built by jayus — Last updated 2026 — Bookmark this page!! ★ ★ ★ Best viewed in 1920x1080 ★ ★ ★ Made with Notepad and a dream ★ ★ ★
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <span class="stars">✦</span>
+  <span class="stars">✦</span>
+  <span class="stars">✦</span>
+  <br>
+  <h1>jayus calculator</h1>
+  <div class="subtitle">⚔ Where Winds Meet — Damage Calculator ⚔</div>
+  <br>
+  <span class="stars">✧</span>
+  <span style="color:#ff0;font-size:12px;"> v2.0 — now with MORE math!! </span>
+  <span class="stars">✧</span>
+  <br>
+  <div style="margin-top:8px;">
+    <a class="myspace-btn" onclick="showMySpacePopup()">🔴 Login with MySpace</a>
+    <span style="color:#666;font-size:10px;margin-left:8px;">(trusted by millions™)</span>
+  </div>
+  <div class="countdown-box" style="margin-top:8px;">
+    <span class="label">TIME UNTIL </span><span style="color:#ff0000;">67</span><span class="label">: </span><span id="countdownDisplay">67:00:00</span>
+  </div>
+</div>
+
+<div class="guestbook">
+  <span class="badge">NEW</span>
+  You are visitor #<span class="hit-counter" id="visitorCount">001337</span> to this page!!
+  <span class="badge">HOT</span>
+</div>
+
+<!-- Main Layout -->
+<div class="main-container">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-box">
+      <div class="sidebar-title">★ Navigation ★</div>
+      <div class="sidebar-content">
+        <a href="#" onclick="return false;">Phys Damage</a>
+        <a href="#" onclick="return false;">Skill Damage</a>
+        <a href="#" onclick="return false;">DPS Calc</a>
+        <a href="#" onclick="return false;">Comps</a>
+      </div>
+    </div>
+    <div class="sidebar-box">
+      <div class="sidebar-title">★ Links ★</div>
+      <div class="sidebar-content">
+        <a href="#" onclick="return false;">WWM Wiki</a>
+        <a href="#" onclick="return false;">Game Site</a>
+        <a href="https://discord.gg/vuNSJmdeHG" target="_blank">Discord</a>
+      </div>
+    </div>
+    <div class="sidebar-box">
+      <div class="sidebar-title">★ About ★</div>
+      <div class="sidebar-content" style="color:#aaa;">
+        <p style="margin-bottom:5px;">This calculator helps you compute your character's damage output in Where Winds Meet.</p>
+        <p style="color:#ff66ff;">Last updated: Jul 2026</p>
+        <p style="margin-top:5px;color:#ffff00;">★ Best viewed with Netscape Navigator ★</p>
+      </div>
+    </div>
+    <div class="sidebar-box">
+      <div class="sidebar-title">★ Fun Facts ★</div>
+      <div class="sidebar-content" style="color:#ffcc00;">
+        <p>✦ Affinity rolls FIRST on the ladder!</p>
+        <p style="margin-top:5px;">✦ Affinity & Crit are mutually exclusive!</p>
+        <p style="margin-top:5px;">✦ Pen & Res are separate buckets!</p>
+        <p style="margin-top:5px;">✦ Defense is multiplied by 2.5!</p>
+        <p style="margin-top:5px;">✦ Direct rates bypass caps!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area">
+
+    <div class="welcome-banner">
+      <span>▸ THIS SITE IS UNDER CONSTRUCTION ◂</span>
+      <span style="color:#ffff00;"> &nbsp; Please report bugs on my guestbook!!</span>
+      <span style="color:#00ffff;"> &nbsp; ICQ# 8675309</span>
+    </div>
+
+    <!-- Input Section -->
+    <div class="calc-box">
+      <div class="calc-title">⚙ Character Stats Input ⚙</div>
+      <div class="calc-body">
+
+        <div class="separator">·:*¨¨*:·. .·:*¨¨*:·.</div>
+
+        <!-- Probability Ladder Info -->
+        <div class="info-box">
+          <div class="info-box-title">▼ Probability Ladder — How Your Hits Roll ▼</div>
+          <div class="info-box-body">
+            <div class="ladder-step">
+              <div class="ladder-num">1</div>
+              <div class="ladder-desc">
+                <strong>Affinity Check</strong> — The game rolls Affinity first. If it triggers, your hit is locked in as a <span class="hit-type-aff">Max Attack</span> hit with Affinity DMG Bonuses. <em>Crit cannot also trigger.</em>
+              </div>
+            </div>
+            <div class="ladder-step">
+              <div class="ladder-num">2</div>
+              <div class="ladder-desc">
+                <strong>Precision Check</strong> — If Affinity fails, the game rolls Precision.<br>
+                ✗ <span class="hit-type-abr">FAIL → Abrasion Hit:</span> Forces your lowest Min Attack. Check Abrasion Conversion for a save.<br>
+                ✓ <span class="hit-type-prec">PASS → Precision Hit:</span> Uses Average (Min+Max)/2. Move to Step 3.
+              </div>
+            </div>
+            <div class="ladder-step">
+              <div class="ladder-num">3</div>
+              <div class="ladder-desc">
+                <strong>Critical Check</strong> — Only on a successful Precision Hit. If Crit triggers, your hit becomes a <span class="hit-type-crit">Critical Hit</span> with Crit DMG Bonus applied to your Average Attack.
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:10px;color:#886688;text-align:center;">
+              ⚠ Affinity and Crit are MUTUALLY EXCLUSIVE — only one can trigger per attack!
+            </div>
+          </div>
+        </div>
+
+        <!-- Damage Formula Reference -->
+        <div class="info-box">
+          <div class="info-box-title">▲ Damage Formula Reference ▲</div>
+          <div class="info-box-body">
+            <div class="pipeline-box"><span class="var">Phys Pipeline</span> <span class="eq">=</span> { [<span class="var">Attack</span> <span class="op">-</span> (<span class="var">PhyDef</span> <span class="op">×</span> <span class="num">2.5</span>)] <span class="op">×</span> [<span class="var">Crit/Aff Mult</span>] <span class="op">×</span> (<span class="num">1</span> <span class="op">+</span> <span class="var">Pen</span>) <span class="op">×</span> (<span class="num">1</span> <span class="op">-</span> <span class="var">Res</span>) } <span class="op">×</span> (<span class="num">1</span> <span class="op">+</span> <span class="var">PhysDMGBonus</span>)
+
+<span class="var">Attr Pipeline</span> <span class="eq">=</span> { [<span class="var">Attack</span>] <span class="op">×</span> [<span class="var">Crit/Aff Mult</span>] <span class="op">×</span> (<span class="num">1</span> <span class="op">+</span> <span class="var">Pen</span>) <span class="op">×</span> (<span class="num">1</span> <span class="op">-</span> <span class="var">Res</span>) } <span class="op">×</span> (<span class="num">1</span> <span class="op">+</span> <span class="var">AttrDMGBonus</span>)
+
+<span class="var">Final</span> <span class="eq">=</span> (<span class="var">Phys</span> <span class="op">+</span> <span class="var">Attr</span>) <span class="op">×</span> (<span class="num">1</span> <span class="op">+</span> <span class="var">AllMA%</span>) <span class="op">×</span> (<span class="num">1</span> <span class="op">+</span> <span class="var">BossBonus%</span>)</div>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+
+          <!-- Physical Damage -->
+          <div class="section-label">⚔ Physical Damage ⚔</div>
+
+          <div class="stat-row">
+            <label for="minPhys">Min Phys:</label>
+            <input type="text" id="minPhys" value="992.82">
+          </div>
+          <div class="stat-row">
+            <label for="maxPhys">Max Phys:</label>
+            <input type="text" id="maxPhys" value="3453.38">
+          </div>
+
+          <!-- Accuracy / Crit / Affinity -->
+          <div class="section-label">✦ Precision & Crit ✦</div>
+
+          <div class="stat-row">
+            <label for="precision">Precision %:</label>
+            <input type="text" id="precision" value="94.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="effPrecision">Effective Precision:</label>
+            <input type="text" id="effPrecision" value="85.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="critPct">Crit %:</label>
+            <input type="text" id="critPct" value="45.25">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="effCrit">Effective Crit:</label>
+            <input type="text" id="effCrit" value="31.21">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="affinityPct">Affinity %:</label>
+            <input type="text" id="affinityPct" value="56.45">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="effAffinity">Effective Affinity:</label>
+            <input type="text" id="effAffinity" value="38.93">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="directCrit">Direct Crit %:</label>
+            <input type="text" id="directCrit" value="0.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="directAffinity">Direct Affinity %:</label>
+            <input type="text" id="directAffinity" value="2.30">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="realCrit">Real Crit %:</label>
+            <input type="text" id="realCrit" value="26.53">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="abrasionConv">Abrasion Conv %:</label>
+            <input type="text" id="abrasionConv" value="0.00">
+            <span class="stat-unit">%</span>
+          </div>
+
+          <!-- Attributes -->
+          <div class="section-label">✧ Attributes ✧</div>
+
+          <div class="stat-row">
+            <label for="power">Power:</label>
+            <input type="text" id="power" value="541">
+          </div>
+          <div class="stat-row">
+            <label for="agility">Agility:</label>
+            <input type="text" id="agility" value="137">
+          </div>
+          <div class="stat-row">
+            <label for="momentum">Momentum:</label>
+            <input type="text" id="momentum" value="419.8">
+          </div>
+
+          <!-- Skill Damage -->
+          <div class="section-label">⚔ Skill Damage ⚔</div>
+
+          <div class="stat-row">
+            <label for="minSilkbind">Min Silkbind:</label>
+            <input type="text" id="minSilkbind" value="0">
+          </div>
+          <div class="stat-row">
+            <label for="maxSilkbind">Max Silkbind:</label>
+            <input type="text" id="maxSilkbind" value="0">
+          </div>
+          <div class="stat-row">
+            <label for="minBellstrike">Min Bellstrike:</label>
+            <input type="text" id="minBellstrike" value="286.1">
+          </div>
+          <div class="stat-row">
+            <label for="maxBellstrike">Max Bellstrike:</label>
+            <input type="text" id="maxBellstrike" value="573.1">
+          </div>
+          <div class="stat-row">
+            <label for="minStonesplit">Min Stonesplit:</label>
+            <input type="text" id="minStonesplit" value="0">
+          </div>
+          <div class="stat-row">
+            <label for="maxStonesplit">Max Stonesplit:</label>
+            <input type="text" id="maxStonesplit" value="0">
+          </div>
+          <div class="stat-row">
+            <label for="minBamboocut">Min Bamboocut:</label>
+            <input type="text" id="minBamboocut" value="0">
+          </div>
+          <div class="stat-row">
+            <label for="maxBamboocut">Max Bamboocut:</label>
+            <input type="text" id="maxBamboocut" value="0">
+          </div>
+
+          <!-- Penetration & Defense -->
+          <div class="section-label">🛡 Pen & Defense 🛡</div>
+
+          <div class="stat-row">
+            <label for="physPen">Phys Pen:</label>
+            <input type="text" id="physPen" value="41.1">
+          </div>
+          <div class="stat-row">
+            <label for="bellstrikePen">Bellstrike Pen:</label>
+            <input type="text" id="bellstrikePen" value="23.55">
+          </div>
+          <div class="stat-row">
+            <label for="maxHP">Max HP:</label>
+            <input type="text" id="maxHP" value="100139">
+          </div>
+          <div class="stat-row">
+            <label for="physDef">Phys Def (enemy):</label>
+            <input type="text" id="physDef" value="116.7">
+          </div>
+          <div class="stat-row">
+            <label for="enemyRes">Enemy Resistance:</label>
+            <input type="text" id="enemyRes" value="0">
+          </div>
+          <div class="stat-row">
+            <label for="body">Body:</label>
+            <input type="text" id="body" value="137">
+          </div>
+          <div class="stat-row">
+            <label for="defense">Defense:</label>
+            <input type="text" id="defense" value="137">
+          </div>
+
+          <!-- Damage Bonuses -->
+          <div class="section-label">✨ Damage Bonuses ✨</div>
+
+          <div class="stat-row">
+            <label for="physDmgBonus">Phys DMG Bonus %:</label>
+            <input type="text" id="physDmgBonus" value="0.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="attrDmgBonus">Attribute DMG Bonus %:</label>
+            <input type="text" id="attrDmgBonus" value="9.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="critDmgBonus">Crit DMG Bonus %:</label>
+            <input type="text" id="critDmgBonus" value="50.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="affinityDmgBonus">Affinity DMG Bonus %:</label>
+            <input type="text" id="affinityDmgBonus" value="0.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="allMABonus">All MA DMG Boost %:</label>
+            <input type="text" id="allMABonus" value="0.00">
+            <span class="stat-unit">%</span>
+          </div>
+          <div class="stat-row">
+            <label for="bossDmgBonus">Boss DMG Bonus %:</label>
+            <input type="text" id="bossDmgBonus" value="0.00">
+            <span class="stat-unit">%</span>
+          </div>
+
+          <!-- Simulation -->
+          <div class="section-label">🎲 Simulation Settings 🎲</div>
+
+          <div class="stat-row">
+            <label for="atkSpeed">Attack Speed (hits/s):</label>
+            <input type="text" id="atkSpeed" value="1.00">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-calc" id="calcBtn" onclick="calculate()" onmouseenter="onCalcHover()">★ CALCULATE ★</button>
+          <button class="btn-reset" id="resetBtn" onclick="resetForm()">✖ RESET ✖</button>
+        </div>
+
+        <div class="separator">·:*¨¨*:·. .·:*¨¨*:·.</div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-box" id="resultsBox" style="display:none;">
+      <div class="results-title">★ ★ ★ DAMAGE RESULTS ★ ★ ★</div>
+      <div class="results-body">
+
+        <!-- DPS Highlight -->
+        <div class="dps-highlight">
+          <div class="label">▶ ESTIMATED DPA / DPS ◀</div>
+          <div class="value" id="dpsValue">0</div>
+        </div>
+
+        <div class="separator" style="margin:12px 0;">✦·:·.✦·:·.✦·:·.✦·:·.✦·:·.✦</div>
+
+        <div class="result-grid" id="resultGrid"></div>
+
+        <div class="separator" style="margin:12px 0;">✧·:·.✧·:·.✧·:·.✧·:·.✧·:·.✧</div>
+
+        <!-- Skill Damage Breakdown -->
+        <div class="calc-title" style="margin-top:10px;">⚔ Skill Damage Breakdown ⚔</div>
+        <div id="skillResults" style="margin-top:10px;"></div>
+
+        <div class="separator" style="margin:12px 0;">·:*¨¨*:·. .·:*¨¨*:·.</div>
+      </div>
+    </div>
+
+    <!-- Fake Advanced Stats -->
+    <div class="fake-stats-box">
+      <div class="fake-stats-title">📊 Advanced Combat Metrics 📊</div>
+      <div class="fake-stats-grid">
+        <div class="fake-stat-item">
+          <span class="fs-label">DPS (Drama Per Second)</span>
+          <span class="fs-value">847.32</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">APS (Apologies Per Scrim)</span>
+          <span class="fs-value">23.15</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">LPM (Lag Per Match)</span>
+          <span class="fs-value">1,429</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">CPM (Copium Per Minute)</span>
+          <span class="fs-value">9,001</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">WPM (Whiffs Per Minute)</span>
+          <span class="fs-value">412.77</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">BSR (Blame Support Rate)</span>
+          <span class="fs-value">100.00%</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">TPS (Tears Per Swipe)</span>
+          <span class="fs-value">67.00</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">GPM (Gold Per Misplay)</span>
+          <span class="fs-value">0.03</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">Smol Height (cm)</span>
+          <span class="fs-value">119.38</span>
+        </div>
+        <div class="fake-stat-item">
+          <span class="fs-label">Stoke Days Since Last Online</span>
+          <span class="fs-value">∞</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optimization Tips -->
+    <div class="tips-box">
+      <div class="tips-title">💡 Pro Optimization Tips 💡</div>
+      <div class="tips-list">
+        <div class="tip-entry">Have you considered critting more?</div>
+        <div class="tip-entry">Simply dodge every attack.</div>
+        <div class="tip-entry">Equip better teammates.</div>
+        <div class="tip-entry">Your biggest DPS loss is scrolling TikTok between pulls.</div>
+        <div class="tip-entry">Try dealing more damage.</div>
+        <div class="tip-entry">trust me, just communicate telepathically with your party</div>
+        <div class="tip-entry">jayus please stop pulling on the gacha banner. Your dailies aren't going to do themselves but also neither are your bills.</div>
+        <div class="tip-entry">If you die, just don't. Problem solved.</div>
+        <div class="tip-entry">Have you tried uninstalling? Works 100% of the time.</div>
+        <div class="tip-entry">Chrizzie: You are not allowed to play Vernal in GvG. This is non-negotiable.</div>
+        <div class="tip-entry">Stoke will come back someday. Any day now. We're waiting. Still waiting.</div>
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="achievements-box">
+      <div class="achievements-title">🏆 Achievements 🏆</div>
+      <div class="achievements-grid">
+        <div class="achievement-item unlocked" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">📊</div>
+          <div class="achievement-info">
+            <div class="name">Spreadsheet Warrior</div>
+            <div class="desc">Spent more time in calculators than actually playing the game</div>
+          </div>
+        </div>
+        <div class="achievement-item unlocked" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">📉</div>
+          <div class="achievement-info">
+            <div class="name">Min-Maxed Fun Out of the Game</div>
+            <div class="desc">Optimized so hard that playing became a spreadsheet simulator</div>
+          </div>
+        </div>
+        <div class="achievement-item unlocked" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">🔬</div>
+          <div class="achievement-info">
+            <div class="name">0.01% DPS Improvement</div>
+            <div class="desc">Spent 8 hours re-rolling gear for a 12 damage increase</div>
+          </div>
+        </div>
+        <div class="achievement-item unlocked" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">🎰</div>
+          <div class="achievement-info">
+            <div class="name">Gacha Slave (jayus)</div>
+            <div class="desc">Tragically addicted to gacha games. Does dailies like it's a second job. Send help.</div>
+          </div>
+        </div>
+        <div class="achievement-item" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">📏</div>
+          <div class="achievement-info">
+            <div class="name">Smol (3'11)</div>
+            <div class="desc">Smol is literally 3 feet 11 inches tall. The calculator had to add a special short input mode.</div>
+          </div>
+        </div>
+        <div class="achievement-item" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">🏆</div>
+          <div class="achievement-info">
+            <div class="name">Vernal Ban (Chrizzie)</div>
+            <div class="desc">Chrizzie will NEVER be allowed to play Vernal in GvG. Never. The council has spoken.</div>
+          </div>
+        </div>
+        <div class="achievement-item" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">🙏</div>
+          <div class="achievement-info">
+            <div class="name">Stoke Will Return (Locked)</div>
+            <div class="desc">Stoke will someday comeback to play. We believe. Copium level: Maximum.</div>
+          </div>
+        </div>
+        <div class="achievement-item" onclick="this.style.transform='scale(1.05)';setTimeout(()=>this.style.transform='',200)">
+          <div class="achievement-icon">😴</div>
+          <div class="achievement-info">
+            <div class="name">Normal Human Being (Locked)</div>
+            <div class="desc">Play the game for fun. What is fun? Unknown variable.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Codes -->
+    <div class="codes-box">
+      <div class="codes-title">🎮 Exclusive Reward Codes 🎮</div>
+      <div class="codes-grid" id="codesGrid"></div>
+      <div class="codes-note">Codes expire in 24 hours! Claim fast! (jk they don't do anything)</div>
+    </div>
+
+  </div>
+</div>
+<div class="main-container" style="padding-top:0;">
+  <div class="content-area" style="width:100%;">
+    <div class="reviews-box">
+      <div class="reviews-title">★ ★ ★ USER REVIEWS & GUESTBOOK ★ ★ ★</div>
+      <div class="reviews-body">
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Adeep <span class="review-date">— posted 03/14/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            Bro I was doing damage calc in a spreadsheet like an absolute peasant and then someone linked this in discord. <span class="shout">I AM NEVER GOING BACK.</span> The fact that it separates crit and affinity AND shows you the overlap chance?? <span class="heart">♥</span> I literally respecced my entire build because I didn't realize my real crit was that low. This calculator is actually goated. jayus if you're reading this you're a legend. 10/10 would bookmark again (I already did). Also yes I am always high, that's why my DPS numbers look like a seismograph reading.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Bacu <span class="review-date">— posted 03/18/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            OK so I'm not gonna lie I clicked on this expecting some basic calculator and then I saw the skill breakdown section and my jaw literally dropped. The penetration calculations are <span class="wow">chef's kiss</span>. I've been building wrong this whole time apparently. Also the retro design is peak aesthetic, it's like being back on Newgrounds in 2003. <span class="shout">THIS NEEDS TO BE PINNED IN THE OFFICIAL DISCORD.</span>
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Daffo <span class="review-date">— posted 03/22/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            I've been playing WWM since launch and this is the first tool that actually makes sense. Everything else I tried was either in Chinese or had broken formulas. This one just <span class="shout">WORKS</span>. Punched in my stats, hit calculate, and immediately understood why my Bellstrike was hitting like a wet noodle. Turns out my pen was garbage. Fixed my build and now I'm topping damage charts. Thank you jayus <span class="heart">♥♥♥</span>
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Meowkaera <span class="review-date">— posted 04/01/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            <span class="wow">THE AESTHETIC!!</span> The Comic Sans, the marquee, the blinking text, the beveled borders... this page gives me nostalgia for an internet that no longer exists <span class="heart">♥</span> AND it's actually useful?? I spent like 2 hours plugging in different gear combinations trying to optimize my build. The DPS number at the top is so satisfying to watch go up. Also the visitor counter is a nice touch lol. 1337 indeed.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Kay <span class="review-date">— posted 04/09/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            Shoutout to jayus for making the only WWM calc that accounts for effective precision vs raw precision. Most people don't realize those are different stats and it messes up all the math. This tool gets it right. <span class="shout">IF YOU'RE READING THIS AND YOU HAVEN'T TRIED IT YET, WHAT ARE YOU DOING??</span> Go plug your stats in right now. You'll thank me later. Also yes I can suck anyone, that's just a fact. Don't ask what it means.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Entis <span class="review-date">— posted 04/15/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            I showed this to my entire guild and now everyone uses it. We literally have a channel called "jayus calc screenshots" where people post their DPS numbers. It's become a competition at this point <span class="heart">♥</span> The skill damage breakdown is super helpful for comparing which abilities to prioritize. Bamboocut mains stay losing though lol. Seriously great work, this should be in the sidebar of every WWM community. Also Entice is a LOSER NERD.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">SurdzSaid <span class="review-date">— posted 04/22/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            <span class="shout">THIS CALCULATOR CHANGED MY LIFE.</span> No I'm not being dramatic. I was stuck on a boss for 3 days, plugged my stats in here, realized my crit dmg bonus was doing literally nothing because my crit rate was too low, swapped to an affinity build and first-try cleared the boss. <span class="wow">FIRST. TRY.</span> jayus you need to charge money for this. Actually no don't do that, keep it free and bless the community. Absolute W human being. Also I'm a polish femboy and I'm not ashamed. <span class="heart">♥</span><span class="heart">♥</span><span class="heart">♥</span>
+          </div>
+        </div>
+
+        <!-- BAD REVIEWS -->
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">Cheon <span class="review-date">— posted 03/16/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★☆☆☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            This calculator told me my build was bad. I don't want to hear that. I came here for validation, not math. If I wanted someone to tell me my gear is terrible I'd ask my guild leader. Uninstalled my browser.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">Etri <span class="review-date">— posted 03/20/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★★☆☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            The calculator is fine I guess but it doesn't have a button to automatically gear swap for me. 2 stars. Also the retro design gave my monitor anxiety. My CRT is filing a complaint.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">evilw**boss <span class="review-date">— posted 04/02/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★☆☆☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            0/10 calculator doesn't even work for my class. I play literally everything wrong on purpose and none of the builds show up. Also there's no "deal 999999 damage instantly" button. False advertising. My lawyer will be contacting you.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">lamyz <span class="review-date">— posted 04/12/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★★☆☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            I put in all my stats and it just said "lol". I don't think that's a valid damage number. Also the font is Comic Sans which should be a war crime. My eyes are bleeding and it's YOUR fault jayus.
+          </div>
+        </div>
+
+        <!-- GOOD REVIEWS -->
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">chrizzielim <span class="review-date">— posted 04/05/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            Pretty solid calculator. Does what it says on the tin. Took off one star because it didn't automatically install better gear on my character. Would be 5 stars if it could also play the game for me. The probability ladder explanation is actually really well done.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">vaizardes <span class="review-date">— posted 04/08/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            Finally a calculator that understands the difference between Affinity and Crit. I've been trying to explain to people in Discord that they can't stack both and nobody listens. Sending this link to literally everyone. You're doing the lord's work jayus.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">kazuno <span class="review-date">— posted 04/14/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            The skill breakdown section is chef's kiss. I compared my Bellstrike damage to my friend's and immediately saw where my build was going wrong. We both respecced and our DPS went up by like 30%. This tool is actually broken in the best way possible. Keep it up! Also after what this calculator showed me about my old build, I can never trust again.
+          </div>
+        </div>
+
+        <!-- AMAZING REVIEWS -->
+
+        <div class="review-entry" style="border-color:#ffcc00;animation:glow-review 3s ease-in-out infinite;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ffff00;text-shadow:0 0 10px #ffcc00;">Poro <span class="review-date">— posted 03/25/2026</span></span>
+            <span class="review-stars" style="color:#ffff00;font-size:16px;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#ffffaa;border-left-color:#ffcc00;">
+            <span class="wow">THIS IS THE GREATEST CREATION IN THE HISTORY OF GAMING TOOLS.</span> I have used every calculator for every game I've ever played and THIS is the one that finally made me understand damage formulas. The retro aesthetic is PEAK. The math is PEAK. The personality is PEAK. I would give this 10 stars if I could. jayus you are a LEGEND among mortals. Also my internet will someday get better. Someday. I'm loading this page on 2G right now.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#ffcc00;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ffff00;text-shadow:0 0 10px #ffcc00;">Qallisto <span class="review-date">— posted 04/03/2026</span></span>
+            <span class="review-stars" style="color:#ffff00;font-size:16px;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#ffffaa;border-left-color:#ffcc00;">
+            <span class="shout">I AM NOT EXAGGERATING WHEN I SAY THIS CALCULATOR CHANGED HOW I PLAY THE GAME ENTIRELY.</span> I was hardstuck on a boss for WEEKS. Plugged my stats in here, realized my pen was basically doing nothing, reworked my entire build based on the numbers, and cleared it first try. <span class="heart">♥</span> This should be mandatory for every WWM player.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#ffcc00;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ffff00;text-shadow:0 0 10px #ffcc00;">Sunther <span class="review-date">— posted 04/11/2026</span></span>
+            <span class="review-stars" style="color:#ffff00;font-size:16px;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#ffffaa;border-left-color:#ffcc00;">
+            The attention to detail is insane. The probability ladder explanation alone is worth bookmarking this page. But then you also have the dual pipeline formula, the per-skill breakdown, the penetration buckets... This isn't just a calculator, it's a whole education. <span class="wow">I learned more about WWM damage from this page than from 200 hours of gameplay.</span> Absolutely goated.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#ffcc00;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ffff00;text-shadow:0 0 10px #ffcc00;">oVer <span class="review-date">— posted 04/20/2026</span></span>
+            <span class="review-stars" style="color:#ffff00;font-size:16px;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#ffffaa;border-left-color:#ffcc00;">
+            <span class="shout">JAYUS IF YOU EVER STOP MAINTAINING THIS TOOL I WILL PERSONALLY FIND YOU AND ASK YOU POLITELY TO CONTINUE.</span> This is the single most useful community tool in the entire WWM ecosystem. Every guide, every YouTube video, every Discord discussion should have a link to this calculator pinned at the top. Absolute masterpiece. I will someday get godlines on my gear. Someday. <span class="heart">♥♥♥♥♥</span>
+          </div>
+        </div>
+
+        <!-- UNRELATED REVIEW -->
+
+        <div class="review-entry" style="border-color:#555555;background:#111111;">
+          <div class="review-header">
+            <span class="review-user" style="color:#999999;">hanbaobao <span class="review-date">— posted 04/18/2026</span></span>
+            <span class="review-stars" style="color:#777777;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#777777;border-left-color:#555555;">
+            Hey does anyone know a good recipe for mapo tofu? I've been trying to make it at home but it never tastes the same as the restaurant. I think I'm missing the doubanjiang. Also this calculator is cool I guess. Anyway if anyone has a good recipe please DM me on Discord.
+          </div>
+        </div>
+
+        <!-- JOSHTWIST REVIEW -->
+
+        <div class="review-entry" style="border-color:#ff69b4;background:#1a0020;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff69b4;">JoshTwist <span class="review-date">— posted 04/25/2026</span></span>
+            <span class="review-stars" style="color:#ff69b4;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#ddaacc;border-left-color:#ff69b4;">
+            Great calculator! Really helped me optimize my build. <span class="shout">ANYWAY</span> if there are any femboys in the WWM community reading this, my DMs are open. I play on the Jiangzhu region. I will protect you with my life. This is not a joke. I have +40% Affinity DMG Bonus and I'm not afraid to use it. Also I am a femboy feet enjoyer. <span class="heart">♥</span> Please respond I am so lonely.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#555555;background:#111111;">
+          <div class="review-header">
+            <span class="review-user" style="color:#999999;">Us1ng <span class="review-date">— posted 04/24/2026</span></span>
+            <span class="review-stars" style="color:#777777;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#777777;border-left-color:#555555;">
+            Cool calculator. Anyway I will 3D print anything for you for free. Gear models, weapon replicas, your disappointed face when you see your abrasion rate. Just send me the STL files or describe what you want. I have too much filament and not enough friends. DM me.
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:12px;padding:8px;border:2px inset #444;background:#000;">
+          <span style="color:#ffff00;font-size:12px;font-weight:bold;">Want to leave a review?</span>
+          <span style="color:#00ff00;font-size:12px;"> Sign the guestbook or shout me out on Discord!! </span>
+          <span style="color:#ff66ff;font-size:11px;">(please be nice i am a fragile coder)</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Background Music Player -->
+<audio id="bgMusic" loop preload="auto" autoplay>
+  <source src="media/bg.mp3" type="audio/mpeg">
+</audio>
+
+<div class="music-player" id="musicPlayer">
+  <div class="music-titlebar">
+    <span class="title-text">♪ jayus player v1.0</span>
+    <div class="win-btns">
+      <button class="win-btn" onclick="togglePlayer()" title="Minimize">_</button>
+    </div>
+  </div>
+  <div id="musicPlayerBody">
+    <div class="music-display">
+      <span class="scroll-text" id="scrollText">♪ ♫ ♪ ♫ Now Playing: BGM ♫ ♪ ♫ ♪ — jayus calculator — your ears will thank you (or not) ♪ ♫ ♪ ♫</span>
+    </div>
+    <div class="music-viz" id="musicViz"></div>
+    <div class="music-controls">
+      <button class="ctrl-btn" onclick="musicAction('prev')" title="Previous">⏮</button>
+      <button class="ctrl-btn" onclick="musicAction('play')" id="playBtn" title="Play">▶</button>
+      <button class="ctrl-btn" onclick="musicAction('pause')" id="pauseBtn" title="Pause">⏸</button>
+      <button class="ctrl-btn" onclick="musicAction('stop')" title="Stop">⏹</button>
+      <button class="ctrl-btn" onclick="musicAction('next')" title="Next">⏭</button>
+    </div>
+    <div class="music-volume">
+      <span class="vol-label">VOL</span>
+      <input type="range" class="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)">
+      <span class="vol-label" id="volDisplay">30%</span>
+    </div>
+    <div class="music-status" id="musicStatus">Stopped</div>
+  </div>
+</div>
+
+<!-- Shape Button -->
+<button class="shape-btn" id="shapeBtn" onclick="toggleShape()">SQUARE</button>
+
+<!-- Hidden 67 Trigger Button -->
+<button class="hidden-67-btn" onclick="triggerSpam67()" title=""></button>
+
+<!-- MySpace Popup -->
+<div class="myspace-popup-overlay" id="myspacePopup">
+  <div class="myspace-popup">
+    <div class="myspace-popup-title">
+      <span>myspace.exe</span>
+      <button class="myspace-popup-close" onclick="closeMySpacePopup()">X</button>
+    </div>
+    <div class="myspace-popup-body">
+      <div class="skull">💀</div>
+      <div class="big-text">myspace login failed</div>
+      <p>Bro it's <strong>2026</strong>. You're still using MySpace??</p>
+      <p>Tom already unfriended you <strong>19 years ago</strong>.</p>
+      <p>Your Top 8 hasn't updated since the Bush administration.</p>
+      <p style="margin-top:10px;color:#ff6666;">MySpace was discontinued in 2018.<br>This button hasn't worked since <strong>2009</strong>.</p>
+      <div style="margin-top:15px;">
+        <button class="myspace-popup-close" onclick="closeMySpacePopup()" style="padding:8px 20px;font-size:13px;">
+          i am in denial
+        </button>
+      </div>
+      <p style="margin-top:15px;font-size:10px;color:#667799;">
+        Your profile song: "Crawling" by Linkin Park<br>
+        Last login: March 14, 2007<br>
+        Profile views: 4 (all you, checking if it still works)
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Fake Popup: Hot Chinitas -->
+<div class="popup-ad-overlay" id="popupChinitas" style="top:15%;right:5%;">
+  <div class="popup-ad-titlebar">
+    <span>internet_explorer.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupChinitas')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big">🔥 HOT CHINITAS IN YOUR AREA 🔥</div>
+    <p style="font-size:16px;color:#cc0000;margin:8px 0;">1 LOCAL SINGLES WANT TO MEET YOU</p>
+    <p>They're not actually in your area. They're not actually singles.</p>
+    <p>They're not actually chinitas. This is a JPEG from 2004.</p>
+    <p class="ad-link" onclick="closePopup('popupChinitas')">>> CLICK HERE TO NOT GET ANYTHING <<</p>
+    <p style="font-size:8px;color:#999;margin-top:5px;">(this popup has more personality than your ex)</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Guild Discord -->
+<div class="popup-ad-overlay" id="popupDiscord" style="top:25%;left:5%;">
+  <div class="popup-ad-titlebar">
+    <span>important_notice.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupDiscord')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#5865F2;">⚔ AETHERSEA GUILD ⚔</div>
+    <p style="font-size:14px;margin:8px 0;">Join our guild's official Discord server!</p>
+    <p><strong>Aethersea</strong> — Where We Actually Know The Damage Formulas</p>
+    <p style="margin:10px 0;">
+      <a href="https://discord.gg/vuNSJmdeHG" target="_blank" style="font-size:14px;color:#5865F2;font-weight:bold;text-decoration:underline;">
+        >> discord.gg/vuNSJmdeHG <<
+      </a>
+    </p>
+    <p style="font-size:10px;color:#666;">Warning: Guild chat is 80% theorycrafting, 20% arguing about builds, 100% no chill</p>
+    <p class="ad-link" onclick="closePopup('popupDiscord')" style="font-size:10px;">[dismissing this means you'll join later anyway]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: SpeedyHack -->
+<div class="popup-ad-overlay" id="popupSpeedy" style="bottom:10%;right:10%;">
+  <div class="popup-ad-titlebar">
+    <span>free_stuff.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupSpeedy')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#00aa00;">⬇ SPEEDYHACK 2.0 ⬇</div>
+    <p style="font-size:15px;color:#00aa00;margin:5px 0;">DOWNLOAD NOW — 100% FREE — NO VIRUS</p>
+    <p style="font-size:11px;">✅ 999999 DMG ✅ ONE HIT KILL ✅ GOD MODE</p>
+    <p style="font-size:11px;">✅ INSTANT LEVEL 999 ✅ ALL WEAPONS UNLOCKED</p>
+    <p style="font-size:11px;">✅ DEFINITELY NOT A RAT ✅ TRUST ME BRO</p>
+    <p style="font-size:15px;margin:10px 0;">File: <span style="color:#cc0000;">speedyhack_2.0_REAL_NOT_FAKE.exe</span></p>
+    <p style="font-size:10px;color:#cc0000;">File size: 47TB (legit)</p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">Uploaded by: xX_H4CK3R_Xx (trusted member since 3 minutes ago)</p>
+    <p class="ad-link" onclick="closePopup('popupSpeedy')" style="font-size:10px;">[I would click but I value my PC]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: FFXIV Free Trial -->
+<div class="popup-ad-overlay" id="popupFFXIV" style="top:20%;left:15%;">
+  <div class="popup-ad-titlebar">
+    <span>mmorpg_ad.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupFFXIV')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#e8a427;">⚔ Have you heard of it? ⚔</div>
+    <p style="font-size:14px;margin:10px 0;line-height:1.6;">
+      The critically acclaimed MMORPG <strong style="color:#e8a427;">FINAL FANTASY XIV</strong><br>
+      With an expanded free trial which you can play through the entirety of<br>
+      <strong>A Realm Reborn</strong>, and the award-winning <strong>Heavensward</strong>,<br>
+      <strong>Stormblood</strong>, and <strong>Shadowbringers</strong> expansions<br>
+      up to level 80 for free with <span style="color:#cc0000;font-weight:bold;">no restrictions on playtime</span>!
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:8px;">(you will lose 3000 hours of your life but go off)</p>
+    <p class="ad-link" onclick="closePopup('popupFFXIV')" style="font-size:10px;">[I'm already addicted to WWM, one addiction at a time]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Nigerian Prince -->
+<div class="popup-ad-overlay" id="popupNigerian" style="top:30%;right:8%;">
+  <div class="popup-ad-titlebar">
+    <span>URGENT_EMAIL.eml</span>
+    <button class="popup-ad-close" onclick="closePopup('popupNigerian')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#cc9900;">💰 CONGRATULATIONS YOU ARE WINNER 💰</div>
+    <p style="font-size:13px;margin:8px 0;line-height:1.5;">
+      Dear Beloved Friend and/or Distinguished Gamer,<br><br>
+      I am Prince <strong>Abubakar Okonkwo</strong> of the Royal WWM Guild Treasury.
+      My father the Guild Leader has passed and left <strong>47,000,000 gold</strong> in the guild bank.
+      I need your help to transfer it to your account.<br><br>
+      Send me your <span style="color:#cc0000;">credit card, SSN, and password</span> and I will send you
+      <strong>double</strong> the gold plus a free +15 weapon.<br><br>
+      <span style="font-size:10px;color:#cc0000;">THIS OFFER EXPIRES IN 3 MINUTES (it has been expiring for 15 years)</span>
+    </p>
+    <p class="ad-link" onclick="closePopup('popupNigerian')" style="font-size:10px;">[I can't believe people fell for this in 2003]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Doctors Hate This -->
+<div class="popup-ad-overlay" id="popupDoctors" style="bottom:15%;left:8%;">
+  <div class="popup-ad-titlebar">
+    <span>health_tipz.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupDoctors')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#cc0000;">🩺 DOCTORS HATE THIS ONE TRICK 🩺</div>
+    <p style="font-size:15px;margin:8px 0;color:#006600;font-weight:bold;">
+      Panacea Q — The Cure-All Your Healer Won't Tell You About!
+    </p>
+    <p style="font-size:12px;line-height:1.5;">
+      Local WWM player discovers <strong>SECRET</strong> that Big Healer doesn't want you to know!<br>
+      ✅ Cures Abrasion Hits ✅ Fixes Bad Builds ✅ Removes Brain Rot ✅ Heals Real Life Headaches<br>
+      <span style="color:#cc0000;">⚠ WARNING: May cause excessive DPS and spontaneous gear improvement ⚠</span>
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">*Results may vary. Panacea Q is not FDA approved. Or game approved. Or real.</p>
+    <p class="ad-link" onclick="closePopup('popupDoctors')" style="font-size:10px;">[My healer already hates me enough]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Dual Umbrella Hack -->
+<div class="popup-ad-overlay" id="popupUmbrella" style="top:10%;right:20%;">
+  <div class="popup-ad-titlebar">
+    <span>guild_secrets.dll</span>
+    <button class="popup-ad-close" onclick="closePopup('popupUmbrella')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#aa00ff;">☂ GUILD OFFICERS HATE THIS ONE TRICK ☂</div>
+    <p style="font-size:14px;margin:8px 0;color:#cc0000;font-weight:bold;">
+      Find out how you can play DUAL UMBRELLA with this ONE SIMPLE HACK!
+    </p>
+    <p style="font-size:12px;line-height:1.5;">
+      Guild officers DON'T want you to know this but you can actually<br>
+      equip <strong>TWO umbrellas</strong> at the same time by following these<br>
+      <strong>3 EASY STEPS</strong> that game developers are trying to HIDE!<br><br>
+      Step 1: Go to your inventory<br>
+      Step 2: Put umbrella in slot 1<br>
+      Step 3: Put another umbrella in slot 2<br>
+      <span style="color:#cc0000;font-weight:bold;">IT'S THAT SIMPLE!!!</span>
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">*Dual umbrella does nothing useful but it looks really cool in the lobby</p>
+    <p class="ad-link" onclick="closePopup('popupUmbrella')" style="font-size:10px;">[my guild officer is going to /gkick me for reading this]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Demons Wear Halos -->
+<div class="popup-ad-overlay" id="popupDemons" style="bottom:20%;right:15%;">
+  <div class="popup-ad-titlebar">
+    <span>deep_lore.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupDemons')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#ff4444;">😈 DEMONS WEAR HALOS 😇</div>
+    <p style="font-size:13px;margin:8px 0;line-height:1.6;color:#333;">
+      You won't BELIEVE what we uncovered in the WWM lore!<br><br>
+      The final boss has been <strong>your guild leader</strong> the entire time!<br>
+      Every quest giver is secretly <strong>three raccoons in a trenchcoat</strong>!<br>
+      The entire world is just <strong>a really elaborate spreadsheet</strong>!<br><br>
+      <span style="color:#aa0000;font-weight:bold;">SPOILERS: The real damage was the friends we made along the way.</span>
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">This popup was brought to you by the WWM Conspiracy Theorists Guild</p>
+    <p class="ad-link" onclick="closePopup('popupDemons')" style="font-size:10px;">[I came for damage numbers not existential crises]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: JoshTwist Femboy Alert -->
+<div class="popup-ad-overlay" id="popupJosh" style="top:35%;left:10%;">
+  <div class="popup-ad-titlebar">
+    <span>hot_singles.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupJosh')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#ff69b4;">💘 JOSHTWIST IS NEAR YOU 💘</div>
+    <p style="font-size:14px;margin:8px 0;color:#cc0066;font-weight:bold;">
+      1 FEMBOY IN YOUR AREA WANTS TO PARTY
+    </p>
+    <p style="font-size:12px;line-height:1.5;">
+      JoshTwist has been searching the WWM servers looking for<br>
+      <strong>femboys</strong> to protect with his +40% Affinity DMG Bonus.<br><br>
+      <span style="color:#cc0066;">⚠ He has been playing for 14 hours straight ⚠</span><br>
+      <span style="color:#cc0066;">⚠ His DMs are open and he WILL respond ⚠</span><br>
+      <span style="color:#cc0066;">⚠ He is not joking about the loneliness ⚠</span>
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">Status: Online | Guild: None (they kicked him for this)</p>
+    <p class="ad-link" onclick="closePopup('popupJosh')" style="font-size:10px;">[I'm not a femboy but I admire the dedication]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Surdz Looking for JoshTwist's Femboys -->
+<div class="popup-ad-overlay" id="popupSurdzFem" style="bottom:30%;left:20%;">
+  <div class="popup-ad-titlebar">
+    <span>alert_dispatch.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupSurdzFem')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#ff4444;">🚨 SURDZSAID ALERT 🚨</div>
+    <p style="font-size:14px;margin:8px 0;color:#0000cc;font-weight:bold;">
+      Surdz is looking for people looking for femboys
+    </p>
+    <p style="font-size:12px;line-height:1.5;">
+      SurdzSaid saw JoshTwist's post and is now looking for<br>
+      <strong>the people who are looking for the femboys</strong>.<br><br>
+      "I heard JoshTwist is looking for femboys. I'm not a femboy,<br>
+      but I know someone who knows someone who knows a guy<br>
+      who once saw a femboy in the lobby. I can make this happen."<br>
+      <span style="color:#cc0000;">— SurdzSaid, probably</span>
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">This is now a chain of people looking for people who are looking for femboys. Nobody actually knows any femboys.</p>
+    <p class="ad-link" onclick="closePopup('popupSurdzFem')" style="font-size:10px;">[the femboys are NOT in the game, they were inside us all along]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Guild Recruitment (persists) -->
+<div class="popup-ad-overlay" id="popupGuildRecruit" style="top:40%;left:30%;">
+  <div class="popup-ad-titlebar">
+    <span>guild_recruitment.exe</span>
+    <button class="popup-ad-close" onclick="closePopupReappear('popupGuildRecruit', 12000)">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#5865F2;">⚔ GUILD RECRUITMENT ⚔</div>
+    <p style="font-size:13px;margin:8px 0;line-height:1.6;">
+      <strong>Asia/SEA [EN]</strong> | Semi-Competitive GvG Focused Guild<br><br>
+      Apply on Discord:<br>
+      <a href="https://discord.gg/xvCxaW9FtV" target="_blank" style="font-size:14px;color:#5865F2;font-weight:bold;text-decoration:underline;">
+        >> discord.gg/xvCxaW9FtV <<
+      </a><br><br>
+      ✅ No Weekly Activity Required for Active GvG Players<br>
+      ✅ Recruiting Competitive GvG Players
+    </p>
+    <p class="ad-link" onclick="closePopupReappear('popupGuildRecruit', 12000)" style="font-size:10px;">[close if you want, it'll be back]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Miky Chinita Alert -->
+<div class="popup-ad-overlay" id="popupMiky" style="top:15%;right:12%;">
+  <div class="popup-ad-titlebar">
+    <span>alert_miky.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupMiky')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#ff4444;">🚨 MIKY SPOTTED 🚨</div>
+    <p style="font-size:14px;margin:8px 0;color:#cc0066;font-weight:bold;">
+      Miky is looking for hot chinitas again
+    </p>
+    <p style="font-size:12px;line-height:1.5;">
+      Miky has been spotted in the WWM lobby typing<br>
+      "any chinitas want to do co-op?" in area chat<br>
+      for the <strong>47th time today</strong>.<br><br>
+      <span style="color:#cc0000;">⚠ He has been reported 3 times ⚠</span><br>
+      <span style="color:#cc0000;">⚠ The chinitas do not exist Miky ⚠</span><br>
+      <span style="color:#cc0000;">⚠ Please stop Miky ⚠</span>
+    </p>
+    <p class="ad-link" onclick="closePopup('popupMiky')" style="font-size:10px;">[someone tell him they're NPC models]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Emperorgod on the Roof -->
+<div class="popup-ad-overlay" id="popupEmperor" style="bottom:25%;left:12%;">
+  <div class="popup-ad-titlebar">
+    <span>roof_sighting.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupEmperor')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#ffcc00;">👑 EMPERORSPOTTED ON THE ROOF 👑</div>
+    <p style="font-size:14px;margin:8px 0;color:#990000;font-weight:bold;">
+      Emperorgod will suck off any juicy target on the roof
+    </p>
+    <p style="font-size:12px;line-height:1.5;">
+      Emperorgod has been camping the rooftop of the<br>
+      main city for <strong>6 hours straight</strong>, waiting for<br>
+      "any juicy target" to walk by.<br><br>
+      <span style="color:#cc0000;">⚠ He has not moved from that spot ⚠</span><br>
+      <span style="color:#cc0000;">⚠ Guild members are concerned ⚠</span><br>
+      <span style="color:#cc0000;">⚠ He says he's "strategizing" ⚠</span>
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">Status: On Roof | Targets Sucked: 0 | Patience Level: Infinite</p>
+    <p class="ad-link" onclick="closePopup('popupEmperor')" style="font-size:10px;">[the roof is NOT the place to be]</p>
+  </div>
+</div>
+
+<!-- Fake Popup: Hari War Thunder Leak -->
+<div class="popup-ad-overlay" id="popupHari" style="top:45%;right:5%;">
+  <div class="popup-ad-titlebar">
+    <span>classified_info.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupHari')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#cc0000;">🔴 BREAKING NEWS 🔴</div>
+    <p style="font-size:14px;margin:8px 0;color:#cc0000;font-weight:bold;">
+      Hari leaked confidential military files in War Thunder
+    </p>
+    <p style="font-size:12px;line-height:1.5;">
+      That's why he's been inactive.<br><br>
+      Hari posted <strong>CLASSIFIED DOCUMENTS</strong> on the<br>
+      War Thunder forums to win an argument about<br>
+      a plane's turn radius.<br><br>
+      <span style="color:#cc0000;">⚠ Multiple government agencies are involved ⚠</span><br>
+      <span style="color:#cc0000;">⚠ He was right about the turn radius though ⚠</span><br>
+      <span style="color:#cc0000;">⚠ War Thunder players are built different ⚠</span>
+    </p>
+    <p style="font-size:10px;color:#999;margin-top:5px;">Hari's current status: [REDACTED]</p>
+    <p class="ad-link" onclick="closePopup('popupHari')" style="font-size:10px;">[average War Thunder player behavior]</p>
+  </div>
+</div>
+
+<!-- Premium Popup -->
+<div class="popup-ad-overlay" id="popupPremium" style="top:50%;left:50%;transform:translate(-50%,-50%);">
+  <div class="popup-ad-titlebar">
+    <span>premium_offer.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupPremium')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#ffcc00;">⭐ PREMIUM SUBSCRIPTION ⭐</div>
+    <p style="font-size:14px;margin:8px 0;color:#cc0000;font-weight:bold;">
+      Want MORE luck in your draws?
+    </p>
+    <p style="font-size:12px;line-height:1.6;">
+      Subscribe to <strong style="color:#ffcc00;">jayus PREMIUM</strong> for only <span style="color:#cc0000;text-decoration:line-through;">$49.99</span> <strong>$99.99/month</strong>!<br><br>
+      ✅ +500% Luck in Harmonic Core drops<br>
+      ✅ +999% Draw Rate (guaranteed gold every pull!)<br>
+      ✅ Exclusive "I Paid Money" chat badge<br>
+      ✅ Access to the secret button that does nothing<br>
+      ✅ A JPEG of jayus giving you a thumbs up<br><br>
+      <span style="color:#cc0000;font-size:10px;">⚠ WARNING: This is not real. Nothing here is real. You are reading a fake popup on a joke calculator. Please seek help. ⚠</span>
+    </p>
+    <button onclick="closePopup('popupPremium')" style="background:linear-gradient(180deg,#ffcc00,#cc9900);border:3px outset #ffee66;color:#000;padding:8px 25px;font-weight:bold;font-size:13px;cursor:pointer;margin-top:8px;">SUBSCRIBE NOW (trust me bro)</button>
+    <p style="font-size:9px;color:#999;margin-top:6px;">No refund. No reward. No regrets. (Okay maybe some regrets.)</p>
+  </div>
+</div>
+
+<!-- Captcha Overlay -->
+<div class="captcha-overlay" id="captchaOverlay">
+  <div class="captcha-box">
+    <div class="captcha-header">
+      <h3>⚠️ Human Verification Required ⚠️</h3>
+      <span class="close" onclick="closeCaptcha()">×</span>
+    </div>
+    <div class="captcha-body" id="captchaBody"></div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="hearts">♥ ♥ ♥</div>
+  <p>jayus calculator © 2026 — All rights reserved</p>
+  <p>Made with <span style="color:#ff0000;">♥</span> and way too much coffee</p>
+  <p style="margin-top:5px;">This site is not affiliated with Where Winds Meet or its developers</p>
+  <p style="margin-top:3px;color:#666699;">Best viewed in Internet Explorer 6 at 1920x1080</p>
+  <div class="hit-counter" style="margin-top:8px;">VISITORS: <span id="footerCount">001337</span></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ═══════════════════════════════════════════
+function parseNum(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const val = el.value.replace(/,/g, '').trim();
+  return parseFloat(val) || 0;
+}
+
+function fmt(n) {
+  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ═══════════════════════════════════════════
+// MYSPACE POPUP
+// ═══════════════════════════════════════════
+function showMySpacePopup() {
+  document.getElementById('myspacePopup').classList.add('show');
+}
+function closeMySpacePopup() {
+  document.getElementById('myspacePopup').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════
+// FAKE POPUP ADS
+// ═══════════════════════════════════════════
+function showPopup(id) {
+  document.getElementById(id).classList.add('show');
+}
+function closePopup(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function closePopupReappear(id, delay) {
+  document.getElementById(id).classList.remove('show');
+  setTimeout(() => showPopup(id), delay);
+}
+
+let popupTimer;
+function schedulePopups() {
+  const delays = [8000, 18000, 35000, 50000, 65000, 80000, 95000, 110000, 130000, 150000, 170000, 190000, 210000, 230000];
+  const popups = ['popupChinitas', 'popupDiscord', 'popupSpeedy', 'popupFFXIV', 'popupNigerian', 'popupDoctors', 'popupUmbrella', 'popupDemons', 'popupJosh', 'popupSurdzFem', 'popupGuildRecruit', 'popupMiky', 'popupEmperor', 'popupHari'];
+  popups.forEach((p, i) => {
+    setTimeout(() => showPopup(p), delays[i]);
+  });
+}
+
+// ═══════════════════════════════════════════
+// 67 COUNTDOWN + SPAM
+// ═══════════════════════════════════════════
+let countdownSeconds = 67 * 60;
+
+function updateCountdown() {
+  const h = Math.floor(countdownSeconds / 3600);
+  const m = Math.floor((countdownSeconds % 3600) / 60);
+  const s = countdownSeconds % 60;
+  const display = document.getElementById('countdownDisplay');
+  if (display) {
+    display.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
+  if (countdownSeconds <= 0) {
+    triggerSpam67();
+    return;
+  }
+  countdownSeconds--;
+  setTimeout(updateCountdown, 1000);
+}
+
+function triggerSpam67() {
+  for (let i = 0; i < 67; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'spam-67';
+      el.textContent = '67';
+      el.style.left = Math.random() * 95 + 'vw';
+      el.style.top = Math.random() * 95 + 'vh';
+      el.style.fontSize = (20 + Math.random() * 40) + 'px';
+      el.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }, i * 50);
+  }
+}
+
+// ═══════════════════════════════════════════
+// CAPTCHA
+// ═══════════════════════════════════════════
+let captchaPassed = false;
+let captchaStep = 0;
+
+const captchaQuestions = [
+  {
+    q: 'Step 1/5: Prove you\'re not a robot. What is 2 + 2?',
+    opts: ['5', 'Fish', 'Also 5', 'A convincing lie'],
+    correct: -1
+  },
+  {
+    q: 'Step 2/5: Select all squares that contain a slightly disappointed horse.',
+    opts: ['🐴', '🐎', '🐴', '🐴', '🫏', '🐴', '🐴', '🐴', '🐴'],
+    correct: -1
+  },
+  {
+    q: 'Step 3/5: What is the airspeed velocity of an unladen swallow?',
+    opts: ['African or European?', 'About 42', 'Who cares lol', 'Mach 3.7'],
+    correct: -1
+  },
+  {
+    q: 'Step 4/5: Solve: ∫(sin³(x)·cos⁵(x)dx) from 0 to π = ?',
+    opts: ['Just trust me bro', 'undefined', 'NaN', 'It\'s giving'],
+    correct: -1
+  },
+  {
+    q: 'Step 5/5: Final question. Select the checkbox that definitely exists below this text:',
+    opts: ['☐ I am definitely a human person', '☑ I am lying right now', '☐ Trust me I\'m a computer', '☐ This captcha is pointless'],
+    correct: -1
+  }
+];
+
+function openCaptcha() {
+  captchaStep = 0;
+  captchaPassed = false;
+  renderCaptchaStep();
+  document.getElementById('captchaOverlay').classList.add('show');
+}
+
+function renderCaptchaStep() {
+  const body = document.getElementById('captchaBody');
+  if (captchaStep >= captchaQuestions.length) {
+    body.innerHTML = '<div class="captcha-result pass">✅ CAPTCHA PASSED</div>' +
+      '<p style="text-align:center;color:#666;font-size:12px;margin-top:10px;">You have successfully proven you are a human (or at least more human than a bot).</p>' +
+      '<button class="captcha-btn" onclick="captchaSuccess()" style="background:#006600;margin-top:15px;">CONTINUE TO DAMAGE CALCULATION</button>';
+    return;
+  }
+  const q = captchaQuestions[captchaStep];
+  let html = '<div class="captcha-step"><label>' + q.q + '</label><div class="captcha-options">';
+  q.opts.forEach((opt, i) => {
+    html += '<div class="captcha-opt" onclick="selectCaptchaOpt(this,' + i + ')">' + opt + '</div>';
+  });
+  html += '</div></div>';
+  html += '<button class="captcha-btn" id="captchaNextBtn" disabled onclick="nextCaptchaStep()">Submit Answer (any answer works)</button>';
+  html += '<p style="text-align:center;font-size:10px;color:#999;margin-top:8px;">Step ' + (captchaStep + 1) + ' of ' + captchaQuestions.length + '</p>';
+  body.innerHTML = html;
+}
+
+function selectCaptchaOpt(el, idx) {
+  el.parentNode.querySelectorAll('.captcha-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('captchaNextBtn').disabled = false;
+}
+
+function nextCaptchaStep() {
+  captchaStep++;
+  renderCaptchaStep();
+}
+
+function captchaSuccess() {
+  captchaPassed = true;
+  document.getElementById('captchaOverlay').classList.remove('show');
+  doCalculate();
+}
+
+function closeCaptcha() {
+  document.getElementById('captchaOverlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════
+// FAKE CODES GENERATOR
+// ═══════════════════════════════════════════
+function generateCodes() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const grid = document.getElementById('codesGrid');
+  if (!grid) return;
+
+  const fakeNames = [
+    'GUILD_WELCOME', 'PREORDER_BONUS', 'STREAMER_DROP',
+    'COLLAB_GIFT', 'ANNIVERSARY', 'COMPENSATION',
+    'LIMITED_EVENT', 'SEASON_PASS', 'BETA_TESTER',
+    'WEEKLY_GIFT', 'FRIEND_INVITE', 'LAUNCH_PARTY'
+  ];
+
+  for (let i = 0; i < 12; i++) {
+    let code = '';
+    for (let j = 0; j < 10; j++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateStr = (yesterday.getMonth()+1) + '/' + yesterday.getDate() + '/' + yesterday.getFullYear();
+
+    const entry = document.createElement('div');
+    entry.className = 'code-entry';
+    entry.innerHTML = '<div class="code-info"><div class="code-text">' + code + '</div><div class="code-date">Added ' + dateStr + '</div></div><button class="claim-btn" onclick="claimCode(this)">CLAIM</button>';
+    grid.appendChild(entry);
+  }
+}
+
+function claimCode(btn) {
+  const juicy = new Audio('media/juicy.mp3');
+  juicy.volume = 0.5;
+  juicy.play().catch(() => {});
+  btn.textContent = 'CLAIMED';
+  btn.classList.add('claimed');
+  btn.onclick = null;
+  btn.style.background = '#333';
+  btn.style.borderColor = '#555';
+  btn.style.color = '#999';
+}
+
+// ═══════════════════════════════════════════
+// DAMAGE CALCULATION
+// ═══════════════════════════════════════════
+function calculate() {
+  if (Math.random() < 0.25) {
+    const calcBtn = document.getElementById('calcBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const tempLeft = calcBtn.style.left;
+    const tempTop = calcBtn.style.top;
+    calcBtn.style.left = resetBtn.style.left || '';
+    calcBtn.style.top = resetBtn.style.top || '';
+    resetBtn.style.left = tempLeft || '';
+    resetBtn.style.top = tempTop || '';
+    resetBtn.click();
+    return;
+  }
+  if (!captchaPassed) {
+    openCaptcha();
+    return;
+  }
+  doCalculate();
+}
+
+function doCalculate() {
+  const minPhys = parseNum('minPhys');
+  const maxPhys = parseNum('maxPhys');
+  const effPrecision = parseNum('effPrecision') / 100;
+  const effCrit = parseNum('effCrit') / 100;
+  const effAffinity = parseNum('effAffinity') / 100;
+  const realCrit = parseNum('realCrit') / 100;
+  const directCrit = parseNum('directCrit') / 100;
+  const directAffinity = parseNum('directAffinity') / 100;
+  const abrasionConv = parseNum('abrasionConv') / 100;
+  const physPen = parseNum('physPen');
+  const bellstrikePen = parseNum('bellstrikePen');
+  const physDef = parseNum('physDef');
+  const enemyRes = parseNum('enemyRes') / 100;
+  const physDmgBonus = parseNum('physDmgBonus') / 100;
+  const attrDmgBonus = parseNum('attrDmgBonus') / 100;
+  const critDmgBonus = parseNum('critDmgBonus') / 100;
+  const affinityDmgBonus = parseNum('affinityDmgBonus') / 100;
+  const allMABonus = parseNum('allMABonus') / 100;
+  const bossDmgBonus = parseNum('bossDmgBonus') / 100;
+  const atkSpeed = parseNum('atkSpeed') || 1;
+
+  const avgPhys = (minPhys + maxPhys) / 2;
+  const critRate = Math.min(realCrit, effCrit + directCrit);
+  const affinityRate = Math.min(effAffinity + directAffinity, 1);
+  const missRate = Math.max(1 - effPrecision, 0);
+
+  function calcPipelines(attackMin, attackMax, attackAvg, penValue) {
+    const physDefReduction = physDef * 2.5;
+    const penBucket = (1 + penValue / 100);
+    const resBucket = Math.max(1 - enemyRes, 0);
+    const resPenMult = penBucket * resBucket;
+
+    const physBase_normal = Math.max(attackAvg - physDefReduction, 0);
+    const physBase_crit = Math.max(attackAvg - physDefReduction, 0);
+    const physBase_aff = Math.max(attackMax - physDefReduction, 0);
+    const physBase_abr = Math.max(attackMin - physDefReduction, 0);
+    const physBase_abrSaved = Math.max(attackAvg - physDefReduction, 0);
+
+    const attrBase_normal = attackAvg;
+    const attrBase_crit = attackAvg;
+    const attrBase_aff = attackMax;
+    const attrBase_abr = attackMin;
+    const attrBase_abrSaved = attackAvg;
+
+    function pipeline(physAtk, attrAtk, critMult) {
+      const physPipe = physAtk * critMult * resPenMult * (1 + physDmgBonus);
+      const attrPipe = attrAtk * critMult * resPenMult * (1 + attrDmgBonus);
+      return (physPipe + attrPipe) * (1 + allMABonus) * (1 + bossDmgBonus);
+    }
+
+    const dmg_normal = pipeline(physBase_normal, attrBase_normal, 1);
+    const dmg_crit = pipeline(physBase_crit, attrBase_crit, 1 + critDmgBonus);
+    const dmg_aff = pipeline(physBase_aff, attrBase_aff, 1 + affinityDmgBonus);
+    const dmg_abr = pipeline(physBase_abr, attrBase_abr, 1);
+    const dmg_abrSaved = pipeline(physBase_abrSaved, attrBase_abrSaved, 1);
+
+    const affOnlyRate = affinityRate;
+    const precOnlyRate = (1 - affinityRate) * effPrecision;
+    const abrRate = (1 - affinityRate) * (1 - effPrecision) * (1 - abrasionConv);
+    const abrConvRate = (1 - affinityRate) * (1 - effPrecision) * abrasionConv;
+
+    const critOnPrec = Math.min(critRate, 1);
+    const critHitRate = precOnlyRate * critOnPrec;
+    const normHitRate = precOnlyRate * (1 - critOnPrec);
+
+    const avgDmg = (
+      affOnlyRate * dmg_aff +
+      critHitRate * dmg_crit +
+      normHitRate * dmg_normal +
+      abrRate * dmg_abr +
+      abrConvRate * dmg_abrSaved
+    );
+
+    const avgDmgOnHit = avgDmg / Math.max(1 - missRate, 0.0001);
+
+    return {
+      avgDmg, avgDmgOnHit,
+      hitBreakdown: {
+        affRate: affOnlyRate, critRate: critHitRate, normRate: normHitRate,
+        abrRate: abrRate, abrConvRate: abrConvRate,
+        dmg_aff, dmg_crit, dmg_normal, dmg_abr, dmg_abrSaved,
+        physDefReduction, penBucket, resBucket, resPenMult
+      }
+    };
+  }
+
+  const physResult = calcPipelines(minPhys, maxPhys, avgPhys, physPen);
+  const dps = physResult.avgDmg * atkSpeed;
+  const dpsOnHit = physResult.avgDmgOnHit * atkSpeed;
+  const bd = physResult.hitBreakdown;
+
+  const resultGrid = document.getElementById('resultGrid');
+  resultGrid.innerHTML = '';
+
+  function addResult(label, value, cls) {
+    const item = document.createElement('div');
+    item.className = 'result-item' + (cls ? ' ' + cls : '');
+    item.innerHTML = '<span class="label">' + label + '</span><span class="value">' + value + '</span>';
+    resultGrid.appendChild(item);
+  }
+
+  addResult('Miss Rate', fmt(missRate * 100) + '%', '');
+  addResult('Abrasion Rate (raw)', fmt(bd.abrRate * 100 + bd.abrConvRate * 100) + '%', 'abrasion');
+  addResult('→ Abrasion Converted', fmt(bd.abrConvRate * 100) + '%', '');
+  addResult('→ Actual Abrasion', fmt(bd.abrRate * 100) + '%', 'abrasion');
+  addResult('Affinity Rate', fmt(bd.affRate * 100) + '%', 'affinity');
+  addResult('Crit Rate (overall)', fmt(bd.critRate * 100) + '%', 'crit');
+  addResult('Precision Hit Rate', fmt((bd.normRate + bd.critRate) * 100) + '%', '');
+  addResult('Min Attack', fmt(minPhys), '');
+  addResult('Avg Attack', fmt(avgPhys), '');
+  addResult('Max Attack', fmt(maxPhys), '');
+  addResult('Phys Def × 2.5', fmt(bd.physDefReduction), '');
+  addResult('Pen Bucket (1+Pen)', fmt(bd.penBucket), '');
+  addResult('Res Bucket (1-Res)', fmt(bd.resBucket), '');
+  addResult('Pen × Res Mult', fmt(bd.resPenMult), '');
+  addResult('▼ Abrasion Hit', fmt(bd.dmg_abr), 'abrasion');
+  addResult('▼ Precision Hit', fmt(bd.dmg_normal), '');
+  addResult('▼ Crit Hit', fmt(bd.dmg_crit), 'crit');
+  addResult('▼ Affinity Hit', fmt(bd.dmg_aff), 'affinity');
+  addResult('★ Avg DPA (all hits)', fmt(physResult.avgDmg), 'highlight');
+  addResult('★ Avg DPA (hits only)', fmt(physResult.avgDmgOnHit), 'highlight');
+  addResult('★ DPS', fmt(dps), 'highlight');
+  addResult('★ DPS (hits only)', fmt(dpsOnHit), 'highlight');
+
+  const skillResults = document.getElementById('skillResults');
+  skillResults.innerHTML = '';
+
+  const skills = [
+    { name: 'Silkbind', min: parseNum('minSilkbind'), max: parseNum('maxSilkbind'), pen: physPen },
+    { name: 'Bellstrike', min: parseNum('minBellstrike'), max: parseNum('maxBellstrike'), pen: bellstrikePen },
+    { name: 'Stonesplit', min: parseNum('minStonesplit'), max: parseNum('maxStonesplit'), pen: physPen },
+    { name: 'Bamboocut', min: parseNum('minBamboocut'), max: parseNum('maxBamboocut'), pen: physPen }
+  ];
+
+  for (const skill of skills) {
+    if (skill.min === 0 && skill.max === 0) continue;
+    const sResult = calcPipelines(skill.min, skill.max, (skill.min + skill.max) / 2, skill.pen);
+    const sDps = sResult.avgDmg * atkSpeed;
+    const sBd = sResult.hitBreakdown;
+
+    let html = '<div class="result-item" style="grid-column:1/-1;background:#0a0a22;border:2px outset #6666aa;margin-bottom:5px;">';
+    html += '<span class="label" style="color:#ff9900;font-size:14px;">⚔ ' + skill.name + '</span>';
+    html += '<span class="value" style="color:#ff9900;font-size:14px;">' + fmt(sDps) + ' DPS</span></div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:5px;margin-bottom:10px;">';
+    html += '<div class="result-item"><span class="label">Abrasion</span><span class="value">' + fmt(sBd.dmg_abr) + '</span></div>';
+    html += '<div class="result-item"><span class="label">Precision</span><span class="value">' + fmt(sBd.dmg_normal) + '</span></div>';
+    html += '<div class="result-item crit"><span class="label">Crit</span><span class="value">' + fmt(sBd.dmg_crit) + '</span></div>';
+    html += '<div class="result-item affinity"><span class="label">Affinity</span><span class="value">' + fmt(sBd.dmg_aff) + '</span></div>';
+    html += '<div class="result-item highlight"><span class="label">Avg DPA</span><span class="value">' + fmt(sResult.avgDmg) + '</span></div>';
+    html += '<div class="result-item highlight"><span class="label">DPS</span><span class="value">' + fmt(sDps) + '</span></div>';
+    html += '</div>';
+    skillResults.innerHTML += html;
+  }
+
+  if (skills.every(s => s.min === 0 && s.max === 0)) {
+    skillResults.innerHTML = '<div class="result-item" style="grid-column:1/-1;"><span class="label">No skill damage data entered!</span></div>';
+  }
+
+  document.getElementById('dpsValue').textContent = fmt(dps);
+  document.getElementById('resultsBox').style.display = 'block';
+  document.getElementById('resultsBox').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+// RESET FORM
+// ═══════════════════════════════════════════
+function resetForm() {
+  const defaults = {
+    minPhys: '992.82', maxPhys: '3453.38',
+    precision: '94.00', effPrecision: '85.00',
+    critPct: '45.25', effCrit: '31.21',
+    affinityPct: '56.45', effAffinity: '38.93',
+    directCrit: '0.00', directAffinity: '2.30', realCrit: '26.53',
+    abrasionConv: '0.00',
+    power: '541', agility: '137', momentum: '419.8',
+    minSilkbind: '0', maxSilkbind: '0',
+    minBellstrike: '286.1', maxBellstrike: '573.1',
+    minStonesplit: '0', maxStonesplit: '0',
+    minBamboocut: '0', maxBamboocut: '0',
+    physPen: '41.1', bellstrikePen: '23.55',
+    maxHP: '100139', physDef: '116.7', enemyRes: '0',
+    body: '137', defense: '137',
+    physDmgBonus: '0.00', attrDmgBonus: '9.00',
+    critDmgBonus: '50.00', affinityDmgBonus: '0.00',
+    allMABonus: '0.00', bossDmgBonus: '0.00',
+    atkSpeed: '1.00'
+  };
+  for (const [id, val] of Object.entries(defaults)) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  }
+  captchaPassed = false;
+  document.getElementById('resultsBox').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+// CALCULATE BUTTON DODGE + PREMIUM POPUP
+// ═══════════════════════════════════════════
+let premiumShown = false;
+let dodgeActive = true;
+
+function onCalcHover() {
+  if (!premiumShown) {
+    premiumShown = true;
+    setTimeout(() => showPopup('popupPremium'), 200);
+  }
+}
+
+(function initDodge() {
+  const btn = document.getElementById('calcBtn');
+  if (!btn) return;
+
+  btn.addEventListener('mouseenter', function(e) {
+    if (!dodgeActive) return;
+    if (Math.random() > 0.25) return;
+
+    const rect = btn.getBoundingClientRect();
+    const maxLeft = window.innerWidth - rect.width - 10;
+    const maxTop = window.innerHeight - rect.height - 10;
+
+    const newX = Math.max(10, Math.random() * maxLeft);
+    const newY = Math.max(10, Math.random() * maxTop);
+
+    btn.style.position = 'fixed';
+    btn.style.left = newX + 'px';
+    btn.style.top = newY + 'px';
+    btn.style.zIndex = '9999';
+  });
+})();
+
+// ═══════════════════════════════════════════
+// SHAPE BUTTON
+// ═══════════════════════════════════════════
+let isCircle = false;
+function toggleShape() {
+  isCircle = !isCircle;
+  const btn = document.getElementById('shapeBtn');
+  btn.classList.toggle('circle', isCircle);
+  btn.textContent = isCircle ? 'CIRCLE' : 'SQUARE';
+  showShapePopup();
+}
+
+function showShapePopup() {
+  const existing = document.getElementById('shapePopup');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.id = 'shapePopup';
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999999;background:#ffffcc;border:4px outset #cccc88;padding:30px 50px;text-align:center;box-shadow:5px 5px 0 #000;font-family:Comic Sans MS,cursive;animation:popupSlideIn 0.3s ease-out;';
+  el.innerHTML = '<div style="font-size:24px;font-weight:bold;color:#cc0000;margin-bottom:10px;">🔄 Square to Circle! 🔄</div><div style="font-size:13px;color:#333;margin-bottom:15px;">You have successfully transformed the button.<br>This changes absolutely nothing. Congratulations.</div><button onclick="this.parentElement.remove()" style="background:#c0c0c0;border:2px outset #fff;padding:5px 20px;cursor:pointer;font-weight:bold;">OK</button>';
+  document.body.appendChild(el);
+  setTimeout(() => { if (el.parentElement) el.remove(); }, 4000);
+}
+
+// ═══════════════════════════════════════════
+// MUSIC PLAYER
+// ═══════════════════════════════════════════
+const bgMusic = document.getElementById('bgMusic');
+const vizContainer = document.getElementById('musicViz');
+let playerMinimized = false;
+let vizInterval;
+
+function initViz() {
+  vizContainer.innerHTML = '';
+  for (let i = 0; i < 16; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.setProperty('--max-h', (8 + Math.random() * 17) + 'px');
+    const colors = ['#00ff00','#44ff00','#ffff00','#ff8800','#ff00ff','#00ffff'];
+    bar.style.setProperty('--bar-color', colors[i % colors.length]);
+    bar.style.animationDelay = (Math.random() * 0.4) + 's';
+    vizContainer.appendChild(bar);
+  }
+}
+
+function startViz() {
+  vizContainer.querySelectorAll('.bar').forEach(b => b.classList.add('playing'));
+}
+
+function stopViz() {
+  vizContainer.querySelectorAll('.bar').forEach(b => b.classList.remove('playing'));
+  vizContainer.querySelectorAll('.bar').forEach(b => b.style.height = '2px');
+}
+
+function musicAction(action) {
+  switch (action) {
+    case 'play':
+      bgMusic.volume = 0.3;
+      bgMusic.play().catch(() => {});
+      document.getElementById('playBtn').classList.add('active');
+      document.getElementById('pauseBtn').classList.remove('active');
+      document.getElementById('musicStatus').textContent = 'Playing';
+      startViz();
+      break;
+    case 'pause':
+      bgMusic.pause();
+      document.getElementById('pauseBtn').classList.add('active');
+      document.getElementById('playBtn').classList.remove('active');
+      document.getElementById('musicStatus').textContent = 'Paused';
+      stopViz();
+      break;
+    case 'stop':
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+      document.getElementById('playBtn').classList.remove('active');
+      document.getElementById('pauseBtn').classList.remove('active');
+      document.getElementById('musicStatus').textContent = 'Stopped';
+      stopViz();
+      break;
+    case 'prev':
+      bgMusic.currentTime = 0;
+      break;
+    case 'next':
+      bgMusic.currentTime = bgMusic.duration ? bgMusic.duration - 1 : 0;
+      break;
+  }
+}
+
+function setVolume(val) {
+  bgMusic.volume = val / 100;
+  document.getElementById('volDisplay').textContent = val + '%';
+}
+
+function togglePlayer() {
+  playerMinimized = !playerMinimized;
+  document.getElementById('musicPlayerBody').style.display = playerMinimized ? 'none' : 'block';
+}
+
+initViz();
+musicAction('play');
+
+bgMusic.addEventListener('ended', () => {
+  document.getElementById('musicStatus').textContent = 'Ended';
+  stopViz();
+  document.getElementById('playBtn').classList.remove('active');
+});
+
+bgMusic.addEventListener('error', () => {
+  document.getElementById('musicStatus').textContent = 'No file found';
+  document.getElementById('scrollText').textContent = '♪ ♫ ♪ ♫ ERROR: media/bg.mp3 not found ♫ ♪ ♫ ♪';
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !document.getElementById('captchaOverlay').classList.contains('show')) {
+    calculate();
+  }
+});
+
+updateCountdown();
+schedulePopups();
+generateCodes();
+</script>
+
+</body>
+</html>
