@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aethersea — Guild Info</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 5px #3399cc, 0 0 10px #3399cc; }
+  50% { text-shadow: 0 0 15px #66ccff, 0 0 25px #3399cc, 0 0 35px #0066aa; }
+}
+
+.top-bar {
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 5px 0;
+  overflow: hidden;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+  font-size: 14px;
+  color: #66ccff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.header {
+  background: linear-gradient(180deg, #000d1a 0%, #002244 30%, #003d6b 60%, #002244 100%);
+  border: 4px outset #3399cc;
+  margin: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 32px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366, 0 0 15px #3399cc;
+  animation: glow 3s ease-in-out infinite;
+  letter-spacing: 4px;
+}
+
+.header .subtitle {
+  font-size: 13px;
+  color: #99ccee;
+  margin-top: 6px;
+  letter-spacing: 2px;
+}
+
+.content {
+  max-width: 900px;
+  margin: 10px auto;
+  padding: 0 10px;
+}
+
+.policy-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  padding: 15px;
+}
+
+.policy-box h2 {
+  color: #66ccff;
+  font-size: 18px;
+  border-bottom: 2px solid #3399cc;
+  padding-bottom: 5px;
+  margin-bottom: 12px;
+  text-shadow: 1px 1px 0 #003366;
+}
+
+.policy-box h3 {
+  color: #ffcc00;
+  font-size: 14px;
+  margin: 14px 0 6px 0;
+}
+
+.policy-box p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.policy-box ul {
+  margin: 6px 0 6px 20px;
+  font-size: 13px;
+}
+
+.policy-box li {
+  margin-bottom: 5px;
+  line-height: 1.6;
+}
+
+.highlight {
+  color: #ffcc00;
+  font-weight: bold;
+}
+
+.warning {
+  color: #ff6666;
+  font-weight: bold;
+}
+
+.info {
+  color: #66ccff;
+  font-weight: bold;
+}
+
+.tag {
+  display: inline-block;
+  background: #003366;
+  color: #66ccff;
+  border: 1px solid #3399cc;
+  padding: 1px 6px;
+  font-size: 11px;
+  border-radius: 2px;
+  margin: 0 2px;
+}
+
+.section-divider {
+  text-align: center;
+  color: #336699;
+  font-size: 12px;
+  padding: 5px 0;
+  letter-spacing: 4px;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 15px 10px;
+  padding: 6px 16px;
+  background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+  border: 2px outset #3399cc;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  background: linear-gradient(180deg, #004488 0%, #002244 100%);
+  color: #99ddff;
+}
+
+.footer {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border-top: 3px outset #3399cc;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #336699;
+}
+
+.footer .hearts {
+  color: #3399cc;
+  font-size: 14px;
+  animation: blink 1.5s step-end infinite;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="marquee-text">
+    🌊 AETHERSEA GUILD — Where Winds Meet 🌊 — Semi-Competitive GvG — Play smart, not loud 🌊 — We win together 🌊
+  </div>
+</div>
+
+<div class="header">
+  <span style="color:#3399cc;font-size:18px;">✦ ✦ ✦</span>
+  <br>
+  <h1>🌊 AETHERSEA 🌊</h1>
+  <div class="subtitle">⚔ Guild Information ⚔</div>
+  <br>
+  <span style="color:#3399cc;font-size:18px;">✧ ✧ ✧</span>
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+<a class="back-link" href="aethersea-policy.html">Inactivity Policy →</a>
+
+<div class="content">
+
+  <!-- WELCOME -->
+  <div class="policy-box">
+    <h2>🌊 Welcome to Aethersea</h2>
+    <p>We're a <span class="highlight">semi-competitive GvG guild</span> — we take the game seriously when it counts, but we're not going to breathe down your neck. If you want a place that pushes you to improve without the drama, you're in the right spot.</p>
+  </div>
+
+  <!-- WHAT WE'RE ABOUT -->
+  <div class="policy-box">
+    <h2>🎯 What We're About</h2>
+    <p>We compete in Guild Wars and aim to stay in the <span class="highlight">top rankings</span>. We win by playing smart together, not by yelling at each other over mistakes.</p>
+  </div>
+
+  <div class="section-divider">═══════════════ ⚔ ═══════════════</div>
+
+  <!-- GVG INFORMATION -->
+  <div class="policy-box">
+    <h2>⚔ GvG Information & Expectations</h2>
+    <p>Here's some important information on what to expect during GvG <span class="info">(If you're a GvG Player)</span></p>
+
+    <!-- WEAPON CHOICES -->
+    <h3>🛡 Weapon Choices & Team Composition</h3>
+    <p>We don't force members to play specific weapon combinations, but we do provide recommendations for players who want guidance.</p>
+    <p>We will still try to give everyone opportunities to play. However, the less meta or flexible a build is — especially if multiple players are using the same type of build — the harder it may be to fit everyone into the final roster depending on the matchup and team needs.</p>
+
+    <!-- SIGN-UPS -->
+    <h3>📋 Sign-Ups Are Mandatory</h3>
+    <p>Responding to the sign-up poll in <span class="tag">#guild-war-signups</span> is mandatory if you want to be considered for the roster, whether you are attending or not.</p>
+    <p>This is extremely important for:</p>
+    <ul>
+      <li>Planning replacements</li>
+      <li>Building balanced team compositions</li>
+      <li>Organizing roles ahead of time</li>
+    </ul>
+    <p>We will finalize and post rosters on <span class="highlight">Fridays</span>, so please make sure to sign up by <span class="highlight">Thursday</span> whenever possible.</p>
+    <p>You should still vote or update your vote even after the roster is posted to indicate that you are available as a reserve/bench player.</p>
+    <p>If your availability changes, please update your vote as soon as possible, especially if you selected <span class="info">Tentative</span>.</p>
+
+    <!-- LATE / ABSENCE NOTICES -->
+    <h3>⏰ Late / Absence Notices</h3>
+    <p>If you'll be:</p>
+    <ul>
+      <li><span class="warning">Late</span></li>
+      <li><span class="warning">Leaving early</span></li>
+      <li><span class="warning">Suddenly unable to attend</span></li>
+    </ul>
+    <p>Please notify us immediately in <span class="tag">#early-out-late-absence</span> so we can adjust the roster accordingly.</p>
+
+    <!-- WAR PLANS -->
+    <h3>🗺 War Plans & Strategy</h3>
+    <p>Strategies, maps, and visual guides will be posted in <span class="tag">#war-plans</span> before each war.</p>
+    <p>Everyone is encouraged to review and understand their role beforehand. We still go over everything again before the match, especially for newer players.</p>
+    <p>If anything is unclear, <span class="highlight">please ask questions</span>.</p>
+
+    <!-- ROSTERS -->
+    <h3>📌 Rosters & Assigned Roles</h3>
+    <p>The final roster and any special assignments will be posted in <span class="tag">#roster</span>.</p>
+    <p>This may include junglers, tree carriers, chicken throwers, Tank EX pull order, and other role-specific responsibilities.</p>
+    <p>The roster may still change up until the last minute. If there are any changes affecting you, we will <span class="info">tag you directly</span>.</p>
+
+    <!-- FOLLOWING CALLS -->
+    <h3>🎯 Following Calls</h3>
+    <p>Following calls during the match is <span class="warning">extremely important</span>.</p>
+    <p>Even if a call may not seem optimal in the moment, we need everyone to commit to the play without hesitation. Decisions can always be reviewed afterward, but during the match <span class="highlight">teamwork and coordination matter most</span>.</p>
+
+    <!-- COMMUNICATION -->
+    <h3>🎤 Communication During GvG</h3>
+    <p>Communication is encouraged, but comms should stay focused and concise.</p>
+    <p><span class="info">Who calls:</span></p>
+    <ul>
+      <li><span class="highlight">The shotcaller</span> has final say during fights</li>
+      <li><span class="info">Support callers</span> handle assigned info (timers, etc.)</li>
+      <li>Anyone can speak up for quick, critical info — keep it brief and clear</li>
+    </ul>
+    <p><span class="info">Useful comms:</span></p>
+    <ul>
+      <li>Enemy movement</li>
+      <li>Jungle / boss timers</li>
+      <li>EX coordination</li>
+      <li>Bomb setups</li>
+      <li>Any other important fight info</li>
+    </ul>
+    <p><span class="warning">Please avoid:</span></p>
+    <ul>
+      <li>Talking over the shotcaller or active callers</li>
+      <li>Off-topic chatter during fights — save it for downtime</li>
+      <li>Arguing or questioning calls mid-fight — feedback can come after the game</li>
+      <li>Long explanations in combat — short and direct is best</li>
+    </ul>
+
+    <!-- VODS -->
+    <h3>🎥 VODs & Improvement</h3>
+    <p>We highly appreciate players who record and share gameplay in <span class="tag">#vods-stats</span>.</p>
+    <p>The purpose is <span class="highlight">never to shame players</span>. Reviewing gameplay helps us:</p>
+    <ul>
+      <li>Improve as a team</li>
+      <li>Learn from mistakes</li>
+      <li>Verify role execution</li>
+      <li>Develop better strategies</li>
+    </ul>
+    <p>Mistakes are completely normal and part of improving together.</p>
+  </div>
+
+  <!-- FINAL NOTE -->
+  <div class="policy-box" style="border-color:#66ccff;">
+    <h2>🎉 Final Note</h2>
+    <p>Our goal is to have as much <span class="highlight">fun</span> as possible while still taking GvG seriously and staying competitive.</p>
+    <p style="text-align:center;font-size:15px;color:#66ccff;margin-top:10px;">🌊 Welcome aboard, sailor. 🌊</p>
+  </div>
+
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+<a class="back-link" href="aethersea-policy.html">Inactivity Policy →</a>
+
+<div class="footer">
+  <div class="hearts">🌊 🌊 🌊</div>
+  <p>AETHERSEA — Where Winds Meet</p>
+  <p style="margin-top:5px;">Est. 2025 — Made by lorddy</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aethersea Inactivity Policy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 5px #3399cc, 0 0 10px #3399cc; }
+  50% { text-shadow: 0 0 15px #66ccff, 0 0 25px #3399cc, 0 0 35px #0066aa; }
+}
+
+.top-bar {
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 5px 0;
+  overflow: hidden;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+  font-size: 14px;
+  color: #66ccff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.header {
+  background: linear-gradient(180deg, #000d1a 0%, #002244 30%, #003d6b 60%, #002244 100%);
+  border: 4px outset #3399cc;
+  margin: 10px;
+  padding: 15px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 28px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366, 0 0 15px #3399cc;
+  animation: glow 3s ease-in-out infinite;
+  letter-spacing: 3px;
+}
+
+.header .subtitle {
+  font-size: 12px;
+  color: #99ccee;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+.content {
+  max-width: 900px;
+  margin: 10px auto;
+  padding: 0 10px;
+}
+
+.policy-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  padding: 15px;
+}
+
+.policy-box h2 {
+  color: #66ccff;
+  font-size: 18px;
+  border-bottom: 2px solid #3399cc;
+  padding-bottom: 5px;
+  margin-bottom: 12px;
+  text-shadow: 1px 1px 0 #003366;
+}
+
+.policy-box h3 {
+  color: #ffcc00;
+  font-size: 14px;
+  margin: 12px 0 6px 0;
+}
+
+.policy-box p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.policy-box ul {
+  margin: 6px 0 6px 20px;
+  font-size: 13px;
+}
+
+.policy-box li {
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+table th {
+  background: #003366;
+  color: #66ccff;
+  border: 2px outset #3399cc;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 13px;
+}
+
+table td {
+  background: #001122;
+  border: 2px inset #336699;
+  padding: 8px 10px;
+  color: #ccddff;
+  vertical-align: top;
+}
+
+table tr:hover td {
+  background: #001a33;
+}
+
+.highlight {
+  color: #ffcc00;
+  font-weight: bold;
+}
+
+.warning {
+  color: #ff6666;
+  font-weight: bold;
+}
+
+.info {
+  color: #66ccff;
+  font-weight: bold;
+}
+
+.disclaimer-box {
+  background: linear-gradient(180deg, #1a0033 0%, #0d001a 100%);
+  border: 3px outset #9966cc;
+  margin: 10px 0;
+  padding: 12px;
+}
+
+.disclaimer-box h2 {
+  color: #cc66ff;
+  border-bottom: 2px solid #9966cc;
+}
+
+.disclaimer-box p {
+  color: #cc99ff;
+  font-size: 12px;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 15px 10px;
+  padding: 6px 16px;
+  background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+  border: 2px outset #3399cc;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  background: linear-gradient(180deg, #004488 0%, #002244 100%);
+  color: #99ddff;
+}
+
+.footer {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border-top: 3px outset #3399cc;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #336699;
+}
+
+.footer .hearts {
+  color: #3399cc;
+  font-size: 14px;
+  animation: blink 1.5s step-end infinite;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="marquee-text">
+    🌊 AETHERSEA GUILD — Where Winds Meet 🌊 — Inactivity Policy — Know the rules, stay in the guild!! 🌊 — Active GvG players wanted!! 🌊
+  </div>
+</div>
+
+<div class="header">
+  <span style="color:#3399cc;font-size:18px;">✦ ✦ ✦</span>
+  <br>
+  <h1>🌊 AETHERSEA 🌊</h1>
+  <div class="subtitle">⚔ Inactivity Policy ⚔</div>
+  <br>
+  <span style="color:#3399cc;font-size:18px;">✧ ✧ ✧</span>
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+
+<div class="content">
+
+  <!-- INACTIVE MEMBER REMOVAL -->
+  <div class="policy-box">
+    <h2>⚠ Inactive Member Removal</h2>
+    <p>Members removed due to inactivity are <span class="highlight">not permanently blacklisted</span>. Since we are primarily recruiting active GvG players, inactive members may be removed to free up roster space. Removed members are welcome to <span class="info">reapply at any time</span>. Applications will be considered when guild slots become available, though leadership may also make room for returning members at its discretion.</p>
+  </div>
+
+  <!-- REMOVAL THRESHOLDS TABLE -->
+  <div class="policy-box">
+    <h2>📋 Removal Thresholds by Rank</h2>
+    <table>
+      <tr>
+        <th>Rank</th>
+        <th>Active GvG Player</th>
+        <th>Non-GvG Player</th>
+      </tr>
+      <tr>
+        <td><span class="highlight">Core Disciple / Hall Master</span></td>
+        <td>4 weeks inactive <span class="info">(even with notice)</span><br>2 weeks inactive <span class="warning">(without notice)</span></td>
+        <td>Below <span class="warning">4,000</span> Monthly Activity Points</td>
+      </tr>
+      <tr>
+        <td><span class="highlight">Inner Disciple</span></td>
+        <td>2 weeks inactive <span class="info">(even with notice)</span><br>1 week inactive <span class="warning">(without notice)</span></td>
+        <td>Below <span class="warning">8,000</span> Monthly Activity Points</td>
+      </tr>
+      <tr>
+        <td><span class="highlight">Outer Disciple / Apprentice</span></td>
+        <td>1 week inactive <span class="info">(even with notice)</span></td>
+        <td>Below <span class="warning">2,500</span> Weekly Activity Points</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ACTIVE GVG PLAYER -->
+  <div class="policy-box">
+    <h2>⚔ To be considered an Active GvG Player:</h2>
+
+    <h3>Guild War Signups</h3>
+    <p>Members are expected to <span class="highlight">vote on every Guild War signup</span> in <span class="info">#guild-war-signups</span>. Make sure to vote on both Saturday and Sunday.</p>
+    <ul>
+      <li>Voting <span class="info">Absent</span> is perfectly fine if you cannot attend.</li>
+      <li>Must sign up as attending and <span class="highlight">actually attend</span> if rostered at least <span class="warning">5 games in the last 2 weeks</span>.</li>
+    </ul>
+  </div>
+
+  <!-- EXTENDED ABSENCES -->
+  <div class="policy-box">
+    <h2>📅 Extended Absences</h2>
+    <p>If you will be unavailable for <span class="warning">more than 7 days</span>, post in <span class="info">#inactivity-notice</span> beforehand so we can take it into consideration.</p>
+  </div>
+
+  <!-- LEADERSHIP DISCRETION -->
+  <div class="policy-box">
+    <h2>👑 Leadership Discretion</h2>
+    <p>The inactivity policy serves as a <span class="highlight">guideline</span>, not an automatic removal system. Meeting any removal condition does not guarantee an immediate kick. Leadership may consider factors such as:</p>
+    <ul>
+      <li>Prior contributions</li>
+      <li>Communication</li>
+      <li>Attendance history</li>
+      <li>Guild needs</li>
+      <li>Exceptional circumstances</li>
+    </ul>
+    <p>Likewise, leadership reserves the right to make <span class="info">exceptions</span> or retain members who would otherwise qualify for removal when deemed beneficial for the guild.</p>
+  </div>
+
+  <!-- POLICY DISCLAIMER -->
+  <div class="disclaimer-box">
+    <h2>📜 Policy Disclaimer</h2>
+    <p>These policies are subject to change at any time as the needs of the guild evolve. Leadership reserves the right to modify, add, remove, or make exceptions to any policy when deemed necessary for the guild's best interests.</p>
+  </div>
+
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+
+<div class="footer">
+  <div class="hearts">🌊 🌊 🌊</div>
+  <p>AETHERSEA — Where Winds Meet</p>
+  <p style="margin-top:5px;">Est. 2025 — Made by lorddy</p>
+</div>
+
+</body>
+</html>

@@ -448,6 +448,60 @@ body {
   animation: blink 1.5s step-end infinite;
 }
 
+.credits-link {
+  color: #aaddff;
+  text-decoration: underline;
+  cursor: pointer;
+  position: relative;
+}
+
+.credits-link:hover {
+  color: #ffcc00;
+}
+
+.concept-preview {
+  position: fixed;
+  z-index: 99999;
+  border: 3px outset #9999ff;
+  background: #1a1a4e;
+  padding: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.concept-preview.visible {
+  opacity: 1;
+}
+
+.concept-preview img {
+  display: block;
+  max-width: 400px;
+  max-height: 350px;
+}
+
+.concept-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 100000;
+  justify-content: center;
+  align-items: center;
+}
+
+.concept-overlay.show {
+  display: flex;
+}
+
+.concept-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border: 4px outset #6666cc;
+  box-shadow: 0 0 30px #6666ff;
+}
+
 .hit-counter {
   display: inline-block;
   background: #000;
@@ -1478,8 +1532,19 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
 <!-- Top Marquee Bar -->
 <div class="top-bar">
   <div class="marquee-text">
-    ★ ★ ★ Welcome to jayus calculator — The ULTIMATE Where Winds Meet Damage Calculator!! ★ ★ ★ Built by jayus — Last updated 2026 — Bookmark this page!! ★ ★ ★ Best viewed in 1920x1080 ★ ★ ★ Made with Notepad and a dream ★ ★ ★
+    ★ ★ ★ Welcome to jayus calculator — The ULTIMATE Where Winds Meet Damage Calculator!! ★ ★ ★ Last updated 2026 — Bookmark this page!! ★ ★ ★ Best viewed in 1920x1080 ★ ★ ★ Made with Notepad and a dream ★ ★ ★
   </div>
+</div>
+
+<!-- EMERGENCY ANNOUNCEMENT -->
+<div id="emergencyBanner" style="background:linear-gradient(90deg,#001a33,#003366,#001a33);border-top:3px outset #3399cc;border-bottom:3px outset #3399cc;padding:8px 10px;text-align:center;position:relative;">
+  <button onclick="document.getElementById('emergencyBanner').style.display='none'" style="position:absolute;top:4px;right:8px;background:#001a33;color:#66ccff;border:2px outset #3399cc;padding:2px 8px;font-size:12px;cursor:pointer;font-family:'Comic Sans MS',cursive;">✕</button>
+  <div style="margin-bottom:4px;">
+    <span style="color:#66ccff;font-size:18px;font-weight:bold;letter-spacing:2px;text-shadow:0 0 8px #3399cc;">🌊 AETHERSEA GUILD 🌊</span>
+  </div>
+  <span style="color:#ffff00;font-size:15px;font-weight:bold;">🚨 EMERGENCY ANNOUNCEMENT 🚨</span><br>
+  <span style="color:#ffffff;font-size:13px;">Jaeus has vowed to wear a <span style="color:#ff66cc;font-size:15px;font-weight:bold;">MAID OUTFIT</span> if we get <span style="color:#ffff00;font-weight:bold;">TOP 8</span> in ranked GvG leaderboards!!</span><br>
+  <span style="color:#aaddff;font-size:11px;">This is NOT a drill. Make it happen.</span>
 </div>
 
 <!-- Header -->
@@ -1518,18 +1583,20 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
     <div class="sidebar-box">
       <div class="sidebar-title">★ Navigation ★</div>
       <div class="sidebar-content">
-        <a href="#" onclick="return false;">Phys Damage</a>
-        <a href="#" onclick="return false;">Skill Damage</a>
-        <a href="#" onclick="return false;">DPS Calc</a>
-        <a href="#" onclick="return false;">Comps</a>
+        <a href="#" onclick="showPopup('popupPhysDmg');return false;">Phys Damage</a>
+        <a href="#" onclick="showPopup('popupSkillDmg');return false;">Skill Damage</a>
+        <a href="#" onclick="showPopup('popupDPSCalc');return false;">DPS Calc</a>
+        <a href="#" onclick="showPopup('popupComps');return false;">Comps</a>
       </div>
     </div>
     <div class="sidebar-box">
       <div class="sidebar-title">★ Links ★</div>
       <div class="sidebar-content">
-        <a href="#" onclick="return false;">WWM Wiki</a>
-        <a href="#" onclick="return false;">Game Site</a>
-        <a href="https://discord.gg/vuNSJmdeHG" target="_blank">Discord</a>
+        <a href="https://wherewindsmeet.wiki.fextralife.com/Where_Winds_Meet_Wiki" target="_blank">WWM Wiki</a>
+        <a href="https://www.wherewindsmeetgame.com/" target="_blank">Game Site</a>
+        <a href="https://discord.gg/vuNSJmdeHG" target="_blank">Guild Discord</a>
+        <a href="aethersea-info.html">Guild Info</a>
+        <a href="aethersea-policy.html">Inactivity Policy</a>
       </div>
     </div>
     <div class="sidebar-box">
@@ -2607,6 +2674,67 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
   </div>
 </div>
 
+<!-- Nav Popups -->
+<div class="popup-ad-overlay" id="popupPhysDmg" style="top:30%;left:25%;">
+  <div class="popup-ad-titlebar">
+    <span>phys_damage_not_found.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupPhysDmg')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big">⚠ PHYS DAMAGE MODULE ⚠</div>
+    <p style="font-size:14px;margin:8px 0;">Status: <span style="color:#cc0000;">NOT FOUND</span></p>
+    <p style="font-size:12px;">Error 404: Physical damage could not be located.</p>
+    <p style="font-size:12px;">Did you mean: <span style="color:#00aa00;text-decoration:underline;">"just parry lol"</span>?</p>
+    <p style="font-size:11px;margin-top:8px;">Tip: Have you tried putting all your points into Affinity and praying?</p>
+    <p style="font-size:9px;color:#999;margin-top:6px;">Developer note: phys damage was removed in patch 0.0.1 because it was "too fair"</p>
+  </div>
+</div>
+
+<div class="popup-ad-overlay" id="popupSkillDmg" style="top:20%;right:15%;">
+  <div class="popup-ad-titlebar">
+    <span>skill_issue.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupSkillDmg')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#ff6600;">⚔ SKILL DAMAGE ⚔</div>
+    <p style="font-size:14px;margin:8px 0;">Loading skill damage data...</p>
+    <p style="font-size:12px;">Calculated value: <span style="color:#00aa00;">IT'S A SKILL ISSUE</span></p>
+    <p style="font-size:12px;margin-top:5px;">Did you know? 9 out of 10 WWM players blame their build instead of their rotation.</p>
+    <p style="font-size:11px;margin-top:8px;">The 10th player blames lag.</p>
+    <p style="font-size:9px;color:#999;margin-top:6px;">Sponsored by: "Have you tried reading your skill descriptions?" — Aethersea Leadership</p>
+  </div>
+</div>
+
+<div class="popup-ad-overlay" id="popupDPSCalc" style="bottom:20%;left:15%;">
+  <div class="popup-ad-titlebar">
+    <span>dps_calculator_totally_real.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupDPSCalc')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#0066ff;">📊 DPS CALC ULTRA 📊</div>
+    <p style="font-size:14px;margin:8px 0;">Your DPS: <span style="color:#cc0000;font-size:18px;">YES</span></p>
+    <p style="font-size:12px;">Competing DPS: <span style="color:#00aa00;">ALSO YES</span></p>
+    <p style="font-size:12px;margin-top:5px;">The real DPS was the friends we made along the way.</p>
+    <p style="font-size:11px;margin-top:8px;">Advanced analytics show your DPS increases by 47% when nobody is watching.</p>
+    <p style="font-size:9px;color:#999;margin-top:6px;">Note: DPS stands for "Drama Per Second" in this guild</p>
+  </div>
+</div>
+
+<div class="popup-ad-overlay" id="popupComps" style="top:40%;right:10%;">
+  <div class="popup-ad-titlebar">
+    <span>team_comp_simulator.exe</span>
+    <button class="popup-ad-close" onclick="closePopup('popupComps')">X</button>
+  </div>
+  <div class="popup-ad-body">
+    <div class="ad-big" style="color:#cc66ff;">🧩 TEAM COMPS 🧩</div>
+    <p style="font-size:14px;margin:8px 0;">Optimal comp found: <span style="color:#ffcc00;">5 Healers</span></p>
+    <p style="font-size:12px;">Alt comp: <span style="color:#ff6666;">4 Healers + 1 guy who doesn't read chat</span></p>
+    <p style="font-size:12px;margin-top:5px;">Meta report: Every comp is viable if you believe hard enough.</p>
+    <p style="font-size:11px;margin-top:8px;">Fun fact: "Comps" is short for "Complaints about who got rostered"</p>
+    <p style="font-size:9px;color:#999;margin-top:6px;">Actual tip: Check #war-plans before you queue the wrong weapons again</p>
+  </div>
+</div>
+
 <!-- Captcha Overlay -->
 <div class="captcha-overlay" id="captchaOverlay">
   <div class="captcha-box">
@@ -2624,8 +2752,16 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
   <p>jayus calculator © 2026 — All rights reserved</p>
   <p>Made with <span style="color:#ff0000;">♥</span> and way too much coffee</p>
   <p style="margin-top:5px;">This site is not affiliated with Where Winds Meet or its developers</p>
+  <p style="margin-top:8px;font-size:12px;color:#aaddff;">Made by <strong>lorddy</strong> — <a class="credits-link" id="conceptLink">Original Concept Sketch</a></p>
   <p style="margin-top:3px;color:#666699;">Best viewed in Internet Explorer 6 at 1920x1080</p>
   <div class="hit-counter" style="margin-top:8px;">VISITORS: <span id="footerCount">001337</span></div>
+</div>
+
+<div class="concept-preview" id="conceptPreview">
+  <img src="media/calculator-sketch.png" alt="Original Concept Sketch">
+</div>
+<div class="concept-overlay" id="conceptOverlay" onclick="this.classList.remove('show')">
+  <img src="media/calculator-sketch.png" alt="Original Concept Sketch">
 </div>
 
 <script>
@@ -3216,6 +3352,31 @@ document.addEventListener('keydown', function(e) {
 updateCountdown();
 schedulePopups();
 generateCodes();
+
+// ═══════════════════════════════════════════
+// CONCEPT SKETCH HOVER/CLICK
+// ═══════════════════════════════════════════
+(function() {
+  var link = document.getElementById('conceptLink');
+  var preview = document.getElementById('conceptPreview');
+  var overlay = document.getElementById('conceptOverlay');
+  if (!link) return;
+
+  link.addEventListener('mousemove', function(e) {
+    preview.style.left = (e.clientX + 15) + 'px';
+    preview.style.top = (e.clientY - 30) + 'px';
+    preview.classList.add('visible');
+  });
+
+  link.addEventListener('mouseleave', function() {
+    preview.classList.remove('visible');
+  });
+
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    overlay.classList.add('show');
+  });
+})();
 </script>
 
 </body>
