@@ -68,6 +68,60 @@ body {
   to { transform: rotate(360deg); }
 }
 
+@keyframes trolly-shake {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(-8px) rotate(-2deg); }
+  20% { transform: translateX(8px) rotate(2deg); }
+  30% { transform: translateX(-6px) rotate(-1deg); }
+  40% { transform: translateX(6px) rotate(1deg); }
+  50% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  70% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+  90% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes trolly-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg) scale(1.02); }
+  75% { transform: rotate(3deg) scale(1.02); }
+}
+
+@keyframes trolly-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.trolly-shake {
+  animation: trolly-shake 0.4s ease-in-out;
+}
+
+.stat-row {
+  transition: transform 0.1s, opacity 0.1s;
+}
+
+.stat-row.trolly-dragging {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0.85;
+  transform: rotate(-2deg) scale(1.05);
+  background: #1a0033;
+  border: 2px solid #ff00ff;
+  padding: 4px 8px;
+}
+
+.stat-row.trolly-shuffle {
+  animation: trolly-wobble 0.5s ease-in-out;
+}
+
+.stat-row.trolly-giant input {
+  font-size: 22px !important;
+  height: 32px !important;
+  transition: font-size 0.15s;
+}
+
 .blink { animation: blink 1s step-end infinite; }
 .rainbow-text { animation: rainbow 3s linear infinite; }
 .sparkle-text { animation: sparkle 2s ease-in-out infinite; }
@@ -4073,6 +4127,235 @@ generateCodes();
       addMessage(p.name, p.color, replies[Math.floor(Math.random() * replies.length)], getTime());
     }, 800 + Math.random() * 1500);
   };
+})();
+
+// ═══════════════════════════════════════════
+// TROLLY STAT INPUTS
+// ═══════════════════════════════════════════
+(function() {
+  var statInputs = document.querySelectorAll('#statsGrid input[type="text"]');
+  var statRows = document.querySelectorAll('#statsGrid .stat-row');
+  var originalLabels = [];
+
+  statRows.forEach(function(row) {
+    var label = row.querySelector('label');
+    if (label) originalLabels.push(label.textContent);
+  });
+
+  // === 1. SHAKE ON FOCUS ===
+  statInputs.forEach(function(input) {
+    input.addEventListener('focus', function() {
+      var row = input.closest('.stat-row');
+      if (row) {
+        row.classList.add('trolly-shake');
+        setTimeout(function() { row.classList.remove('trolly-shake'); }, 400);
+      }
+    });
+  });
+
+  // === 2. GIANT TEXT ON FOCUS ===
+  statInputs.forEach(function(input) {
+    input.addEventListener('focus', function() {
+      var row = input.closest('.stat-row');
+      if (row) row.classList.add('trolly-giant');
+    });
+    input.addEventListener('blur', function() {
+      var row = input.closest('.stat-row');
+      if (row) row.classList.remove('trolly-giant');
+    });
+  });
+
+  // === 3. RANDOM VALUE DRIFT ===
+  function driftValues() {
+    var idx = Math.floor(Math.random() * statInputs.length);
+    var input = statInputs[idx];
+    if (document.activeElement === input) return;
+    var val = parseFloat(input.value.replace(/,/g, '')) || 0;
+    var drift = (Math.random() - 0.5) * 2;
+    var newVal = Math.round((val + drift) * 100) / 100;
+    if (newVal < 0) newVal = Math.abs(newVal);
+    input.value = newVal;
+    setTimeout(driftValues, 3000 + Math.random() * 5000);
+  }
+  setTimeout(driftValues, 5000);
+
+  // === 4. LABEL SWAP ===
+  function swapLabels() {
+    if (statRows.length < 2) return;
+    var a = Math.floor(Math.random() * statRows.length);
+    var b = Math.floor(Math.random() * statRows.length);
+    while (b === a) b = Math.floor(Math.random() * statRows.length);
+    var labelA = statRows[a].querySelector('label');
+    var labelB = statRows[b].querySelector('label');
+    if (labelA && labelB) {
+      var temp = labelA.textContent;
+      labelA.textContent = labelB.textContent;
+      labelB.textContent = temp;
+      setTimeout(function() {
+        labelA.textContent = temp;
+        labelB.textContent = labelA.textContent !== temp ? labelA.textContent : labelB.textContent;
+        var origA = originalLabels[a] || labelA.textContent;
+        var origB = originalLabels[b] || labelB.textContent;
+        labelA.textContent = origA;
+        labelB.textContent = origB;
+      }, 3000 + Math.random() * 3000);
+    }
+    setTimeout(swapLabels, 10000 + Math.random() * 15000);
+  }
+  setTimeout(swapLabels, 8000);
+
+  // === 5. DRAGGABLE INPUTS ===
+  var dragRow = null, dragOffX = 0, dragOffY = 0;
+
+  statRows.forEach(function(row) {
+    row.addEventListener('mousedown', function(e) {
+      if (e.target.tagName === 'INPUT') return;
+      dragRow = row;
+      var rect = row.getBoundingClientRect();
+      dragOffX = e.clientX - rect.left;
+      dragOffY = e.clientY - rect.top;
+      row.classList.add('trolly-dragging');
+      row.style.left = rect.left + 'px';
+      row.style.top = rect.top + 'px';
+      row.style.width = rect.width + 'px';
+      e.preventDefault();
+    });
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!dragRow) return;
+    dragRow.style.left = (e.clientX - dragOffX) + 'px';
+    dragRow.style.top = (e.clientY - dragOffY) + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (!dragRow) return;
+    dragRow.classList.remove('trolly-dragging');
+    dragRow.style.position = '';
+    dragRow.style.left = '';
+    dragRow.style.top = '';
+    dragRow.style.width = '';
+    dragRow = null;
+  });
+
+  // === 7. INPUT SWAP ON TYPE ===
+  statInputs.forEach(function(input) {
+    input.addEventListener('input', function() {
+      if (Math.random() > 0.3) return;
+      var others = Array.from(statInputs).filter(function(i) { return i !== input; });
+      var target = others[Math.floor(Math.random() * others.length)];
+      var val = parseFloat(target.value.replace(/,/g, '')) || 0;
+      var change = Math.round((Math.random() - 0.5) * 4 * 100) / 100;
+      var newVal = Math.round((val + change) * 100) / 100;
+      if (newVal < 0) newVal = Math.abs(newVal);
+      target.value = newVal;
+      target.style.transition = 'background 0.3s';
+      target.style.background = 'rgba(255,0,255,0.2)';
+      setTimeout(function() { target.style.background = ''; }, 500);
+    });
+  });
+
+  // === 8. INVERT ON BLUR ===
+  statInputs.forEach(function(input) {
+    input.addEventListener('blur', function() {
+      if (Math.random() > 0.3) return;
+      var val = parseFloat(input.value.replace(/,/g, ''));
+      if (isNaN(val) || val === 0) return;
+      var roll = Math.random();
+      var newVal;
+      if (roll < 0.33) newVal = -val;
+      else if (roll < 0.66) newVal = val * 2;
+      else newVal = val / 2;
+      newVal = Math.round(newVal * 100) / 100;
+      if (newVal < 0) newVal = Math.abs(newVal);
+      input.value = newVal;
+      input.style.transition = 'color 0.3s, background 0.3s';
+      input.style.color = '#ff0000';
+      input.style.background = 'rgba(255,0,0,0.1)';
+      setTimeout(function() { input.style.color = ''; input.style.background = ''; }, 800);
+    });
+  });
+
+  // === 9. INPUT MODE CHAOS — START TROLLY FROM PAGE LOAD ===
+  var inputModes = [
+    { mode: 'password', ph: '••••••••' },
+    { mode: 'range', min: '0', max: '999' },
+    { mode: 'email', ph: 'stat@build.com' },
+    { mode: 'url', ph: 'https://bad-build.gg' },
+    { mode: 'tel', ph: '1-800-BAD-DPS' },
+    { mode: 'color', ph: '#ff0000' },
+    { mode: 'date', ph: '' },
+    { mode: 'search', ph: 'search stats...' },
+    { mode: 'text', ph: '' }
+  ];
+
+  // Pre-troll ~40% of inputs on page load
+  statInputs.forEach(function(input) {
+    if (Math.random() > 0.4) return;
+    var mode = inputModes[Math.floor(Math.random() * inputModes.length)];
+    input.placeholder = mode.ph || '';
+
+    if (mode.mode === 'password') {
+      input.type = 'password';
+    } else if (mode.mode === 'range') {
+      input.type = 'range';
+      input.min = mode.min;
+      input.max = mode.max;
+      input.style.accentColor = '#ff00ff';
+    } else if (mode.mode === 'color') {
+      input.type = 'color';
+      input.value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+    } else if (mode.mode === 'date') {
+      input.type = 'date';
+    } else {
+      input.setAttribute('inputmode', mode.mode);
+    }
+  });
+
+  // Keep swapping them around
+  function inputModeChaos() {
+    var idx = Math.floor(Math.random() * statInputs.length);
+    var input = statInputs[idx];
+    if (document.activeElement === input) return;
+    var original = {
+      type: input.type,
+      inputMode: input.getAttribute('inputmode'),
+      placeholder: input.placeholder,
+      className: input.className
+    };
+
+    var mode = inputModes[Math.floor(Math.random() * inputModes.length)];
+    input.placeholder = mode.ph || '';
+
+    if (mode.mode === 'password') {
+      input.type = 'password';
+    } else if (mode.mode === 'range') {
+      input.type = 'range';
+      input.min = mode.min;
+      input.max = mode.max;
+      input.style.accentColor = '#ff00ff';
+    } else if (mode.mode === 'color') {
+      input.type = 'color';
+      input.value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+    } else if (mode.mode === 'date') {
+      input.type = 'date';
+    } else {
+      input.setAttribute('inputmode', mode.mode);
+    }
+
+    input.style.transition = 'outline 0.3s';
+    input.style.outline = '2px solid #ff00ff';
+
+    setTimeout(function() {
+      input.type = original.type;
+      input.placeholder = original.placeholder;
+      input.removeAttribute('inputmode');
+      input.style.outline = '';
+      input.style.accentColor = '';
+      if (input.type === 'range') input.type = 'text';
+    }, 4000 + Math.random() * 4000);
+  }
+  setInterval(inputModeChaos, 12000 + Math.random() * 10000);
 })();
 </script>
 
