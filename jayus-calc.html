@@ -1155,7 +1155,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
 
 .music-player {
   position: fixed;
-  bottom: 20px;
+  bottom: 390px;
   right: 20px;
   z-index: 9990;
   width: 260px;
@@ -1164,6 +1164,120 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
   box-shadow: 3px 3px 0 #000, inset 0 0 20px rgba(0,0,0,0.3);
   font-family: 'Courier New', monospace;
   user-select: none;
+}
+
+.chatbox {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9989;
+  width: 320px;
+  height: 350px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%);
+  border: 3px outset #7777aa;
+  box-shadow: 3px 3px 0 #000;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatbox-titlebar {
+  background: linear-gradient(180deg, #000080, #000044, #000066);
+  padding: 3px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px outset #4444aa;
+}
+
+.chatbox-titlebar .title-text {
+  color: #aaaaff;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.chatbox-titlebar .win-btns button {
+  background: #c0c0c0;
+  border: 2px outset #ddd;
+  color: #000;
+  font-size: 9px;
+  font-weight: bold;
+  width: 16px;
+  height: 14px;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.chatbox-titlebar .win-btns button:hover {
+  background: #e0e0e0;
+}
+
+.chatbox-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 6px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.chatbox-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chatbox-messages::-webkit-scrollbar-track {
+  background: #0d0d1a;
+}
+
+.chatbox-messages::-webkit-scrollbar-thumb {
+  background: #333366;
+  border: 1px inset #4444aa;
+}
+
+.chat-msg {
+  margin-bottom: 3px;
+}
+
+.chat-name {
+  font-weight: bold;
+}
+
+.chat-time {
+  color: #555;
+  font-size: 9px;
+}
+
+.chat-text {
+  color: #cccccc;
+}
+
+.chat-input-row {
+  display: flex;
+  border-top: 2px inset #444;
+  background: #111;
+}
+
+.chat-input-row input {
+  flex: 1;
+  background: #0a0a1a;
+  border: none;
+  color: #66ff66;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 4px 6px;
+  outline: none;
+}
+
+.chat-input-row button {
+  background: #c0c0c0;
+  border: 2px outset #ddd;
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
 }
 
 .music-titlebar {
@@ -1528,11 +1642,19 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
   .sidebar { width: 100%; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .codes-grid { grid-template-columns: 1fr; }
+  .chatbox { width: 280px; height: 280px; }
+  .music-player { width: 220px; }
+}
+
+@media (max-width: 600px) {
+  .chatbox { width: calc(100vw - 20px); right: 10px; bottom: 10px; height: 220px; }
+  .music-player { width: calc(100vw - 20px); right: 10px; bottom: 240px; }
 }
 
 @media (max-width: 500px) {
   .stats-grid { grid-template-columns: 1fr; }
   .header h1 { font-size: 18px; }
+  .chatbox { height: 180px; }
 }
 </style>
 </head>
@@ -1562,11 +1684,11 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
   <span class="stars">✦</span>
   <span class="stars">✦</span>
   <br>
-  <h1>jayus calculator</h1>
+  <h1>jayus calculator <span style="font-size:14px;color:#ff66ff;">v1.5</span></h1>
   <div class="subtitle">⚔ Where Winds Meet — Damage Calculator ⚔</div>
   <br>
   <span class="stars">✧</span>
-  <span style="color:#ff0;font-size:12px;"> v2.0 — now with MORE math!! </span>
+  <span style="color:#ff0;font-size:12px;"> v1.5 — now with MORE math!! </span>
   <span class="stars">✧</span>
   <br>
   <div style="margin-top:8px;">
@@ -2084,7 +2206,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
             <span class="review-stars">★★★★★</span>
           </div>
           <div class="review-text">
-            I've been playing WWM since launch and this is the first tool that actually makes sense. Everything else I tried was either in Chinese or had broken formulas. This one just <span class="shout">WORKS</span>. Punched in my stats, hit calculate, and immediately understood why my Bellstrike was hitting like a wet noodle. Turns out my pen was garbage. Fixed my build and now I'm topping damage charts. Thank you jayus <span class="heart">♥♥♥</span>
+            Healer main since launch and this is the first tool that actually made me understand the defense and resistance formulas. Everything else I tried was either in Chinese or assumed everyone plays DPS. This one gets it. <span class="shout">HEALERS NEED MATH TOO.</span> Plugged in my healing stats, finally understood why my heals felt weak despite having "good" gear. Turns out my pen/res bucket was completely wrong. Fixed my build and now my team stops dying. You're welcome everyone. Also yes I use Golden Body and no jayus cannot stop me. He told me it's suboptimal. I told him I don't care. I'm a healer not a metaslave. Thank you jayus <span class="heart">♥♥♥</span>
           </div>
         </div>
 
@@ -2129,6 +2251,16 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
         </div>
 
         <!-- BAD REVIEWS -->
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">SHADOWxCLOUD <span class="review-date">— posted 05/31/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★☆☆☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            I can't see the golden tree GvG badge in your profile so this calculator must be bad. Also I tried to apply to your guild and nobody responded. Can I have slot on GvG btw? 1 star. Fix your calculator and invite me.
+          </div>
+        </div>
 
         <div class="review-entry" style="border-color:#662222;background:#1a0505;">
           <div class="review-header">
@@ -2278,6 +2410,298 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
           </div>
         </div>
 
+        <!-- NEW PLAYER REVIEWS -->
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Vaizardes <span class="review-date">— posted 05/02/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            The skill damage breakdown section is actually insane. I was sitting there staring at my numbers for like 20 minutes trying to figure out why my rotation felt off and then it just clicked. This calculator does what every YouTube guide pretends to do. Absolute GOAT tool.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Neifile <span class="review-date">— posted 05/03/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            I heal for my group and I was convinced my numbers were fine until I actually sat down and plugged everything in. Turns out I was overvaluing a stat by a LOT. Would be 5 stars but there's no healer-specific section. We healers exist too you know!!
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">Jshen <span class="review-date">— posted 05/04/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★★★☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            I'm still learning my new weapon and I plugged in my stats and the calculator gave me a number so low it might as well have been a typo. I feel personally attacked. At least put a warning label for new players or something. My ego is in shambles.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Yushou <span class="review-date">— posted 05/05/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator is so beautifully designed it actually inspired me to draw something. The probability ladder section alone is gorgeous. If anyone wants WWM fanart commissions hit me up on Discord. Anyway 10/10 calculator would let it ruin my build again.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Eunhyan <span class="review-date">— posted 05/06/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            Just came back after being gone for a while and tried to calc my gear. Everything I had is outdated. This calculator showed me my DPS is basically healer-level despite not being a healer. I'm still trying to catch up but at least now I know exactly how far behind I am. Pain. But helpful pain.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Freyer <span class="review-date">— posted 05/07/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator taught me more about how defense and resistance actually work in 5 minutes than I learned in 300 hours of playing. The pen/res bucket explanation is crystal clear. Every healer should bookmark this. Your DPS players need to see their actual numbers too so they stop blaming the heals.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Lunaerys <span class="review-date">— posted 05/08/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            Can confirm everything Freyer said. Also the retro aesthetic makes me feel like I'm back playing RuneScape in 2004 and calculating DPS with a calculator next to me. Except this one actually works and doesn't make me do the math myself. 10/10.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Meckam <span class="review-date">— posted 05/09/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            This calculator is accurate and useful. Took off one star because it made me realize I've been wasting resources on the wrong stats for 3 months. I could have been doing 40% more damage this whole time. I'm not mad I'm just disappointed. Actually no I'm mad. But the calculator is good.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#ff69b4;background:#1a0020;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff69b4;">Omu <span class="review-date">— posted 05/10/2026</span></span>
+            <span class="review-stars" style="color:#ff69b4;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#ddaacc;border-left-color:#ff69b4;">
+            My partner and I literally sit next to each other plugging in numbers comparing our builds. It's our couple activity now. He plays one thing I play another and we argue about whose build is better. 10/10 bonding experience. <span class="heart">♥</span>
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Xyruvial <span class="review-date">— posted 05/11/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            Can confirm my partner's review. This calculator is what made me realize my pen stacking was actually hurting my overall damage because I was neglecting the other bucket. Reworked everything and now I out-damage her. She has not forgiven me. Worth it. Best calculator on the internet.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Shalltear <span class="review-date">— posted 05/12/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            Poro told me about this calculator and I didn't believe him because he hypes up literally everything. He was right this time though. The damage numbers are accurate and the skill breakdown is super useful. Giving 4 stars because Poro doesn't deserve to be right about everything.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Xiehart <span class="review-date">— posted 05/13/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            I use this before every GvG to figure out what my team is actually putting out. When you're making callouts you need to know the numbers and this tool makes it so easy. Every shotcaller needs this bookmarked immediately. Stop guessing and start calculating.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">Akuxeru <span class="review-date">— posted 05/14/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★★★☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            Calculator is good but I spend more time on other games these days. Used it once, got my numbers, went back to what I was doing. Would be 5 stars if it calculated damage for other games too. Just kidding. Unless...?
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">barurut <span class="review-date">— posted 05/15/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            The defense/resistance breakdown is something I've been trying to explain to my guild for WEEKS. Now I just link this page and say "read." It has saved me so many arguments. Thank you jayus for doing what I could not.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Kush <span class="review-date">— posted 05/16/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator doesn't have a tank section but I used the phys damage calc to figure out how much damage I'm actually soaking. Turns out my defense is doing way more work than I thought. Tank players we ARE the meta. Bookmark this tool.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Damii <span class="review-date">— posted 05/17/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator helped me figure out exactly how much damage I'm losing by not optimizing my pen bucket. Also chicken throwing DPS is actually not bad if you stack right. Don't sleep on it. Junglers and chicken throwers deserve nice things too. This tool is cracked.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Feng <span class="review-date">— posted 05/18/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            Miky told me about this calculator and I've been using it nonstop. The skill damage breakdown is super helpful for comparing rotations. Took off one star because it doesn't have a "compare with your friend's build" feature. Miky and I need that.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">Kensei <span class="review-date">— posted 05/19/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★☆☆☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            I haven't played in a while and just came back to check the calculator. It still works which is more than I can say for my gear. Everything is outdated. I don't even recognize my own build anymore. This calculator made me realize I need to touch grass AND the game. 1 star because it hurt my feelings.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#662222;background:#1a0505;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ff4444;">Mojozuzu <span class="review-date">— posted 05/20/2026</span></span>
+            <span class="review-stars" style="color:#ff4444;">★★☆☆☆</span>
+          </div>
+          <div class="review-text" style="color:#ddaaaa;border-left-color:#662222;">
+            Too busy to play but I opened this out of nostalgia and now I'm sad because I miss the game. Thanks for reminding me I have responsibilities jayus. 2 stars because emotional damage is not included in the formula.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Ninelie <span class="review-date">— posted 05/21/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator is the reason I finally understand why my crit build was underperforming. Turns out I was rolling Affinity most of the time and my crit rate was basically a decorative stat. The probability ladder is an absolute wake-up call. 10/10 educational content.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Ribin <span class="review-date">— posted 05/22/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator showed me that my tank build is actually contributing more damage than some of our DPS players. I screenshotted it and sent it in guild chat. Nobody was happy. Except me. I was very happy. Thank you jayus for giving me ammunition.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Smol <span class="review-date">— posted 05/23/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator is taller than me in terms of usefulness. The defense formula section helped me understand something I've been confused about for months. Either way 5 stars the retro vibes match my energy perfectly.
+          </div>
+        </div>
+
+        <div class="review-entry" style="border-color:#ffcc00;animation:glow-review 3s ease-in-out infinite;">
+          <div class="review-header">
+            <span class="review-user" style="color:#ffff00;text-shadow:0 0 10px #ffcc00;">Shenyue <span class="review-date">— posted 05/24/2026</span></span>
+            <span class="review-stars" style="color:#ffff00;font-size:16px;">★★★★★</span>
+          </div>
+          <div class="review-text" style="color:#ffffaa;border-left-color:#ffcc00;">
+            <span class="wow">I CHECK THIS CALCULATOR BEFORE EVERY SINGLE GVG.</span> The pen/res bucket breakdown is CRUCIAL for keeping my team alive. Every GVG I get closer to where I want to be. This tool is not optional it is LIFESTYLE. <span class="heart">♥</span>
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Starly <span class="review-date">— posted 05/25/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            Simple and effective calculator. Does exactly what it promises. I used it to check my numbers and they were accurate. Took off one star because the chatbox keeps distracting me from actually optimizing my build. I've been reading fake messages for 20 minutes. Help.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Voidz <span class="review-date">— posted 05/26/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator exposed me. I thought I was doing crazy damage and it turns out I'm mid at best. The skill breakdown section doesn't lie and that's what I respect about it. Brutal honesty wrapped in Comic Sans. The best kind of pain. 5 stars for making me a better player through emotional damage.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Vinci <span class="review-date">— posted 05/27/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            I send this calculator to every single new player who asks "how do I build my character." The answer is always "plug your stats into jayus calculator and read the results." It's that simple. If you're reading this and you haven't used it yet, what are you doing? Go. Now.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Xolenn <span class="review-date">— posted 05/28/2026</span></span>
+            <span class="review-stars">★★★★☆</span>
+          </div>
+          <div class="review-text">
+            The calculator is great and accurate. I just wish there was a healer section. We contribute to the team too you know. Every review I see is from DPS players flexing their numbers. Meanwhile I'm over here keeping everyone alive and getting zero credit. Anyway the math is correct 4 stars.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Yihsuan <span class="review-date">— posted 05/29/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            This calculator is the reason I stopped blindly following build guides and started actually understanding my damage formula. The dual pipeline breakdown changed everything for me. I now know exactly where each point of damage comes from. Most underrated tool in the WWM community. Share it.
+          </div>
+        </div>
+
+        <div class="review-entry">
+          <div class="review-header">
+            <span class="review-user">Augustus <span class="review-date">— posted 05/30/2026</span></span>
+            <span class="review-stars">★★★★★</span>
+          </div>
+          <div class="review-text">
+            I plugged in my stats expecting to be humbled and I was. But then I reworked my entire build using the numbers from this calculator and now I'm doing 35% more damage than before. My guild thinks I hired a coach. No I just used math. The ancient art of arithmetic. 5 stars jayus you absolute king.
+          </div>
+        </div>
+
         <div style="text-align:center;margin-top:12px;padding:8px;border:2px inset #444;background:#000;">
           <span style="color:#ffff00;font-size:12px;font-weight:bold;">Want to leave a review?</span>
           <span style="color:#00ff00;font-size:12px;"> Sign the guestbook or shout me out on Discord!! </span>
@@ -2290,9 +2714,24 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
 </div>
 
 <!-- Background Music Player -->
-<audio id="bgMusic" loop preload="auto" autoplay>
+<audio id="bgMusic" preload="auto" autoplay>
   <source src="media/bg.mp3" type="audio/mpeg">
 </audio>
+
+<!-- Chatbox -->
+<div class="chatbox" id="chatbox">
+  <div class="chatbox-titlebar">
+    <span class="title-text">💬 Aethersea Chat</span>
+    <div class="win-btns">
+      <button onclick="document.getElementById('chatboxMessages').scrollTop = document.getElementById('chatboxMessages').scrollHeight" title="Scroll">↓</button>
+    </div>
+  </div>
+  <div class="chatbox-messages" id="chatboxMessages"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="type something..." maxlength="100" onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">▶</button>
+  </div>
+</div>
 
 <div class="music-player" id="musicPlayer">
   <div class="music-titlebar">
@@ -3269,6 +3708,25 @@ const vizContainer = document.getElementById('musicViz');
 let playerMinimized = false;
 let vizInterval;
 
+const playlist = [
+  { src: 'media/bg.mp3', title: 'BGM' },
+  { src: 'media/darude-sandstorm.mp3', title: 'Darude - Sandstorm' },
+  { src: 'media/i-am-blue.mp3', title: 'Eiffel 65 - Blue (Da Ba Dee)' },
+  { src: 'media/patty-circulation.mp3', title: 'Renai Circulation' },
+  { src: 'media/vitas.mp3', title: 'Vitas - The 7th Element' },
+  { src: 'media/Smash Mouth - Shooting All Star.mp3', title: 'Smash Mouth - All Star' },
+  { src: 'media/We Are Number One Remix but by The Living Tombstone (Lazytown).mp3', title: 'We Are Number One (Living Tombstone Remix)' },
+  { src: 'media/John Denver - Take Me Home, Country Roads (Jesse Bloch Bootleg) 👑 Rex Sounds.mp3', title: 'Country Roads (Jesse Bloch Bootleg)' }
+];
+let currentTrack = 0;
+
+function loadTrack(idx) {
+  currentTrack = (idx + playlist.length) % playlist.length;
+  bgMusic.src = playlist[currentTrack].src;
+  document.getElementById('scrollText').textContent = '♪ ♫ ♪ ♫ Now Playing: ' + playlist[currentTrack].title + ' ♫ ♪ ♫ ♪ — jayus calculator — your ears will thank you (or not) ♪ ♫ ♪ ♫';
+  bgMusic.load();
+}
+
 function initViz() {
   vizContainer.innerHTML = '';
   for (let i = 0; i < 16; i++) {
@@ -3298,7 +3756,7 @@ function musicAction(action) {
       bgMusic.play().catch(() => {});
       document.getElementById('playBtn').classList.add('active');
       document.getElementById('pauseBtn').classList.remove('active');
-      document.getElementById('musicStatus').textContent = 'Playing';
+      document.getElementById('musicStatus').textContent = 'Playing: ' + playlist[currentTrack].title;
       startViz();
       break;
     case 'pause':
@@ -3317,10 +3775,12 @@ function musicAction(action) {
       stopViz();
       break;
     case 'prev':
-      bgMusic.currentTime = 0;
+      loadTrack(currentTrack - 1);
+      musicAction('play');
       break;
     case 'next':
-      bgMusic.currentTime = bgMusic.duration ? bgMusic.duration - 1 : 0;
+      loadTrack(currentTrack + 1);
+      musicAction('play');
       break;
   }
 }
@@ -3336,17 +3796,18 @@ function togglePlayer() {
 }
 
 initViz();
+playlist.sort(() => Math.random() - 0.5);
+loadTrack(0);
 musicAction('play');
 
 bgMusic.addEventListener('ended', () => {
-  document.getElementById('musicStatus').textContent = 'Ended';
-  stopViz();
-  document.getElementById('playBtn').classList.remove('active');
+  loadTrack(currentTrack + 1);
+  musicAction('play');
 });
 
 bgMusic.addEventListener('error', () => {
   document.getElementById('musicStatus').textContent = 'No file found';
-  document.getElementById('scrollText').textContent = '♪ ♫ ♪ ♫ ERROR: media/bg.mp3 not found ♫ ♪ ♫ ♪';
+  document.getElementById('scrollText').textContent = '♪ ♫ ♪ ♫ ERROR: media/' + playlist[currentTrack].src.split('/').pop() + ' not found ♫ ♪ ♫ ♪';
 });
 
 // ═══════════════════════════════════════════
@@ -3385,6 +3846,233 @@ generateCodes();
     e.preventDefault();
     overlay.classList.add('show');
   });
+})();
+
+// ═══════════════════════════════════════════
+// CHATBOX
+// ═══════════════════════════════════════════
+(function() {
+  var chatBox = document.getElementById('chatboxMessages');
+  var names = [
+    {name:'Adeep',color:'#ff6666'},
+    {name:'Bacu',color:'#66aaff'},
+    {name:'Daffo',color:'#66ff66'},
+    {name:'Meowkaera',color:'#ff66ff'},
+    {name:'Kay',color:'#ffaa66'},
+    {name:'Entis',color:'#66ffff'},
+    {name:'SurdzSaid',color:'#ff4444'},
+    {name:'Cheon',color:'#ff8888'},
+    {name:'Etri',color:'#cc88ff'},
+    {name:'chrizzielim',color:'#88ff88'},
+    {name:'vaizardes',color:'#ffcc44'},
+    {name:'kazuno',color:'#ff88cc'},
+    {name:'Poro',color:'#ffff00'},
+    {name:'Qallisto',color:'#ffdd88'},
+    {name:'Sunther',color:'#ff9944'},
+    {name:'oVer',color:'#ff66cc'},
+    {name:'hanbaobao',color:'#aaaaaa'},
+    {name:'JoshTwist',color:'#ff69b4'},
+    {name:'Us1ng',color:'#999999'},
+    {name:'lamyz',color:'#cc66ff'},
+    {name:'Vaizardes',color:'#ffcc44'},
+    {name:'Neifile',color:'#77bbdd'},
+    {name:'Jshen',color:'#ff8844'},
+    {name:'Yushou',color:'#ffaa99'},
+    {name:'Eunhyan',color:'#aaddff'},
+    {name:'Freyer',color:'#88ddaa'},
+    {name:'Lunaerys',color:'#ccaaff'},
+    {name:'Meckam',color:'#ddaa66'},
+    {name:'Omu',color:'#ff88cc'},
+    {name:'Xyruvial',color:'#8888ff'},
+    {name:'Shalltear',color:'#ff66aa'},
+    {name:'Xiehart',color:'#ffcc66'},
+    {name:'Akuxeru',color:'#ff5555'},
+    {name:'barurut',color:'#66ccaa'},
+    {name:'Kush',color:'#88bbee'},
+    {name:'Damii',color:'#ffaa44'},
+    {name:'Feng',color:'#88ffaa'},
+    {name:'Kensei',color:'#aaaaaa'},
+    {name:'Mojozuzu',color:'#cc99ff'},
+    {name:'Ninelie',color:'#ff99aa'},
+    {name:'Ribin',color:'#66aadd'},
+    {name:'Smol',color:'#ffaaee'},
+    {name:'Shenyue',color:'#ffdd44'},
+    {name:'Starly',color:'#aaddff'},
+    {name:'Voidz',color:'#8888cc'},
+    {name:'Vinci',color:'#88ddcc'},
+    {name:'Xolenn',color:'#99bbee'},
+    {name:'Yihsuan',color:'#ddcc88'},
+    {name:'Augustus',color:'#eebb66'},
+    {name:'SHADOWxCLOUD',color:'#aa44ff'}
+  ];
+
+  var messages = [
+    'is this calc even accurate lmao',
+    'just hit max affinity 4head',
+    'my dps went up 0.01% lets gooo',
+    'whoever made this is unhinged',
+    'where winds math could never',
+    'bruh i just got a 3 on the captcha',
+    'the maid outfit bet is real btw',
+    'can we get an aff res calc next',
+    'im literally just here for the popups',
+    'this site made me quit the game',
+    'wait you guys actually read the skill descriptions?',
+    'the music player goes hard ngl',
+    'im submitting a 0dps build hold on',
+    'whoever keeps clicking calculate on my keyboard stop',
+    'is the background music just a lie',
+    'bro the captcha had me dying',
+    'i thought this was a real website for 10 minutes',
+    'the footer says best viewed in ie6 and i believe it',
+    'someone tell me how def works i cant read',
+    'im literally typing this from the chatbox this is cursed',
+    'yo can someone calc my healing output',
+    'the hit counter is flexing on us',
+    'this site has more features than the actual game',
+    'i opened this at work and now my boss is concerned',
+    'the retro vibes are immaculate',
+    'can we get a tier list of the fake popups',
+    'this calc is why i have trust issues',
+    'someone invite me to the guild already',
+    'the 67 button is my favorite feature',
+    'i clicked shape like 50 times nothing happened',
+    'the concept sketch is art honestly',
+    'wait theres actual math behind this??',
+    'this is the only spreadsheet i enjoy',
+    'does the captcha count as a personality test',
+    'im sending this to everyone in my fc',
+    'the bonus section is just vibes',
+    'why does the cursor look like that',
+    'my cat walked across my keyboard and got better results',
+    'nameless strat build gang rise up',
+    'dust players are eating good with this calc',
+    'healers exist too you know !!',
+    'just reworked my pen bucket and my dps doubled',
+    'twin-mo tanks are the real carries',
+    'the probability ladder is actually genius',
+    'my healer numbers lookin kinda cute rn',
+    'chicken throwing is a legit strat and ill die on this hill',
+    'anyone else maining panacea or is it just me',
+    'this calc just exposed my whole build',
+    'im never trusting a youtube build guide again',
+    'the def x2.5 formula goes so hard',
+    'hengao players rise up',
+    'i plugged in my stats and it said "lol"',
+    'the pen/res bucket breakdown is crystal clear',
+    'whoever coded this calc is a menace to society',
+    'this site runs smoother than my actual gameplay',
+    'chatbox is more addictive than the calculator',
+    'im a healer and i feel seen by this tool',
+    'can we add a flex section where you compare with your guildmates',
+    'the retro aesthetic is peak game design',
+    'nameless panacea gang where you at',
+    'this calc taught me more than 200 hours of gameplay',
+    'divine healer achievement soon trust',
+    'im still learning dust and this calc is carrying me',
+    'my wife and i compare builds on this every night',
+    'xyruvial out-dpsd me and im not over it',
+    'tank players do more damage than our dps lol',
+    'the skill breakdown section is underrated',
+    'this is the official aethersea calculator now',
+    'i showed this to my mom and she said it was cool',
+    'the emotes in this chat are so expressive',
+    'anyone else opening this calc at 3am or is it just me',
+    'can i have slot on gvg',
+    'this calculator cant even show my golden tree badge smh'
+  ];
+
+  var sentBy = {};
+
+  function addMessage(name, color, text, time) {
+    var div = document.createElement('div');
+    div.className = 'chat-msg';
+    div.innerHTML = '<span class="chat-name" style="color:' + color + '">' + name + ':</span> <span class="chat-text">' + text + '</span> <span class="chat-time">' + time + '</span>';
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    if (chatBox.children.length > 80) chatBox.removeChild(chatBox.firstChild);
+  }
+
+  function getTime() {
+    var d = new Date();
+    var h = d.getHours(), m = d.getMinutes();
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+
+  var msgIdx = 0;
+
+  function postRandomMessage() {
+    var p = names[Math.floor(Math.random() * names.length)];
+    var m = messages[msgIdx % messages.length];
+    msgIdx++;
+    addMessage(p.name, p.color, m, getTime());
+  }
+
+  var greetingNames = names.slice(0, 12);
+  for (var i = 0; i < greetingNames.length; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        var greetings = ['hey','yo','sup','hiii','hai','ello','hi','hewwo','haiii','yo yo','supp','hehe'];
+        addMessage(greetingNames[idx].name, greetingNames[idx].color, greetings[idx], getTime());
+      }, idx * 400);
+    })(i);
+  }
+
+  setInterval(postRandomMessage, 5000 + Math.random() * 4000);
+
+  window.sendChat = function() {
+    var input = document.getElementById('chatInput');
+    var text = input.value.trim();
+    if (!text) return;
+    addMessage('you', '#66ff66', text, getTime());
+    input.value = '';
+    setTimeout(function() {
+      var p = names[Math.floor(Math.random() * names.length)];
+      var replies = [
+        'lol',
+        'real',
+        'based',
+        'skill issue',
+        'true',
+        'no way',
+        'same',
+        'wait what',
+        'lmaooo',
+        'factssss',
+        'ok but have you tried aff stacking',
+        'calc says otherwise',
+        'nice try',
+        'sus',
+        'ratio',
+        'thats crazy',
+        'who asked (jk)',
+        'drop the build',
+        'ive been saying this',
+        'mood',
+        'as a healer i agree',
+        'nameless gang',
+        'dust player detected',
+        'the pen bucket agrees',
+        'your def is crying',
+        'bro your aff is carrying',
+        'check the probability ladder',
+        'healer diff',
+        'twin-mo diff',
+        'jungle diff',
+        'chicken thrower approved',
+        'the strat build is valid',
+        'panacea users rise',
+        'divine healer energy',
+        'poggers',
+        'oof',
+        'f in the chat',
+        'W calculator',
+        'L build sorry',
+        'this is the way'
+      ];
+      addMessage(p.name, p.color, replies[Math.floor(Math.random() * replies.length)], getTime());
+    }, 800 + Math.random() * 1500);
+  };
 })();
 </script>
 
