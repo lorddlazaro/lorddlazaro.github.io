@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guild War Strategy Planner — Aethersea</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+@keyframes glow { 0%,100%{text-shadow:0 0 5px #3399cc,0 0 10px #3399cc} 50%{text-shadow:0 0 15px #66ccff,0 0 25px #3399cc} }
+
+.top-bar {
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 5px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+  position: relative;
+}
+
+.top-bar h1 {
+  font-size: 16px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366;
+  white-space: nowrap;
+}
+
+.top-bar .subtitle {
+  font-size: 10px;
+  color: #99ccee;
+}
+
+.back-link {
+  color: #66ccff;
+  text-decoration: none;
+  font-size: 11px;
+  padding: 4px 10px;
+  background: linear-gradient(180deg, #003366, #001a33);
+  border: 2px outset #3399cc;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.back-link:hover { background: linear-gradient(180deg, #004488, #002244); }
+
+.app-layout {
+  display: flex;
+  height: calc(100vh - 42px);
+}
+
+.toolbar {
+  width: 48px;
+  background: linear-gradient(180deg, #001a33, #001122);
+  border-right: 3px outset #3399cc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0;
+  gap: 4px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.tool-btn {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(180deg, #003366, #001a33);
+  border: 2px outset #3399cc;
+  color: #66ccff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tool-btn:hover { background: linear-gradient(180deg, #004488, #002244); color: #99ddff; }
+.tool-btn.active { border-style: inset; background: linear-gradient(180deg, #005588, #003366); color: #fff; }
+
+.tool-sep {
+  width: 30px;
+  height: 2px;
+  background: #333366;
+  margin: 2px 0;
+  flex-shrink: 0;
+}
+
+.canvas-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #050510;
+  cursor: crosshair;
+}
+
+#mainCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.icon-panel {
+  width: 200px;
+  background: linear-gradient(180deg, #001a33, #001122);
+  border-left: 3px outset #3399cc;
+  overflow-y: auto;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.panel-section {
+  margin-bottom: 10px;
+}
+
+.panel-title {
+  font-size: 10px;
+  font-weight: bold;
+  color: #66ccff;
+  border-bottom: 1px solid #333366;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.icon-item {
+  aspect-ratio: 1;
+  background: rgba(0,40,80,0.3);
+  border: 1px inset #336699;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  padding: 3px;
+  position: relative;
+}
+
+.icon-item:hover {
+  border-color: #66ccff;
+  background: rgba(0,60,100,0.4);
+}
+
+.icon-item img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.icon-item .icon-label {
+  font-size: 7px;
+  color: #667799;
+  text-align: center;
+  margin-top: 2px;
+  pointer-events: none;
+  line-height: 1.1;
+}
+
+.placed-icon {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  z-index: 10;
+}
+
+.placed-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.placed-icon.selected {
+  outline: 2px dashed #66ccff;
+  outline-offset: 2px;
+}
+
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.color-picker-row input[type="color"] {
+  width: 28px;
+  height: 22px;
+  border: 1px inset #336699;
+  background: #0a0a1a;
+  cursor: pointer;
+  padding: 0;
+}
+
+.color-picker-row input[type="range"] {
+  width: 50px;
+  accent-color: #3399cc;
+}
+
+.color-picker-row label {
+  font-size: 9px;
+  color: #99bbdd;
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 48px;
+  right: 200px;
+  background: linear-gradient(180deg, #002244, #001a33);
+  border-top: 2px outset #3399cc;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  color: #667799;
+  z-index: 50;
+}
+
+.bottom-bar span { color: #66ccff; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="jayus-calc.html">← jayus calc</a>
+  <div>
+    <h1>⚔ Guild War Strategy Planner</h1>
+    <div class="subtitle">AETHERSEA — Where Winds Meet</div>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="back-link" onclick="undoAction()" title="Undo (Ctrl+Z)">↩ Undo</button>
+    <button class="back-link" onclick="clearDrawings()" title="Clear drawings only">Clear Lines</button>
+    <button class="back-link" onclick="clearIcons()" title="Clear icons only">Clear Icons</button>
+    <button class="back-link" style="color:#ff9999;border-color:#cc6666;" onclick="clearAll()" title="Clear everything">✕ Clear All</button>
+  </div>
+</div>
+
+<div class="app-layout">
+  <div class="toolbar">
+    <button class="tool-btn active" id="tool-select" onclick="setTool('select')" title="Select / Move">➤</button>
+    <button class="tool-btn" id="tool-pen" onclick="setTool('pen')" title="Pen">✏</button>
+    <button class="tool-btn" id="tool-line" onclick="setTool('line')" title="Line">╱</button>
+    <button class="tool-btn" id="tool-arrow" onclick="setTool('arrow')" title="Arrow">→</button>
+    <button class="tool-btn" id="tool-rect" onclick="setTool('rect')" title="Rectangle">▭</button>
+    <button class="tool-btn" id="tool-circle" onclick="setTool('circle')" title="Circle">○</button>
+    <div class="tool-sep"></div>
+    <button class="tool-btn" id="tool-eraser" onclick="setTool('eraser')" title="Eraser">⌫</button>
+    <div class="tool-sep"></div>
+    <div class="color-picker-row">
+      <input type="color" id="drawColor" value="#ff3333">
+    </div>
+    <div class="color-picker-row">
+      <input type="range" id="drawSize" min="1" max="20" value="3">
+    </div>
+    <div class="color-picker-row">
+      <label>Size</label>
+    </div>
+  </div>
+
+  <div class="canvas-area" id="canvasArea">
+    <canvas id="mainCanvas"></canvas>
+  </div>
+
+  <div class="icon-panel">
+    <div class="panel-section">
+      <div class="panel-title">🗺 MAP ICONS</div>
+      <div class="icon-grid" id="mapIcons"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-title">⚔ BUILD PATHS</div>
+      <div class="icon-grid" id="buildIcons"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-title">🏷 CUSTOM LABEL</div>
+      <div style="display:flex;gap:4px;margin-top:4px;">
+        <input type="text" id="customLabel" placeholder="Label text" style="flex:1;background:#0a0a1a;border:1px inset #336699;color:#66ff66;font-size:10px;padding:3px 5px;font-family:'Courier New',monospace;">
+        <button class="tool-btn" onclick="addCustomLabel()" style="width:auto;padding:0 8px;font-size:10px;">+ Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <span>Tool:</span> <span id="statusTool">Select</span>
+  <span>|</span>
+  <span>Icons:</span> <span id="statusIcons">0</span>
+  <span>|</span>
+  <span>Drawings:</span> <span id="statusDrawings">0</span>
+  <span>|</span>
+  <span>Drag</span> icons from the right panel • <span>Ctrl+Z</span> to undo • <span>Del</span> to remove selected
+</div>
+
+<script>
+var canvas = document.getElementById('mainCanvas');
+var ctx = canvas.getContext('2d');
+var canvasArea = document.getElementById('canvasArea');
+
+var currentTool = 'select';
+var isDrawing = false;
+var drawColor = '#ff3333';
+var drawSize = 3;
+
+var placedIcons = [];
+var drawingHistory = [];
+var undoStack = [];
+var selectedIcon = null;
+var dragOffset = { x: 0, y: 0 };
+var lineStart = null;
+
+var mapIconFiles = [
+  { file: 'media/Map Icons/tree_red.png', label: 'Tree (Red)' },
+  { file: 'media/Map Icons/tree_blue.png', label: 'Tree (Blue)' },
+  { file: 'media/Map Icons/tower_red.png', label: 'Tower (Red)' },
+  { file: 'media/Map Icons/tower_blue.png', label: 'Tower (Blue)' },
+  { file: 'media/Map Icons/goose_red.png', label: 'Goose (Red)' },
+  { file: 'media/Map Icons/goose_blue.png', label: 'Goose (Blue)' },
+  { file: 'media/Map Icons/boss.png', label: 'Boss' }
+];
+
+var buildIconFiles = [
+  { file: 'media/Paths/stonesplit-strength.png', label: 'Stonesplit Str' },
+  { file: 'media/Paths/stonesplit-might.png', label: 'Stonesplit Mgt' },
+  { file: 'media/Paths/silkbind-jade.png', label: 'Silkbind Jade' },
+  { file: 'media/Paths/silkbind-deluge.png', label: 'Silkbind Deluge' },
+  { file: 'media/Paths/bellstrike-umbra.png', label: 'Bellstrike Um' },
+  { file: 'media/Paths/bellstrike-splendor.png', label: 'Bellstrike Sp' },
+  { file: 'media/Paths/bamboocut-wind.png', label: 'Bamboocut W' },
+  { file: 'media/Paths/bamboocut-dust-where-winds-meet-wiki-guide.webp', label: 'Bamboocut D' }
+];
+
+function initIconPanel() {
+  var mapGrid = document.getElementById('mapIcons');
+  var buildGrid = document.getElementById('buildIcons');
+
+  mapIconFiles.forEach(function(icon) {
+    var div = document.createElement('div');
+    div.className = 'icon-item';
+    div.setAttribute('draggable', 'true');
+    div.setAttribute('data-src', icon.file);
+    div.setAttribute('data-type', 'map');
+    div.innerHTML = '<img src="' + icon.file + '" draggable="false"><div class="icon-label">' + icon.label + '</div>';
+    mapGrid.appendChild(div);
+  });
+
+  buildIconFiles.forEach(function(icon) {
+    var div = document.createElement('div');
+    div.className = 'icon-item';
+    div.setAttribute('draggable', 'true');
+    div.setAttribute('data-src', icon.file);
+    div.setAttribute('data-type', 'build');
+    div.innerHTML = '<img src="' + icon.file + '" draggable="false"><div class="icon-label">' + icon.label + '</div>';
+    buildGrid.appendChild(div);
+  });
+
+  document.querySelectorAll('.icon-item').forEach(function(item) {
+    item.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text/plain', this.getAttribute('data-src'));
+      e.dataTransfer.setData('application/icon-type', this.getAttribute('data-type'));
+    });
+  });
+}
+
+function resizeCanvas() {
+  var rect = canvasArea.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  redrawAll();
+}
+
+function redrawAll() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (mapImg && mapImg.complete) {
+    var scale = Math.min(canvas.width / mapImg.width, canvas.height / mapImg.height);
+    var w = mapImg.width * scale;
+    var h = mapImg.height * scale;
+    var x = (canvas.width - w) / 2;
+    var y = (canvas.height - h) / 2;
+    ctx.drawImage(mapImg, x, y, w, h);
+  }
+  drawingHistory.forEach(function(action) {
+    drawAction(action);
+  });
+}
+
+var mapImg = new Image();
+mapImg.src = 'media/map.png';
+mapImg.onload = function() { redrawAll(); };
+
+function drawAction(action) {
+  ctx.strokeStyle = action.color;
+  ctx.lineWidth = action.size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  if (action.type === 'pen') {
+    if (action.points.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(action.points[0].x, action.points[0].y);
+    for (var i = 1; i < action.points.length; i++) {
+      ctx.lineTo(action.points[i].x, action.points[i].y);
+    }
+    ctx.stroke();
+  } else if (action.type === 'line') {
+    ctx.beginPath();
+    ctx.moveTo(action.x1, action.y1);
+    ctx.lineTo(action.x2, action.y2);
+    ctx.stroke();
+  } else if (action.type === 'arrow') {
+    drawArrow(ctx, action.x1, action.y1, action.x2, action.y2, action.color, action.size);
+  } else if (action.type === 'rect') {
+    ctx.strokeRect(action.x, action.y, action.w, action.h);
+  } else if (action.type === 'circle') {
+    ctx.beginPath();
+    ctx.ellipse(action.cx, action.cy, Math.abs(action.rx), Math.abs(action.ry), 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawArrow(context, fx, fy, tx, ty, color, size) {
+  var headLen = 12 + size * 2;
+  var dx = tx - fx;
+  var dy = ty - fy;
+  var angle = Math.atan2(dy, dx);
+  context.strokeStyle = color;
+  context.lineWidth = size;
+  context.beginPath();
+  context.moveTo(fx, fy);
+  context.lineTo(tx, ty);
+  context.stroke();
+  context.beginPath();
+  context.moveTo(tx, ty);
+  context.lineTo(tx - headLen * Math.cos(angle - Math.PI / 6), ty - headLen * Math.sin(angle - Math.PI / 6));
+  context.moveTo(tx, ty);
+  context.lineTo(tx - headLen * Math.cos(angle + Math.PI / 6), ty - headLen * Math.sin(angle + Math.PI / 6));
+  context.stroke();
+}
+
+function setTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.tool-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('tool-' + tool);
+  if (btn) btn.classList.add('active');
+  document.getElementById('statusTool').textContent = tool.charAt(0).toUpperCase() + tool.slice(1);
+
+  if (tool === 'select') canvasArea.style.cursor = 'default';
+  else if (tool === 'eraser') canvasArea.style.cursor = 'cell';
+  else canvasArea.style.cursor = 'crosshair';
+
+  if (tool !== 'select') deselectIcon();
+}
+
+function deselectIcon() {
+  if (selectedIcon) {
+    selectedIcon.element.classList.remove('selected');
+    selectedIcon = null;
+  }
+}
+
+function getCanvasPos(e) {
+  var rect = canvasArea.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+canvasArea.addEventListener('mousedown', function(e) {
+  if (e.target.classList.contains('placed-icon') || e.target.closest('.placed-icon')) return;
+  var pos = getCanvasPos(e);
+
+  if (currentTool === 'eraser') {
+    isDrawing = true;
+    eraseAt(pos);
+    return;
+  }
+
+  if (currentTool === 'select') return;
+
+  isDrawing = true;
+  lineStart = pos;
+
+  if (currentTool === 'pen') {
+    undoStack.push({ action: 'drawing', index: drawingHistory.length });
+    drawingHistory.push({ type: 'pen', color: drawColor, size: drawSize, points: [pos] });
+  } else if (currentTool === 'line') {
+    undoStack.push({ action: 'drawing', index: drawingHistory.length });
+    drawingHistory.push({ type: 'line', color: drawColor, size: drawSize, x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y });
+  } else if (currentTool === 'arrow') {
+    undoStack.push({ action: 'drawing', index: drawingHistory.length });
+    drawingHistory.push({ type: 'arrow', color: drawColor, size: drawSize, x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y });
+  } else if (currentTool === 'rect') {
+    undoStack.push({ action: 'drawing', index: drawingHistory.length });
+    drawingHistory.push({ type: 'rect', color: drawColor, size: drawSize, x: pos.x, y: pos.y, w: 0, h: 0 });
+  } else if (currentTool === 'circle') {
+    undoStack.push({ action: 'drawing', index: drawingHistory.length });
+    drawingHistory.push({ type: 'circle', color: drawColor, size: drawSize, cx: pos.x, cy: pos.y, rx: 0, ry: 0 });
+  }
+  updateStatus();
+});
+
+canvasArea.addEventListener('mousemove', function(e) {
+  if (!isDrawing) return;
+  var pos = getCanvasPos(e);
+
+  if (currentTool === 'eraser') {
+    eraseAt(pos);
+    return;
+  }
+
+  var last = drawingHistory[drawingHistory.length - 1];
+  if (!last) return;
+
+  if (currentTool === 'pen') {
+    last.points.push(pos);
+  } else if (currentTool === 'line' || currentTool === 'arrow') {
+    last.x2 = pos.x;
+    last.y2 = pos.y;
+  } else if (currentTool === 'rect') {
+    last.w = pos.x - last.x;
+    last.h = pos.y - last.y;
+  } else if (currentTool === 'circle') {
+    last.rx = Math.abs(pos.x - last.cx);
+    last.ry = Math.abs(pos.y - last.cy);
+  }
+  redrawAll();
+});
+
+canvasArea.addEventListener('mouseup', function() {
+  isDrawing = false;
+  lineStart = null;
+});
+
+canvasArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+
+canvasArea.addEventListener('drop', function(e) {
+  e.preventDefault();
+  var src = e.dataTransfer.getData('text/plain');
+  if (!src) return;
+  var rect = canvasArea.getBoundingClientRect();
+  var x = e.clientX - rect.left - 24;
+  var y = e.clientY - rect.top - 24;
+  placeIcon(src, x, y);
+});
+
+function placeIcon(src, x, y) {
+  var el = document.createElement('div');
+  el.className = 'placed-icon';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.width = '48px';
+  el.style.height = '48px';
+  el.innerHTML = '<img src="' + src + '">';
+
+  var iconData = { element: el, src: src, x: x, y: y };
+
+  el.addEventListener('mousedown', function(e) {
+    e.stopPropagation();
+    if (currentTool === 'eraser') {
+      removeIcon(iconData);
+      return;
+    }
+    deselectIcon();
+    selectedIcon = iconData;
+    el.classList.add('selected');
+    dragOffset.x = e.offsetX;
+    dragOffset.y = e.offsetY;
+    isDraggingIcon = true;
+  });
+
+  canvasArea.appendChild(el);
+  placedIcons.push(iconData);
+  undoStack.push({ action: 'icon', iconData: iconData });
+  updateStatus();
+}
+
+var isDraggingIcon = false;
+
+document.addEventListener('mousemove', function(e) {
+  if (!selectedIcon || !isDraggingIcon) return;
+  var areaRect = canvasArea.getBoundingClientRect();
+  selectedIcon.x = e.clientX - areaRect.left - dragOffset.x;
+  selectedIcon.y = e.clientY - areaRect.top - dragOffset.y;
+  selectedIcon.element.style.left = selectedIcon.x + 'px';
+  selectedIcon.element.style.top = selectedIcon.y + 'px';
+});
+
+document.addEventListener('mouseup', function() {
+  isDraggingIcon = false;
+});
+
+function removeIcon(iconData) {
+  if (iconData.element.parentNode) iconData.element.parentNode.removeChild(iconData.element);
+  var idx = placedIcons.indexOf(iconData);
+  if (idx !== -1) placedIcons.splice(idx, 1);
+  if (selectedIcon === iconData) selectedIcon = null;
+  updateStatus();
+}
+
+function addCustomLabel() {
+  var text = document.getElementById('customLabel').value.trim();
+  if (!text) return;
+  var el = document.createElement('div');
+  el.className = 'placed-icon';
+  el.style.left = '50px';
+  el.style.top = '50px';
+  el.style.width = 'auto';
+  el.style.height = 'auto';
+  el.style.padding = '4px 8px';
+  el.style.background = 'rgba(0,20,40,0.8)';
+  el.style.border = '1px solid #3399cc';
+  el.style.color = drawColor;
+  el.style.fontSize = '12px';
+  el.style.fontFamily = "'Comic Sans MS', cursive";
+  el.style.fontWeight = 'bold';
+  el.style.whiteSpace = 'nowrap';
+  el.textContent = text;
+
+  var iconData = { element: el, src: null, x: 50, y: 50, isLabel: true, text: text };
+
+  el.addEventListener('mousedown', function(e) {
+    e.stopPropagation();
+    if (currentTool === 'eraser') {
+      removeIcon(iconData);
+      return;
+    }
+    deselectIcon();
+    selectedIcon = iconData;
+    el.classList.add('selected');
+    dragOffset.x = e.offsetX;
+    dragOffset.y = e.offsetY;
+    isDraggingIcon = true;
+  });
+
+  canvasArea.appendChild(el);
+  placedIcons.push(iconData);
+  undoStack.push({ action: 'icon', iconData: iconData });
+  document.getElementById('customLabel').value = '';
+  updateStatus();
+}
+
+function undoAction() {
+  if (undoStack.length === 0) return;
+  var last = undoStack.pop();
+  if (last.action === 'drawing') {
+    drawingHistory.splice(last.index, 1);
+    redrawAll();
+  } else if (last.action === 'erased-drawing') {
+    drawingHistory.splice(last.index, 0, last.drawing);
+    redrawAll();
+  } else if (last.action === 'icon') {
+    removeIcon(last.iconData);
+  }
+  updateStatus();
+}
+
+function distToSegment(px, py, x1, y1, x2, y2) {
+  var dx = x2 - x1, dy = y2 - y1;
+  var lenSq = dx * dx + dy * dy;
+  if (lenSq === 0) return Math.hypot(px - x1, py - y1);
+  var t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
+  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+}
+
+function eraseAt(pos) {
+  while (true) {
+    var idx = findDrawingAt(pos.x, pos.y);
+    if (idx === -1) break;
+    undoStack.push({ action: 'erased-drawing', drawing: drawingHistory[idx], index: idx });
+    drawingHistory.splice(idx, 1);
+  }
+  redrawAll();
+  updateStatus();
+}
+
+function findDrawingAt(x, y) {
+  var threshold = 8 + drawSize;
+  for (var i = drawingHistory.length - 1; i >= 0; i--) {
+    var a = drawingHistory[i];
+    if (a.type === 'pen') {
+      for (var j = 0; j < a.points.length; j++) {
+        if (Math.hypot(x - a.points[j].x, y - a.points[j].y) < threshold) return i;
+      }
+    } else if (a.type === 'line') {
+      if (distToSegment(x, y, a.x1, a.y1, a.x2, a.y2) < threshold) return i;
+    } else if (a.type === 'arrow') {
+      if (distToSegment(x, y, a.x1, a.y1, a.x2, a.y2) < threshold) return i;
+    } else if (a.type === 'rect') {
+      var left = a.x, right = a.x + a.w, top = a.y, bottom = a.y + a.h;
+      if (a.w < 0) { left = a.x + a.w; right = a.x; }
+      if (a.h < 0) { top = a.y + a.h; bottom = a.y; }
+      if (distToSegment(x, y, left, top, right, top) < threshold) return i;
+      if (distToSegment(x, y, right, top, right, bottom) < threshold) return i;
+      if (distToSegment(x, y, right, bottom, left, bottom) < threshold) return i;
+      if (distToSegment(x, y, left, bottom, left, top) < threshold) return i;
+    } else if (a.type === 'circle') {
+      var angle = Math.atan2(y - a.cy, x - a.cx);
+      var closestX = a.cx + a.rx * Math.cos(angle);
+      var closestY = a.cy + a.ry * Math.sin(angle);
+      if (Math.hypot(x - closestX, y - closestY) < threshold) return i;
+    }
+  }
+  return -1;
+}
+
+function clearDrawings() {
+  drawingHistory = [];
+  redrawAll();
+  updateStatus();
+}
+
+function clearIcons() {
+  placedIcons.forEach(function(icon) {
+    if (icon.element.parentNode) icon.element.parentNode.removeChild(icon.element);
+  });
+  placedIcons = [];
+  selectedIcon = null;
+  updateStatus();
+}
+
+function clearAll() {
+  clearDrawings();
+  clearIcons();
+  undoStack = [];
+  updateStatus();
+}
+
+function updateStatus() {
+  document.getElementById('statusIcons').textContent = placedIcons.length;
+  document.getElementById('statusDrawings').textContent = drawingHistory.length;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Delete' && selectedIcon) {
+    removeIcon(selectedIcon);
+    updateStatus();
+  }
+  if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    undoAction();
+  }
+});
+
+document.getElementById('drawColor').addEventListener('input', function() {
+  drawColor = this.value;
+});
+
+document.getElementById('drawSize').addEventListener('input', function() {
+  drawSize = parseInt(this.value);
+});
+
+window.addEventListener('resize', resizeCanvas);
+initIconPanel();
+resizeCanvas();
+</script>
+
+</body>
+</html>

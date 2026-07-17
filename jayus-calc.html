@@ -1377,10 +1377,11 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
 .music-display {
   background: #000;
   margin: 5px;
-  padding: 4px 8px;
+  padding: 2px 8px;
   border: 2px inset #333;
-  height: 20px;
+  height: 24px;
   overflow: hidden;
+  line-height: 20px;
 }
 
 .music-display .scroll-text {
@@ -1389,6 +1390,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
   white-space: nowrap;
   animation: musicScroll 10s linear infinite;
   display: inline-block;
+  line-height: 20px;
 }
 
 @keyframes musicScroll {
@@ -1782,6 +1784,8 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
         <a href="https://discord.gg/vuNSJmdeHG" target="_blank">Guild Discord</a>
         <a href="aethersea-info.html">Guild Info</a>
         <a href="aethersea-policy.html">Inactivity Policy</a>
+        <a href="gvg-roster.html">GvG Roster Generator</a>
+        <a href="gw-strategy.html">GW Strategy Planner</a>
       </div>
     </div>
     <div class="sidebar-box">
@@ -2769,7 +2773,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
 
 <!-- Background Music Player -->
 <audio id="bgMusic" preload="auto" autoplay>
-  <source src="media/bg.mp3" type="audio/mpeg">
+  <source src="media/songs/bg.mp3" type="audio/mpeg">
 </audio>
 
 <!-- Chatbox -->
@@ -2808,7 +2812,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
     </div>
     <div class="music-volume">
       <span class="vol-label">VOL</span>
-      <input type="range" class="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)">
+      <input type="range" class="vol-slider" min="0" max="100" value="10" oninput="setVolume(this.value)">
       <span class="vol-label" id="volDisplay">30%</span>
     </div>
     <div class="music-status" id="musicStatus">Stopped</div>
@@ -3763,14 +3767,21 @@ let playerMinimized = false;
 let vizInterval;
 
 const playlist = [
-  { src: 'media/bg.mp3', title: 'BGM' },
-  { src: 'media/darude-sandstorm.mp3', title: 'Darude - Sandstorm' },
-  { src: 'media/i-am-blue.mp3', title: 'Eiffel 65 - Blue (Da Ba Dee)' },
-  { src: 'media/patty-circulation.mp3', title: 'Renai Circulation' },
-  { src: 'media/vitas.mp3', title: 'Vitas - The 7th Element' },
-  { src: 'media/Smash Mouth - Shooting All Star.mp3', title: 'Smash Mouth - All Star' },
-  { src: 'media/We Are Number One Remix but by The Living Tombstone (Lazytown).mp3', title: 'We Are Number One (Living Tombstone Remix)' },
-  { src: 'media/John Denver - Take Me Home, Country Roads (Jesse Bloch Bootleg) 👑 Rex Sounds.mp3', title: 'Country Roads (Jesse Bloch Bootleg)' }
+  { src: 'media/songs/bg.mp3', title: 'BGM' },
+  { src: 'media/songs/darude-sandstorm.mp3', title: 'Darude - Sandstorm' },
+  { src: 'media/songs/i-am-blue.mp3', title: 'Eiffel 65 - Blue (Da Ba Dee)' },
+  { src: 'media/songs/patty-circulation.mp3', title: 'Renai Circulation' },
+  { src: 'media/songs/vitas.mp3', title: 'Vitas - The 7th Element' },
+  { src: 'media/songs/Smash Mouth - Shooting All Star.mp3', title: 'Smash Mouth - All Star' },
+  { src: 'media/songs/We Are Number One Remix but by The Living Tombstone (Lazytown).mp3', title: 'We Are Number One (Living Tombstone Remix)' },
+  { src: 'media/songs/John Denver - Take Me Home, Country Roads (Jesse Bloch Bootleg) 👑 Rex Sounds.mp3', title: 'Country Roads (Jesse Bloch Bootleg)' },
+  { src: 'media/songs/WIND ROSE - Diggy Diggy Hole (Official Video) ｜ Napalm Records.mp3', title: 'Diggy Diggy Hole' },
+  { src: 'media/songs/Weed Circulation.mp3', title: 'Weed Circulation' },
+  { src: 'media/songs/LMFAO - Party Rock Anthem ft. Lauren Bennett, GoonRock.mp3', title: 'Party Rock Anthem' },
+  { src: 'media/songs/Jet Set Radio Future - Funky Dealer.mp3', title: 'Funky Dealer' },
+  { src: 'media/songs/Jason Derulo - Whatcha Say [Official Music Video].mp3', title: 'Whatcha Say' },
+  { src: 'media/songs/HEYYEYAAEYAAAEYAEYAA.mp3', title: 'He-Man - What\'s Up' },
+  { src: 'media/songs/Aladdin - Friend Like Me [High Quality].mp3', title: 'Friend Like Me' }
 ];
 let currentTrack = 0;
 
@@ -3806,7 +3817,7 @@ function stopViz() {
 function musicAction(action) {
   switch (action) {
     case 'play':
-      bgMusic.volume = 0.3;
+      bgMusic.volume = 0.1;
       bgMusic.play().catch(() => {});
       document.getElementById('playBtn').classList.add('active');
       document.getElementById('pauseBtn').classList.remove('active');
@@ -3854,6 +3865,17 @@ playlist.sort(() => Math.random() - 0.5);
 loadTrack(0);
 musicAction('play');
 
+var musicStarted = false;
+function tryStartMusic() {
+  if (musicStarted) return;
+  musicStarted = true;
+  bgMusic.play().catch(() => {});
+  document.removeEventListener('click', tryStartMusic);
+  document.removeEventListener('keydown', tryStartMusic);
+}
+document.addEventListener('click', tryStartMusic);
+document.addEventListener('keydown', tryStartMusic);
+
 bgMusic.addEventListener('ended', () => {
   loadTrack(currentTrack + 1);
   musicAction('play');
@@ -3861,7 +3883,7 @@ bgMusic.addEventListener('ended', () => {
 
 bgMusic.addEventListener('error', () => {
   document.getElementById('musicStatus').textContent = 'No file found';
-  document.getElementById('scrollText').textContent = '♪ ♫ ♪ ♫ ERROR: media/' + playlist[currentTrack].src.split('/').pop() + ' not found ♫ ♪ ♫ ♪';
+  document.getElementById('scrollText').textContent = '♪ ♫ ♪ ♫ ERROR: media/songs/' + playlist[currentTrack].src.split('/').pop() + ' not found ♫ ♪ ♫ ♪';
 });
 
 // ═══════════════════════════════════════════

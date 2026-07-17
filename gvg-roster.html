@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GvG Roster Generator — Aethersea</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+}
+
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+@keyframes marquee { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+@keyframes glow { 0%,100%{text-shadow:0 0 5px #3399cc,0 0 10px #3399cc} 50%{text-shadow:0 0 15px #66ccff,0 0 25px #3399cc} }
+@keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+.top-bar {
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 5px 0;
+  overflow: hidden;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+  font-size: 14px;
+  color: #66ccff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.header {
+  background: linear-gradient(180deg, #000d1a 0%, #002244 30%, #003d6b 60%, #002244 100%);
+  border: 4px outset #3399cc;
+  margin: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 28px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366, 0 0 15px #3399cc;
+  animation: glow 3s ease-in-out infinite;
+  letter-spacing: 3px;
+}
+
+.header .subtitle {
+  font-size: 12px;
+  color: #99ccee;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+.content {
+  max-width: 1100px;
+  margin: 10px auto;
+  padding: 0 10px;
+}
+
+.input-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  padding: 15px;
+}
+
+.input-box h2 {
+  color: #66ccff;
+  font-size: 16px;
+  border-bottom: 2px solid #3399cc;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.input-box p {
+  font-size: 12px;
+  color: #99bbdd;
+  margin-bottom: 10px;
+}
+
+.input-box textarea {
+  width: 100%;
+  height: 180px;
+  background: #0a0a1a;
+  border: 2px inset #336699;
+  color: #66ff66;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.input-box textarea::placeholder {
+  color: #335566;
+}
+
+.input-box textarea:focus {
+  outline: 2px solid #3399cc;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.gen-btn {
+  background: linear-gradient(180deg, #005588 0%, #003366 100%);
+  border: 3px outset #3399cc;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 24px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.gen-btn:hover {
+  background: linear-gradient(180deg, #006699 0%, #004477 100%);
+  color: #99ddff;
+}
+
+.gen-btn:active {
+  border-style: inset;
+}
+
+.gen-btn.danger {
+  background: linear-gradient(180deg, #663333 0%, #441111 100%);
+  border-color: #cc6666;
+  color: #ff9999;
+}
+
+.gen-btn.danger:hover {
+  background: linear-gradient(180deg, #774444 0%, #552222 100%);
+}
+
+.roster-output {
+  background: linear-gradient(180deg, #001122 0%, #000a15 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  padding: 15px;
+  display: none;
+}
+
+.roster-output.show { display: block; animation: slideIn 0.3s ease-out; }
+
+.roster-output h2 {
+  color: #66ccff;
+  font-size: 16px;
+  border-bottom: 2px solid #3399cc;
+  padding-bottom: 5px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.side-label {
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 6px;
+  margin: 10px 0 5px 0;
+  border-radius: 2px;
+  letter-spacing: 2px;
+}
+
+.side-label.offense {
+  color: #ff6666;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,50,50,0.15) 50%, transparent 100%);
+  border-bottom: 2px solid #cc3333;
+}
+
+.side-label.defense {
+  color: #66aaff;
+  background: linear-gradient(90deg, transparent 0%, rgba(50,100,255,0.15) 50%, transparent 100%);
+  border-bottom: 2px solid #3366cc;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 800px) {
+  .teams-grid { grid-template-columns: 1fr; }
+}
+
+.team-card {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 10px;
+}
+
+.team-card.offense { border-color: #cc4444; }
+.team-card.defense { border-color: #3366cc; }
+
+.team-card.offense .team-title { color: #ff6666; }
+.team-card.defense .team-title { color: #66aaff; }
+
+.player-slot {
+  display: flex;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(51,51,102,0.3);
+}
+
+.player-slot:last-child { border-bottom: none; }
+
+.role-badge {
+  display: inline-block;
+  width: 50px;
+  font-size: 9px;
+  font-weight: bold;
+  text-align: center;
+  padding: 1px 4px;
+  margin-right: 6px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.role-badge.tank { background: #334466; color: #66aaff; border: 1px solid #3366cc; }
+.role-badge.healer { background: #334433; color: #66ff66; border: 1px solid #339933; }
+.role-badge.dps { background: #443333; color: #ff6666; border: 1px solid #cc3333; }
+
+.player-name { color: #ccddff; }
+
+.stats-summary {
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 2px solid #333366;
+  font-size: 11px;
+  color: #667799;
+}
+
+.stats-summary span { color: #66ccff; font-weight: bold; }
+
+.back-link {
+  display: inline-block;
+  margin: 15px 10px;
+  padding: 6px 16px;
+  background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+  border: 2px outset #3399cc;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  background: linear-gradient(180deg, #004488 0%, #002244 100%);
+  color: #99ddff;
+}
+
+.footer {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border-top: 3px outset #3399cc;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #336699;
+}
+
+.footer .hearts {
+  color: #3399cc;
+  font-size: 14px;
+  animation: blink 1.5s step-end infinite;
+}
+
+.team-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+@media (max-width: 800px) {
+  .team-config-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.team-config {
+  background: rgba(0,40,80,0.3);
+  border: 1px inset #336699;
+  padding: 8px;
+}
+
+.team-config.offense { border-color: #cc4444; }
+.team-config.defense { border-color: #3366cc; }
+
+.team-config .tc-title {
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #333366;
+}
+
+.team-config.offense .tc-title { color: #ff6666; }
+.team-config.defense .tc-title { color: #66aaff; }
+
+.tc-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 3px 0;
+  font-size: 11px;
+  color: #99bbdd;
+}
+
+.tc-row input[type="range"] {
+  flex: 1;
+  height: 14px;
+  accent-color: #3399cc;
+  cursor: pointer;
+}
+
+.tc-val {
+  color: #66ff66;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 12px;
+  text-align: center;
+}
+
+.tc-total {
+  text-align: center;
+  font-size: 10px;
+  color: #66ccff;
+  margin-top: 4px;
+  padding-top: 3px;
+  border-top: 1px solid #333366;
+}
+
+.set-all-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #99bbdd;
+}
+
+.set-all-row input[type="range"] {
+  width: 60px;
+  accent-color: #3399cc;
+  cursor: pointer;
+}
+
+.role-tag {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 1px 5px;
+  margin-left: 4px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}
+
+.tag-tree-watcher {
+  background: linear-gradient(180deg, #1a3322, #0d1a11);
+  color: #44ff88;
+  border: 1px solid #33cc66;
+  animation: blink 2s step-end infinite;
+}
+
+.tag-tree-carrier {
+  background: linear-gradient(180deg, #332200, #1a1100);
+  color: #ffaa33;
+  border: 1px solid #cc8833;
+}
+
+.tag-bulwark-top {
+  background: linear-gradient(180deg, #330033, #1a001a);
+  color: #ff66ff;
+  border: 1px solid #cc33cc;
+}
+
+.tag-bulwark-mid {
+  background: linear-gradient(180deg, #333300, #1a1a00);
+  color: #ffff66;
+  border: 1px solid #cccc33;
+}
+
+.tag-bulwark-bot {
+  background: linear-gradient(180deg, #003333, #001a1a);
+  color: #66ffff;
+  border: 1px solid #33cccc;
+}
+
+.tag-jungler {
+  background: linear-gradient(180deg, #0d330d, #061a06);
+  color: #66ff66;
+  border: 1px solid #33cc33;
+}
+
+.tag-bomb-qi {
+  background: linear-gradient(180deg, #332200, #1a1100);
+  color: #ffcc00;
+  border: 1px solid #ccaa00;
+}
+
+.tag-ex-pull {
+  background: linear-gradient(180deg, #330000, #1a0000);
+  color: #ff6666;
+  border: 1px solid #cc3333;
+}
+
+.team-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="marquee-text">
+    🌊 AETHERSEA GUILD — GvG Roster Generator — Build your dream team or let fate decide 🌊 — May the RNG gods be with you 🌊
+  </div>
+</div>
+
+<div class="header">
+  <span style="color:#3399cc;font-size:18px;">✦ ✦ ✦</span>
+  <br>
+  <h1>⚔ GvG Roster Generator ⚔</h1>
+  <div class="subtitle">AETHERSEA — Where Winds Meet</div>
+  <br>
+  <span style="color:#3399cc;font-size:18px;">✧ ✧ ✧</span>
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+<a class="back-link" href="aethersea-info.html">Guild Info</a>
+
+<div class="content">
+
+  <div class="input-box">
+    <h2>📋 Player List</h2>
+    <p>Paste your player list. Each line should be: <strong>PlayerName&lt;TAB&gt;Build1, Build2, Build3</strong></p>
+    <p>Roles are auto-detected: <strong style="color:#66aaff;">Mo builds = Tank</strong>, <strong style="color:#66ff66;">Panacea builds = Healer</strong>, <strong style="color:#ff6666;">everything else = DPS</strong>.</p>
+    <p>Players with both Mo and Panacea builds will be assigned based on team needs.</p>
+    <textarea id="playerList" placeholder="Paste your roster data here...
+
+Example (tab-separated):
+Adeep	Panacea-Soulshade, Panacea-Twin
+Qallisto	NSword-NSpear
+lorddy	Twin-Mo, Ink-Mo, Storm-Mo
+Kush	Storm-Mo, Twin-Mo
+Daffo	Panacea-Soulshade
+Sunther	NSword-NSpear, NSword-Strat"></textarea>
+    <div class="set-all-row">
+      <span>Set all teams:</span>
+      🛡 <input type="range" id="allTanks" value="1" min="0" max="5"><span id="allTanksVal">1</span>
+      💚 <input type="range" id="allHealers" value="2" min="0" max="5"><span id="allHealersVal">2</span>
+      ⚔ <input type="range" id="allDps" value="2" min="0" max="5"><span id="allDpsVal">2</span>
+      <button class="gen-btn" onclick="applyAll()" style="font-size:11px;padding:3px 10px;">Apply</button>
+    </div>
+    <div class="set-all-row">
+      <span>🌳 Tree Watcher Team:</span>
+      <select id="treeWatcherTeam" style="background:#0a0a1a;border:2px inset #336699;color:#44ff88;font-family:'Courier New',monospace;font-size:12px;padding:3px 6px;">
+        <option value="-1">None</option>
+        <option value="0">Team 1</option>
+        <option value="1">Team 2</option>
+        <option value="2">Team 3</option>
+        <option value="3">Team 4</option>
+        <option value="4">Team 5</option>
+        <option value="5">Team 6</option>
+      </select>
+      <span style="font-size:10px;color:#99bbdd;">(overrides to 6 healers)</span>
+    </div>
+    <div class="set-all-row">
+      <span>🔄 Reserves:</span>
+      🛡 <input type="range" id="resTanks" value="1" min="0" max="5"><span id="resTanksVal">1</span>
+      💚 <input type="range" id="resHealers" value="1" min="0" max="5"><span id="resHealersVal">1</span>
+      ⚔ <input type="range" id="resDps" value="2" min="0" max="5"><span id="resDpsVal">2</span>
+      <span style="font-size:10px;color:#99bbdd;">backup players</span>
+    </div>
+    <div class="team-config-grid" id="teamConfigGrid"></div>
+    <div class="btn-row">
+      <button class="gen-btn" onclick="generateRoster()">⚔ GENERATE ROSTER ⚔</button>
+      <button class="gen-btn" onclick="loadSample()">📋 Load Sample Players</button>
+      <button class="gen-btn danger" onclick="clearAll()">✕ Clear</button>
+    </div>
+  </div>
+
+  <div class="roster-output" id="rosterOutput">
+    <h2>⚔ GENERATED ROSTER ⚔</h2>
+
+    <div class="side-label offense">⚔ OFFENSE (Teams 1-3) ⚔</div>
+    <div class="teams-grid" id="offenseTeams"></div>
+
+    <div class="side-label defense">🛡 DEFENSE (Teams 4-6) 🛡</div>
+    <div class="teams-grid" id="defenseTeams"></div>
+
+    <div class="stats-summary" id="specialRoles" style="text-align:left;padding:10px;border:1px inset #336699;margin-top:12px;background:rgba(0,20,40,0.5);display:none;"></div>
+
+    <div class="stats-summary" id="reservesSection" style="text-align:left;padding:10px;border:1px inset #336699;margin-top:12px;background:rgba(0,20,40,0.5);display:none;"></div>
+
+    <div class="stats-summary" id="rosterStats"></div>
+  </div>
+
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+
+<div class="footer">
+  <div class="hearts">⚔ ⚔ ⚔</div>
+  <p>AETHERSEA — GvG Roster Generator</p>
+  <p style="margin-top:5px;">Made by lorddy</p>
+</div>
+
+<script>
+var samplePlayers = `Adeep\tPanacea-Soulshade, Panacea-Twin
+Arisha천마\tTwin-Mo
+Jaeus\tPanacea-Soulshade
+Bacu\tStorm-Mo
+Etri\tStorm-Mo
+JoshTwist\tNSword-NSpear, NSword-Strat, NSword-Panacea
+凌尼尔\tTwin-Mo, Storm-Mo, Ink-Mo
+Kensei劍聖\tNSword-NSpear
+lorddy\tTwin-Mo, Ink-Mo, Storm-Mo, Panacea-Mo, Twin-RatRope
+Qallisto\tNSword-NSpear
+Stoke\tStorm-Mo, Ink-Mo
+Zuyun\tPanacea-Soulshade, Panacea-Inkwell
+カーズノ\tHengdao-Phalanx
+oVer\tNSword-NSpear, NSword-Strat
+iamnotsmol\tPanacea-Soulshade
+using\tNSword-NSpear, NSword-Strat, NSword-Panacea
+Surdz\tPanacea-Soulshade
+Eunhyan\tPanacea-Soulshade
+Norannah\tNSword-NSpear
+HanBaoBao\tPanacea-Soulshade, Twin-RatRope
+Chrizzielim\tVernal-Inkwell, Panacea-Soulshade
+Vaizardes\tNSword-NSpear, NSword-Strat
+Starly\tPanacea-Soulshade
+Randalloneus\tNSword-NSpear
+YeXingXue\tTwin-RatRope
+Augustusjulius\tNSword-NSpear, NSword-Panacea
+neifile\tPanacea-Soulshade, Panacea-Inkwell
+Entice\tPanacea-Soulshade, Panacea-Inkwell
+Jshen\tEverspring-DustRope
+含笑半步颠Lamyz\tEverspring-DustRope
+CJinX\tTwin-Mo, Hengdao-Phalanx
+meowkaera\tHengdao-Phalanx, Twin-RatRope
+Sunther\tNSword-NSpear, NSword-Strat
+EmperorGod\tTwin-Mo, Storm-Mo
+Yihsuan\tNSword-NSpear
+Poro\tEverspring-DustRope, Panacea-Soulshade
+Feng-LanXiao\tHengdao-Phalanx
+Daffo\tPanacea-Soulshade
+Shenyue\tPanacea-Soulshade
+Yushou\tHengdao-Phalanx
+刘梅香\tPanacea-Soulshade
+ninelie\tNSword-NSpear, NSword-Panacea
+NamelesssShadow\tNSword-NSpear
+OMFGSKYE\tPanacea-Soulshade
+The-Voidz\tNSword-NSpear
+沈yuan\tTwin-RatRope
+颜珊\tNSword-NSpear
+Meileen\tPanacea-Soulshade
+Xyruvial\tNSword-NSpear, NSword-Strat
+Vnci\tPanacea-Soulshade, Panacea-Inkwell
+DailyKushhh\tStorm-Mo, Twin-Mo
+PeanutZoe\tStorm-Mo, Ink-Mo, Hengdao-Phalanx
+Akuxeru\tNSword-NSpear, NSword-Strat
+XieHart\tEverspring-Twin, NSword-NSpear, NSword-Twin, NSword-Panacea
+Damii\tNSword-NSpear
+Elsa-Kennyone\tHengdao-NSword, NSword-NSpear, Hengdao-Phalanx
+Xolenn\tPanacea-Soulshade
+FREYER\tPanacea-Soulshade, Panacea-Inkwell
+天空Sky茹茹\tPanacea-Soulshade, Vernal-Inkwell, Panacea-Inkwell
+오무리\tEverspring-DustRope
+Kayree\tEverspring-Panacea, Everspring-DustRope, Panacea-Inkwell, Everspring-Inkwell, Twin-Mo, Storm-Mo, Panacea-Mo
+Meckam\tNSword-NSpear, NSword-Strat
+Hoon\tHengdao-Phalanx
+Babs\tNSword-NSpear, Vernal-Mo
+内蒙大青蛙\tNSword-Strat, Strat-NSpear
+Jesoiur\tNSword-NSpear, NSword-Strat
+Arilles\tPanacea-Soulshade
+Linsanity\tNSword-NSpear, NSword-Strat
+Rynn\tTwin-RatRope, Panacea-Soulshade
+XDizzy\tVernal-Inkwell, Ink-Mo
+月蝶霜\tEverspring-DustRope
+lunaerys\tPanacea-Soulshade, Everspring-DustRope
+onething\tPanacea-Soulshade, Everspring-DustRope`;
+
+function loadSample() {
+  document.getElementById('playerList').value = samplePlayers;
+}
+
+function clearAll() {
+  document.getElementById('playerList').value = '';
+  document.getElementById('rosterOutput').classList.remove('show');
+}
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function parsePlayers(rawText) {
+  var lines = rawText.trim().split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
+  var players = [];
+  var seen = {};
+
+  lines.forEach(function(line) {
+    var parts = line.split('\t');
+    if (parts.length < 1) return;
+    var name = parts[0].trim();
+    if (!name || seen[name]) return;
+    seen[name] = true;
+
+    var builds = '';
+    if (parts.length > 1) builds = parts[1].trim();
+    var buildList = builds.split(',').map(function(b) { return b.trim(); }).filter(function(b) { return b.length > 0; });
+
+    var hasMo = false;
+    var hasPanacea = false;
+
+    buildList.forEach(function(b) {
+      var bl = b.toLowerCase();
+      if (bl.indexOf('mo') !== -1) hasMo = true;
+      if (bl.indexOf('panacea') !== -1) hasPanacea = true;
+    });
+
+    var preferredRole = 'dps';
+    if (hasMo && hasPanacea) preferredRole = 'flex';
+    else if (hasMo) preferredRole = 'tank';
+    else if (hasPanacea) preferredRole = 'healer';
+
+    players.push({ name: name, builds: builds, role: preferredRole });
+  });
+
+  return players;
+}
+
+var teamConfigs = [
+  { tanks: 1, healers: 2, dps: 2 },
+  { tanks: 1, healers: 1, dps: 3 },
+  { tanks: 1, healers: 2, dps: 2 },
+  { tanks: 1, healers: 1, dps: 3 },
+  { tanks: 1, healers: 2, dps: 2 },
+  { tanks: 1, healers: 1, dps: 3 }
+];
+
+function buildTeamConfigGrid() {
+  var grid = document.getElementById('teamConfigGrid');
+  grid.innerHTML = '';
+  for (var i = 0; i < 6; i++) {
+    var side = i < 3 ? 'offense' : 'defense';
+    var sideLabel = i < 3 ? '⚔' : '🛡';
+    var div = document.createElement('div');
+    div.className = 'team-config ' + side;
+    div.innerHTML =
+      '<div class="tc-title">Team ' + (i + 1) + ' ' + sideLabel + '</div>' +
+      '<div class="tc-row">🛡 <input type="range" min="0" max="5" value="' + teamConfigs[i].tanks + '" data-team="' + i + '" data-role="tanks"> <span class="tc-val">' + teamConfigs[i].tanks + '</span></div>' +
+      '<div class="tc-row">💚 <input type="range" min="0" max="5" value="' + teamConfigs[i].healers + '" data-team="' + i + '" data-role="healers"> <span class="tc-val">' + teamConfigs[i].healers + '</span></div>' +
+      '<div class="tc-row">⚔ <input type="range" min="0" max="5" value="' + teamConfigs[i].dps + '" data-team="' + i + '" data-role="dps"> <span class="tc-val">' + teamConfigs[i].dps + '</span></div>' +
+      '<div class="tc-total">Per team: ' + (teamConfigs[i].tanks + teamConfigs[i].healers + teamConfigs[i].dps) + '</div>';
+    grid.appendChild(div);
+  }
+
+  grid.querySelectorAll('input[type="range"]').forEach(function(input) {
+    input.addEventListener('input', function() {
+      var t = parseInt(this.getAttribute('data-team'));
+      var role = this.getAttribute('data-role');
+      var val = parseInt(this.value);
+      teamConfigs[t][role] = val;
+      this.parentElement.querySelector('.tc-val').textContent = val;
+      var total = teamConfigs[t].tanks + teamConfigs[t].healers + teamConfigs[t].dps;
+      this.closest('.team-config').querySelector('.tc-total').textContent = 'Per team: ' + total;
+    });
+  });
+}
+
+function applyAll() {
+  var t = parseInt(document.getElementById('allTanks').value) || 0;
+  var h = parseInt(document.getElementById('allHealers').value) || 0;
+  var d = parseInt(document.getElementById('allDps').value) || 0;
+  document.getElementById('allTanksVal').textContent = t;
+  document.getElementById('allHealersVal').textContent = h;
+  document.getElementById('allDpsVal').textContent = d;
+  for (var i = 0; i < 6; i++) {
+    teamConfigs[i] = { tanks: t, healers: h, dps: d };
+  }
+  buildTeamConfigGrid();
+}
+
+document.getElementById('allTanks').addEventListener('input', function() {
+  document.getElementById('allTanksVal').textContent = this.value;
+});
+document.getElementById('allHealers').addEventListener('input', function() {
+  document.getElementById('allHealersVal').textContent = this.value;
+});
+document.getElementById('allDps').addEventListener('input', function() {
+  document.getElementById('allDpsVal').textContent = this.value;
+});
+
+document.getElementById('resTanks').addEventListener('input', function() {
+  document.getElementById('resTanksVal').textContent = this.value;
+});
+document.getElementById('resHealers').addEventListener('input', function() {
+  document.getElementById('resHealersVal').textContent = this.value;
+});
+document.getElementById('resDps').addEventListener('input', function() {
+  document.getElementById('resDpsVal').textContent = this.value;
+});
+
+buildTeamConfigGrid();
+
+function generateRoster() {
+  var rawText = document.getElementById('playerList').value;
+  var allPlayers = parsePlayers(rawText);
+
+  var treeWatcherIdx = parseInt(document.getElementById('treeWatcherTeam').value);
+
+  var configs = [];
+  for (var i = 0; i < 6; i++) {
+    configs.push({ tanks: teamConfigs[i].tanks, healers: teamConfigs[i].healers, dps: teamConfigs[i].dps });
+  }
+
+  if (treeWatcherIdx >= 0) {
+    configs[treeWatcherIdx] = { tanks: 0, healers: 6, dps: 0 };
+  }
+
+  var totalNeeded = 0;
+  for (var i = 0; i < 6; i++) {
+    totalNeeded += configs[i].tanks + configs[i].healers + configs[i].dps;
+  }
+
+  var resTanks = parseInt(document.getElementById('resTanks').value) || 0;
+  var resHealers = parseInt(document.getElementById('resHealers').value) || 0;
+  var resDps = parseInt(document.getElementById('resDps').value) || 0;
+  totalNeeded += resTanks + resHealers + resDps;
+
+  if (totalNeeded === 0) {
+    alert('All teams have 0 players! Set at least one role per team.');
+    return;
+  }
+
+  if (allPlayers.length < totalNeeded) {
+    alert('Need at least ' + totalNeeded + ' players! You have ' + allPlayers.length + '.');
+    return;
+  }
+
+  var tanks = shuffle(allPlayers.filter(function(p) { return p.role === 'tank'; }));
+  var healers = shuffle(allPlayers.filter(function(p) { return p.role === 'healer'; }));
+  var flex = shuffle(allPlayers.filter(function(p) { return p.role === 'flex'; }));
+  var dps = shuffle(allPlayers.filter(function(p) { return p.role === 'dps'; }));
+
+  var needTanks = 0, needHealers = 0, needDps = 0;
+  for (var i = 0; i < 6; i++) {
+    needTanks += configs[i].tanks;
+    needHealers += configs[i].healers;
+    needDps += configs[i].dps;
+  }
+
+  var selected = [];
+  function pick(arr, count) {
+    var picked = [];
+    for (var i = 0; i < count && arr.length > 0; i++) {
+      var p = arr.shift();
+      picked.push(p);
+      selected.push(p);
+    }
+    return picked;
+  }
+
+  var teamTanks = pick(tanks, Math.min(needTanks, tanks.length));
+  var teamHealers = pick(healers, Math.min(needHealers, healers.length));
+
+  while (teamTanks.length < needTanks && flex.length > 0) {
+    var f = flex.shift();
+    teamTanks.push({ name: f.name, builds: f.builds, role: 'tank', assignedAs: 'tank' });
+    selected.push(f);
+  }
+
+  while (teamHealers.length < needHealers && flex.length > 0) {
+    var f2 = flex.shift();
+    teamHealers.push({ name: f2.name, builds: f2.builds, role: 'healer', assignedAs: 'healer' });
+    selected.push(f2);
+  }
+
+  while (teamTanks.length < needTanks && dps.length > 0) {
+    var d = dps.shift();
+    teamTanks.push({ name: d.name, builds: d.builds, role: 'tank', assignedAs: 'tank (flexed)' });
+    selected.push(d);
+  }
+
+  while (teamHealers.length < needHealers && dps.length > 0) {
+    var d2 = dps.shift();
+    teamHealers.push({ name: d2.name, builds: d2.builds, role: 'healer', assignedAs: 'healer (flexed)' });
+    selected.push(d2);
+  }
+
+  var teamDps = pick(dps, Math.min(needDps, dps.length));
+
+  var tIdx = 0, hIdx = 0, dIdx = 0;
+  var teams = [];
+
+  for (var t = 0; t < 6; t++) {
+    var team = { name: 'Team ' + (t + 1), side: t < 3 ? 'offense' : 'defense', players: [], idx: t };
+    var cfg = configs[t];
+    for (var ti = 0; ti < cfg.tanks; ti++) {
+      if (tIdx < teamTanks.length) {
+        team.players.push({ name: teamTanks[tIdx].name, role: 'tank', builds: teamTanks[tIdx].builds, tags: [] });
+        tIdx++;
+      }
+    }
+    for (var di = 0; di < cfg.dps; di++) {
+      if (dIdx < teamDps.length) {
+        team.players.push({ name: teamDps[dIdx].name, role: 'dps', builds: teamDps[dIdx].builds, tags: [] });
+        dIdx++;
+      }
+    }
+    for (var hi = 0; hi < cfg.healers; hi++) {
+      if (hIdx < teamHealers.length) {
+        team.players.push({ name: teamHealers[hIdx].name, role: 'healer', builds: teamHealers[hIdx].builds, tags: [] });
+        hIdx++;
+      }
+    }
+    teams.push(team);
+  }
+
+  assignSpecialRoles(teams, treeWatcherIdx);
+  assignReserves(tanks, healers, flex, dps, teamTanks, teamHealers, teamDps, resTanks, resHealers, resDps, totalNeeded);
+  renderRoster(teams, totalNeeded);
+}
+
+function assignSpecialRoles(teams, treeWatcherIdx) {
+  var specialRolesDiv = document.getElementById('specialRoles');
+  specialRolesDiv.innerHTML = '';
+  var lines = [];
+
+  if (treeWatcherIdx >= 0) {
+    var twTeam = teams[treeWatcherIdx];
+    twTeam.treeWatcher = true;
+    lines.push('🌳 <span style="color:#44ff88;font-weight:bold;">Tree Watcher:</span> <span style="color:#66ccff;">' + twTeam.name + '</span> (6 Healers)');
+  }
+
+  if (teams[0].players.length > 0) {
+    var tank0 = teams[0].players.find(function(p) { return p.role === 'tank'; });
+    if (tank0) {
+      tank0.tags.push({ label: 'TREE CARRIER', cls: 'tag-tree-carrier' });
+      lines.push('🎒 <span style="color:#ffaa33;font-weight:bold;">Tree Carrier:</span> <span style="color:#66ccff;">' + tank0.name + '</span> (Team 1 Tank)');
+    }
+  }
+
+  var bulwarkTop = [];
+  var bulwarkMid = [];
+  var bulwarkBot = [];
+
+  if (teams[0].players.length > 0) {
+    var topCandidates = teams[0].players.filter(function(p) { return p.role === 'tank' || p.role === 'dps'; });
+    var topPicks = topCandidates.slice(0, 3);
+    topPicks.forEach(function(p) {
+      p.tags.push({ label: 'TOP BULWARK', cls: 'tag-bulwark-top' });
+      bulwarkTop.push(p.name + ' (Team 1)');
+    });
+  }
+
+  if (teams[1].players.length > 0) {
+    var midCandidates = teams[1].players.filter(function(p) { return p.role === 'tank' || p.role === 'dps'; });
+    var midHealers = teams[1].players.filter(function(p) { return p.role === 'healer'; });
+    var midPicks = midCandidates.slice(0, 2);
+    if (midHealers.length > 0) midPicks.push(midHealers[0]);
+    midPicks.forEach(function(p) {
+      p.tags.push({ label: 'MID BULWARK', cls: 'tag-bulwark-mid' });
+      bulwarkMid.push(p.name + ' (Team 2)');
+    });
+  }
+
+  if (teams[2].players.length > 0) {
+    var botCandidates = teams[2].players.filter(function(p) { return p.role === 'tank' || p.role === 'dps'; });
+    var botPicks = botCandidates.slice(0, 3);
+    botPicks.forEach(function(p) {
+      p.tags.push({ label: 'BOT BULWARK', cls: 'tag-bulwark-bot' });
+      bulwarkBot.push(p.name + ' (Team 3)');
+    });
+  }
+
+  lines.push('🏰 <span style="color:#ff66ff;font-weight:bold;">Top Bulwark:</span> ' + (bulwarkTop.length ? bulwarkTop.join(', ') : '<span style="color:#666;">none</span>'));
+  lines.push('🏰 <span style="color:#ffff66;font-weight:bold;">Mid Bulwark:</span> ' + (bulwarkMid.length ? bulwarkMid.join(', ') : '<span style="color:#666;">none</span>'));
+  lines.push('🏰 <span style="color:#66ffff;font-weight:bold;">Bot Bulwark:</span> ' + (bulwarkBot.length ? bulwarkBot.join(', ') : '<span style="color:#666;">none</span>'));
+
+  var junglerTeams = [0, 2, 3, 5];
+  var junglerInfo = [];
+  junglerTeams.forEach(function(ti) {
+    var team = teams[ti];
+    var jCandidates = team.players.filter(function(p) { return p.role === 'dps' && !p.tags.some(function(t) { return t.cls === 'tag-jungler'; }); });
+    var count = Math.min(2, jCandidates.length);
+    for (var i = 0; i < count; i++) {
+      jCandidates[i].tags.push({ label: 'JUNGLER', cls: 'tag-jungler' });
+      junglerInfo.push(jCandidates[i].name + ' (' + team.name + ')');
+    }
+  });
+  lines.push('🌿 <span style="color:#66ff66;font-weight:bold;">Junglers:</span> ' + (junglerInfo.length ? junglerInfo.join(', ') : '<span style="color:#666;">none</span>'));
+
+  function hasNSwordBuild(builds) {
+    return builds && builds.toLowerCase().indexOf('nsword') !== -1;
+  }
+
+  var offenseTeams = teams.filter(function(t) { return t.side === 'offense'; });
+  var defenseTeams = teams.filter(function(t) { return t.side === 'defense'; });
+  var bombQiOffense = null, bombQiDefense = null;
+
+  for (var ti = 0; ti < offenseTeams.length && !bombQiOffense; ti++) {
+    var team = offenseTeams[ti];
+    for (var pi = 0; pi < team.players.length && !bombQiOffense; pi++) {
+      var p = team.players[pi];
+      if (p.role === 'dps' && hasNSwordBuild(p.builds) && !p.tags.some(function(t) { return t.cls === 'tag-bomb-qi'; })) {
+        p.tags.push({ label: 'BOMB QI SHIELDER', cls: 'tag-bomb-qi' });
+        bombQiOffense = p.name + ' (' + team.name + ')';
+      }
+    }
+  }
+
+  for (var ti = 0; ti < defenseTeams.length && !bombQiDefense; ti++) {
+    var team = defenseTeams[ti];
+    for (var pi = 0; pi < team.players.length && !bombQiDefense; pi++) {
+      var p = team.players[pi];
+      if (p.role === 'dps' && hasNSwordBuild(p.builds) && !p.tags.some(function(t) { return t.cls === 'tag-bomb-qi'; })) {
+        p.tags.push({ label: 'BOMB QI SHIELDER', cls: 'tag-bomb-qi' });
+        bombQiDefense = p.name + ' (' + team.name + ')';
+      }
+    }
+  }
+
+  lines.push('💣 <span style="color:#ffcc00;font-weight:bold;">Bomb Qi Shielder (Offense):</span> ' + (bombQiOffense || '<span style="color:#666;">none</span>'));
+  lines.push('💣 <span style="color:#ffcc00;font-weight:bold;">Bomb Qi Shielder (Defense):</span> ' + (bombQiDefense || '<span style="color:#666;">none</span>'));
+
+  var exPullOffense = [], exPullDefense = [];
+  var pullNum = 1;
+  for (var ti = 0; ti < offenseTeams.length; ti++) {
+    var team = offenseTeams[ti];
+    team.players.forEach(function(p) {
+      if (p.role === 'tank') {
+        p.tags.push({ label: 'EX PULL #' + pullNum, cls: 'tag-ex-pull' });
+        exPullOffense.push(p.name + ' #' + pullNum + ' (' + team.name + ')');
+        pullNum++;
+      }
+    });
+  }
+  pullNum = 1;
+  for (var ti = 0; ti < defenseTeams.length; ti++) {
+    var team = defenseTeams[ti];
+    team.players.forEach(function(p) {
+      if (p.role === 'tank') {
+        p.tags.push({ label: 'EX PULL #' + pullNum, cls: 'tag-ex-pull' });
+        exPullDefense.push(p.name + ' #' + pullNum + ' (' + team.name + ')');
+        pullNum++;
+      }
+    });
+  }
+
+  lines.push('🎯 <span style="color:#ff6666;font-weight:bold;">Tank EX Pull (Offense):</span> ' + (exPullOffense.length ? exPullOffense.join(' → ') : '<span style="color:#666;">none</span>'));
+  lines.push('🎯 <span style="color:#ff6666;font-weight:bold;">Tank EX Pull (Defense):</span> ' + (exPullDefense.length ? exPullDefense.join(' → ') : '<span style="color:#666;">none</span>'));
+
+  specialRolesDiv.innerHTML = '<div style="color:#66ccff;font-size:13px;font-weight:bold;margin-bottom:8px;border-bottom:1px solid #333366;padding-bottom:5px;">⚔ SPECIAL ROLES & ASSIGNMENTS ⚔</div>' + lines.join('<br>');
+  specialRolesDiv.style.display = 'block';
+}
+
+function assignReserves(allTanks, allHealers, allFlex, allDps, teamTanks, teamHealers, teamDps, resTanks, resHealers, resDps, totalNeeded) {
+  var resDiv = document.getElementById('reservesSection');
+  resDiv.innerHTML = '';
+
+  var totalReserves = resTanks + resHealers + resDps;
+  if (totalReserves === 0) {
+    resDiv.style.display = 'none';
+    return;
+  }
+
+  var usedNames = {};
+  teamTanks.forEach(function(p) { usedNames[p.name] = true; });
+  teamHealers.forEach(function(p) { usedNames[p.name] = true; });
+  teamDps.forEach(function(p) { usedNames[p.name] = true; });
+
+  var availTanks = allTanks.filter(function(p) { return !usedNames[p.name]; });
+  var availHealers = allHealers.filter(function(p) { return !usedNames[p.name]; });
+  var availFlex = allFlex.filter(function(p) { return !usedNames[p.name]; });
+  var availDps = allDps.filter(function(p) { return !usedNames[p.name]; });
+
+  var resTankList = availTanks.slice(0, resTanks);
+  resTankList.forEach(function(p) { usedNames[p.name] = true; });
+
+  var resHealerList = availHealers.slice(0, resHealers);
+  resHealerList.forEach(function(p) { usedNames[p.name] = true; });
+
+  var flexForTank = availFlex.filter(function(p) { return !usedNames[p.name]; });
+  while (resTankList.length < resTanks && flexForTank.length > 0) {
+    var f = flexForTank.shift();
+    resTankList.push({ name: f.name, builds: f.builds, role: 'tank' });
+    usedNames[f.name] = true;
+  }
+
+  var flexForHealer = availFlex.filter(function(p) { return !usedNames[p.name]; });
+  while (resHealerList.length < resHealers && flexForHealer.length > 0) {
+    var f2 = flexForHealer.shift();
+    resHealerList.push({ name: f2.name, builds: f2.builds, role: 'healer' });
+    usedNames[f2.name] = true;
+  }
+
+  var resDpsList = availDps.filter(function(p) { return !usedNames[p.name]; }).slice(0, resDps);
+  resDpsList.forEach(function(p) { usedNames[p.name] = true; });
+
+  var flexForDps = availFlex.filter(function(p) { return !usedNames[p.name]; });
+  while (resDpsList.length < resDps && flexForDps.length > 0) {
+    var f3 = flexForDps.shift();
+    resDpsList.push({ name: f3.name, builds: f3.builds, role: 'dps' });
+    usedNames[f3.name] = true;
+  }
+
+  var html = '<div style="color:#66ccff;font-size:13px;font-weight:bold;margin-bottom:8px;border-bottom:1px solid #333366;padding-bottom:5px;">🔄 RESERVES</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">';
+
+  if (resTankList.length > 0) {
+    html += '<div><div style="color:#66aaff;font-weight:bold;font-size:11px;margin-bottom:4px;">🛡 Tank Reserves (' + resTankList.length + ')</div>';
+    resTankList.forEach(function(p) {
+      var buildStr = p.builds ? '<span style="color:#556;font-size:9px;"> (' + p.builds + ')</span>' : '';
+      html += '<div style="font-size:11px;color:#ccddff;padding:2px 0;">• ' + p.name + buildStr + '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (resHealerList.length > 0) {
+    html += '<div><div style="color:#66ff66;font-weight:bold;font-size:11px;margin-bottom:4px;">💚 Healer Reserves (' + resHealerList.length + ')</div>';
+    resHealerList.forEach(function(p) {
+      var buildStr = p.builds ? '<span style="color:#556;font-size:9px;"> (' + p.builds + ')</span>' : '';
+      html += '<div style="font-size:11px;color:#ccddff;padding:2px 0;">• ' + p.name + buildStr + '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (resDpsList.length > 0) {
+    html += '<div><div style="color:#ff6666;font-weight:bold;font-size:11px;margin-bottom:4px;">⚔ DPS Reserves (' + resDpsList.length + ')</div>';
+    resDpsList.forEach(function(p) {
+      var buildStr = p.builds ? '<span style="color:#556;font-size:9px;"> (' + p.builds + ')</span>' : '';
+      html += '<div style="font-size:11px;color:#ccddff;padding:2px 0;">• ' + p.name + buildStr + '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '</div>';
+  resDiv.innerHTML = html;
+  resDiv.style.display = 'block';
+}
+
+function renderRoster(teams, teamSize) {
+  var offenseDiv = document.getElementById('offenseTeams');
+  var defenseDiv = document.getElementById('defenseTeams');
+  offenseDiv.innerHTML = '';
+  defenseDiv.innerHTML = '';
+
+  var totalTanks = 0, totalHealers = 0, totalDps = 0;
+
+  teams.forEach(function(team) {
+    var card = document.createElement('div');
+    card.className = 'team-card ' + team.side;
+    var sideText = team.side === 'offense' ? '⚔ Offense' : '🛡 Defense';
+    var twTag = team.treeWatcher ? ' <span class="role-tag tag-tree-watcher">🌳 TREE WATCHER</span>' : '';
+    var html = '<div class="team-title">' + team.name + ' (' + sideText + ')' + twTag + '</div>';
+
+    team.players.forEach(function(p) {
+      var badgeText = p.role === 'tank' ? 'TANK' : p.role === 'healer' ? 'HEALER' : 'DPS';
+      var buildStr = p.builds ? '<span style="color:#556;font-size:10px;margin-left:4px;">(' + p.builds + ')</span>' : '';
+      var tagsHtml = '';
+      if (p.tags && p.tags.length > 0) {
+        p.tags.forEach(function(tag) {
+          tagsHtml += '<span class="role-tag ' + tag.cls + '">' + tag.label + '</span>';
+        });
+      }
+      html += '<div class="player-slot"><span class="role-badge ' + p.role + '">' + badgeText + '</span><span class="player-name">' + p.name + buildStr + tagsHtml + '</span></div>';
+      if (p.role === 'tank') totalTanks++;
+      else if (p.role === 'healer') totalHealers++;
+      else totalDps++;
+    });
+
+    card.innerHTML = html;
+    if (team.side === 'offense') offenseDiv.appendChild(card);
+    else defenseDiv.appendChild(card);
+  });
+
+  var stats = document.getElementById('rosterStats');
+  stats.innerHTML = 'Total: <span>' + teamSize + '</span> players — <span>' + totalTanks + '</span> Tanks — <span>' + totalHealers + '</span> Healers — <span>' + totalDps + '</span> DPS';
+
+  document.getElementById('rosterOutput').classList.add('show');
+  document.getElementById('rosterOutput').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+</body>
+</html>
