@@ -802,6 +802,8 @@ body {
         <label><input type="checkbox" id="vZeal" checked onchange="saveVoiceSettings()"> Zeal Available</label>
         <label><input type="checkbox" id="vSkill" checked onchange="saveVoiceSettings()"> Skill Cooldowns</label>
         <label><input type="checkbox" id="vRumor" checked onchange="saveVoiceSettings()"> Boss Rumor</label>
+        <div style="border-top:1px solid #333366;margin:4px 0;"></div>
+        <label><input type="checkbox" id="vForceEn" onchange="saveVoiceSettings()"> Force English TTS</label>
       </div>
     </div>
   </div>
@@ -963,7 +965,7 @@ var audioCtx = null;
 
 // ====== VOICE ======
 var voiceEnabled = true;
-var voiceSettings = { war: true, boss: true, jungle: true, jungleWarn: true, zeal: true, skill: true, rumor: true };
+var voiceSettings = { war: true, boss: true, jungle: true, jungleWarn: true, zeal: true, skill: true, rumor: true, forceEn: false };
 
 function loadVoiceSettings() {
   try {
@@ -986,7 +988,8 @@ function saveVoiceSettings() {
   voiceSettings.zeal = document.getElementById('vZeal').checked;
   voiceSettings.skill = document.getElementById('vSkill').checked;
   voiceSettings.rumor = document.getElementById('vRumor').checked;
-  localStorage.setItem('gw-timer-voice', JSON.stringify({ enabled: voiceEnabled, war: voiceSettings.war, boss: voiceSettings.boss, jungle: voiceSettings.jungle, jungleWarn: voiceSettings.jungleWarn, zeal: voiceSettings.zeal, skill: voiceSettings.skill, rumor: voiceSettings.rumor }));
+  voiceSettings.forceEn = document.getElementById('vForceEn').checked;
+  localStorage.setItem('gw-timer-voice', JSON.stringify({ enabled: voiceEnabled, war: voiceSettings.war, boss: voiceSettings.boss, jungle: voiceSettings.jungle, jungleWarn: voiceSettings.jungleWarn, zeal: voiceSettings.zeal, skill: voiceSettings.skill, rumor: voiceSettings.rumor, forceEn: voiceSettings.forceEn }));
 }
 
 function applyVoiceUI() {
@@ -1000,6 +1003,7 @@ function applyVoiceUI() {
   document.getElementById('vZeal').checked = voiceSettings.zeal;
   document.getElementById('vSkill').checked = voiceSettings.skill;
   document.getElementById('vRumor').checked = voiceSettings.rumor;
+  document.getElementById('vForceEn').checked = voiceSettings.forceEn;
 }
 
 function toggleVoice() {
@@ -1012,6 +1016,7 @@ function toggleVoice() {
   } else {
     var u = new SpeechSynthesisUtterance('Voice enabled');
     u.volume = 0.9;
+    if (voiceSettings.forceEn) u.lang = 'en-US';
     window.speechSynthesis.speak(u);
   }
 }
@@ -1030,6 +1035,7 @@ function speak(text, setting, delay) {
       u.rate = 1.0;
       u.pitch = 1.0;
       u.volume = 0.9;
+      if (voiceSettings.forceEn) u.lang = 'en-US';
       window.speechSynthesis.speak(u);
     } catch(e) {}
   }
