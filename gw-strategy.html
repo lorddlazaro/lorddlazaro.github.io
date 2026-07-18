@@ -608,7 +608,16 @@ function resizeCanvas() {
   var rect = canvasArea.getBoundingClientRect();
   canvas.width = rect.width;
   canvas.height = rect.height;
+  repositionIcons();
   redrawAll();
+}
+
+function repositionIcons() {
+  var rect = canvasArea.getBoundingClientRect();
+  placedIcons.forEach(function(icon) {
+    icon.element.style.left = (icon.xPct * rect.width) + 'px';
+    icon.element.style.top = (icon.yPct * rect.height) + 'px';
+  });
 }
 
 function redrawAll() {
@@ -774,6 +783,9 @@ canvasArea.addEventListener('mouseup', function() {
 canvasArea.addEventListener('dragover', function(e) { e.preventDefault(); });
 
 function placeIcon(src, x, y, type) {
+  var rect = canvasArea.getBoundingClientRect();
+  var xPct = x / rect.width;
+  var yPct = y / rect.height;
   var el = document.createElement('div');
   el.className = 'placed-icon';
   el.style.left = x + 'px';
@@ -783,7 +795,7 @@ function placeIcon(src, x, y, type) {
   var imgStyle = (type === 'build-inv') ? ' style="filter:invert(1)"' : '';
   el.innerHTML = '<img src="' + src + '"' + imgStyle + '>';
 
-  var iconData = { element: el, src: src, x: x, y: y };
+  var iconData = { element: el, src: src, xPct: xPct, yPct: yPct };
 
   el.addEventListener('mousedown', function(e) {
     e.stopPropagation();
@@ -810,10 +822,12 @@ var isDraggingIcon = false;
 document.addEventListener('mousemove', function(e) {
   if (!selectedIcon || !isDraggingIcon) return;
   var areaRect = canvasArea.getBoundingClientRect();
-  selectedIcon.x = e.clientX - areaRect.left - dragOffset.x;
-  selectedIcon.y = e.clientY - areaRect.top - dragOffset.y;
-  selectedIcon.element.style.left = selectedIcon.x + 'px';
-  selectedIcon.element.style.top = selectedIcon.y + 'px';
+  var x = e.clientX - areaRect.left - dragOffset.x;
+  var y = e.clientY - areaRect.top - dragOffset.y;
+  selectedIcon.xPct = x / areaRect.width;
+  selectedIcon.yPct = y / areaRect.height;
+  selectedIcon.element.style.left = x + 'px';
+  selectedIcon.element.style.top = y + 'px';
 });
 
 document.addEventListener('mouseup', function() {
@@ -847,7 +861,10 @@ function addCustomLabel() {
   el.style.whiteSpace = 'nowrap';
   el.textContent = text;
 
-  var iconData = { element: el, src: null, x: 50, y: 50, isLabel: true, text: text };
+  var rect = canvasArea.getBoundingClientRect();
+  var xPct = 50 / rect.width;
+  var yPct = 50 / rect.height;
+  var iconData = { element: el, src: null, xPct: xPct, yPct: yPct, isLabel: true, text: text };
 
   el.addEventListener('mousedown', function(e) {
     e.stopPropagation();
@@ -1105,13 +1122,16 @@ canvasArea.addEventListener('drop', function(e) {
 });
 
 function placePlayer(src, x, y, pdata) {
+  var rect = canvasArea.getBoundingClientRect();
+  var xPct = x / rect.width;
+  var yPct = y / rect.height;
   var el = document.createElement('div');
   el.className = 'placed-icon placed-player';
   el.style.left = x + 'px';
   el.style.top = y + 'px';
   el.innerHTML = '<img src="' + src + '"><div class="pp-name">' + pdata.name + '</div>';
 
-  var iconData = { element: el, src: src, x: x, y: y, isPlayer: true, playerData: pdata };
+  var iconData = { element: el, src: src, xPct: xPct, yPct: yPct, isPlayer: true, playerData: pdata };
 
   el.addEventListener('mousedown', function(e) {
     e.stopPropagation();
