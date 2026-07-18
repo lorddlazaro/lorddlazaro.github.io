@@ -148,6 +148,18 @@ body {
   background: linear-gradient(180deg, #774444 0%, #552222 100%);
 }
 
+.gen-btn.edit-active {
+  background: linear-gradient(180deg, #665500 0%, #443300 100%);
+  border-color: #ccaa33;
+  color: #ffdd66;
+  animation: editPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes editPulse {
+  0%, 100% { box-shadow: 0 0 3px #ccaa33; }
+  50% { box-shadow: 0 0 10px #ccaa33; }
+}
+
 .roster-output {
   background: linear-gradient(180deg, #001122 0%, #000a15 100%);
   border: 3px outset #3399cc;
@@ -500,6 +512,7 @@ Sunther	NSword-NSpear, NSword-Strat"></textarea>
     <div class="btn-row">
       <button class="gen-btn" onclick="generateRoster()">⚔ GENERATE ROSTER ⚔</button>
       <button class="gen-btn" onclick="loadSample()">📋 Load Sample Players</button>
+      <button class="gen-btn" onclick="sendToMap()" style="background:linear-gradient(180deg,#006644,#003322);border-color:#33cc66;color:#66ff99;">🗺 Send to Map</button>
       <button class="gen-btn danger" onclick="clearAll()">✕ Clear</button>
     </div>
   </div>
@@ -518,6 +531,9 @@ Sunther	NSword-NSpear, NSword-Strat"></textarea>
     <div class="stats-summary" id="reservesSection" style="text-align:left;padding:10px;border:1px inset #336699;margin-top:12px;background:rgba(0,20,40,0.5);display:none;"></div>
 
     <div class="stats-summary" id="rosterStats"></div>
+    <div style="text-align:center;margin-top:8px;">
+      <button class="gen-btn" onclick="toggleEditMode()" id="editModeBtn" style="margin-right:8px;">✏️ EDIT ROSTER</button>
+    </div>
   </div>
 
 </div>
@@ -607,11 +623,44 @@ onething\tPanacea-Soulshade, Everspring-DustRope`;
 
 function loadSample() {
   document.getElementById('playerList').value = samplePlayers;
+  savePlayerList();
 }
 
 function clearAll() {
   document.getElementById('playerList').value = '';
   document.getElementById('rosterOutput').classList.remove('show');
+  localStorage.removeItem('gvg-player-list');
+  localStorage.removeItem('gvg-roster-result');
+  lastGeneratedTeams = null;
+  editMode = false;
+  var btn = document.getElementById('editModeBtn');
+  if (btn) { btn.textContent = '✏️ EDIT ROSTER'; btn.className = 'gen-btn'; }
+}
+
+function savePlayerList() {
+  localStorage.setItem('gvg-player-list', document.getElementById('playerList').value);
+}
+
+function saveRosterResult() {
+  if (lastGeneratedTeams) {
+    localStorage.setItem('gvg-roster-result', JSON.stringify(lastGeneratedTeams));
+  }
+}
+
+function loadSavedData() {
+  var savedList = localStorage.getItem('gvg-player-list');
+  if (savedList) {
+    document.getElementById('playerList').value = savedList;
+  }
+  var savedRoster = localStorage.getItem('gvg-roster-result');
+  if (savedRoster) {
+    try {
+      lastGeneratedTeams = JSON.parse(savedRoster);
+      var totalSize = 0;
+      lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+      renderRoster(lastGeneratedTeams, totalSize);
+    } catch(e) {}
+  }
 }
 
 function shuffle(arr) {
@@ -653,7 +702,7 @@ function parsePlayers(rawText) {
     else if (hasMo) preferredRole = 'tank';
     else if (hasPanacea) preferredRole = 'healer';
 
-    players.push({ name: name, builds: builds, role: preferredRole });
+    players.push({ name: name, builds: builds, buildList: buildList, selectedBuild: buildList[0] || '', role: preferredRole, tags: [] });
   });
 
   return players;
@@ -708,8 +757,9 @@ function applyAll() {
   for (var i = 0; i < 6; i++) {
     teamConfigs[i] = { tanks: t, healers: h, dps: d };
   }
-  buildTeamConfigGrid();
 }
+
+document.getElementById('playerList').addEventListener('input', savePlayerList);
 
 document.getElementById('allTanks').addEventListener('input', function() {
   document.getElementById('allTanksVal').textContent = this.value;
@@ -731,7 +781,189 @@ document.getElementById('resDps').addEventListener('input', function() {
   document.getElementById('resDpsVal').textContent = this.value;
 });
 
+var lastGeneratedTeams = null;
+var editMode = false;
+
 buildTeamConfigGrid();
+loadSavedData();
+
+function toggleEditMode() {
+  editMode = !editMode;
+  var btn = document.getElementById('editModeBtn');
+  btn.textContent = editMode ? '🔒 LOCK ROSTER' : '✏️ EDIT ROSTER';
+  btn.className = editMode ? 'gen-btn edit-active' : 'gen-btn';
+  if (lastGeneratedTeams) {
+    var totalSize = 0;
+    lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+    renderRoster(lastGeneratedTeams, totalSize);
+  }
+}
+
+function getUnassignedPlayers() {
+  if (!lastGeneratedTeams) return [];
+  var assignedNames = {};
+  lastGeneratedTeams.forEach(function(t) {
+    t.players.forEach(function(p) { assignedNames[p.name] = true; });
+  });
+  var rawText = document.getElementById('playerList').value;
+  var all = parsePlayers(rawText);
+  return all.filter(function(p) { return !assignedNames[p.name]; });
+}
+
+function movePlayer(playerName, fromIdx, toIdx) {
+  if (!lastGeneratedTeams || fromIdx === toIdx) return;
+  var fromTeam = lastGeneratedTeams[fromIdx];
+  var toTeam = lastGeneratedTeams[toIdx];
+  var player = null;
+  for (var i = 0; i < fromTeam.players.length; i++) {
+    if (fromTeam.players[i].name === playerName) {
+      player = fromTeam.players.splice(i, 1)[0];
+      break;
+    }
+  }
+  if (!player) return;
+  toTeam.players.push(player);
+  saveRosterResult();
+  var totalSize = 0;
+  lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+  renderRoster(lastGeneratedTeams, totalSize);
+}
+
+function changeRole(playerName, teamIdx, newRole) {
+  if (!lastGeneratedTeams) return;
+  var team = lastGeneratedTeams[teamIdx];
+  for (var i = 0; i < team.players.length; i++) {
+    if (team.players[i].name === playerName) {
+      team.players[i].role = newRole;
+      break;
+    }
+  }
+  saveRosterResult();
+  var totalSize = 0;
+  lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+  renderRoster(lastGeneratedTeams, totalSize);
+}
+
+function removePlayer(playerName, teamIdx) {
+  if (!lastGeneratedTeams) return;
+  var team = lastGeneratedTeams[teamIdx];
+  for (var i = 0; i < team.players.length; i++) {
+    if (team.players[i].name === playerName) {
+      team.players.splice(i, 1);
+      break;
+    }
+  }
+  saveRosterResult();
+  var totalSize = 0;
+  lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+  renderRoster(lastGeneratedTeams, totalSize);
+}
+
+function addPlayerToTeam(playerName, teamIdx, selectedBuild) {
+  if (!lastGeneratedTeams) return;
+  var rawText = document.getElementById('playerList').value;
+  var all = parsePlayers(rawText);
+  var player = null;
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].name === playerName) { player = all[i]; break; }
+  }
+  if (!player) return;
+  if (selectedBuild) player.selectedBuild = selectedBuild;
+  lastGeneratedTeams[teamIdx].players.push(player);
+  saveRosterResult();
+  var totalSize = 0;
+  lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+  renderRoster(lastGeneratedTeams, totalSize);
+}
+
+function changeBuild(playerName, teamIdx, newBuild) {
+  if (!lastGeneratedTeams) return;
+  var team = lastGeneratedTeams[teamIdx];
+  for (var i = 0; i < team.players.length; i++) {
+    if (team.players[i].name === playerName) {
+      team.players[i].selectedBuild = newBuild;
+      break;
+    }
+  }
+  saveRosterResult();
+  var totalSize = 0;
+  lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+  renderRoster(lastGeneratedTeams, totalSize);
+}
+
+function addTagToPlayer(playerName, teamIdx, tagType) {
+  if (!lastGeneratedTeams || !tagType) return;
+  var team = lastGeneratedTeams[teamIdx];
+  var tagMap = {
+    'tree-carrier': { label: 'TREE CARRIER', cls: 'tag-tree-carrier' },
+    'bulwark-top': { label: 'TOP BULWARK', cls: 'tag-bulwark-top' },
+    'bulwark-mid': { label: 'MID BULWARK', cls: 'tag-bulwark-mid' },
+    'bulwark-bot': { label: 'BOT BULWARK', cls: 'tag-bulwark-bot' },
+    'jungler': { label: 'JUNGLER', cls: 'tag-jungler' },
+    'bomb-qi': { label: 'BOMB QI SHIELDER', cls: 'tag-bomb-qi' },
+    'ex-pull': { label: 'EX PULL', cls: 'tag-ex-pull' },
+    'tree-watcher': { label: 'TREE WATCHER', cls: 'tag-tree-watcher' }
+  };
+  for (var i = 0; i < team.players.length; i++) {
+    if (team.players[i].name === playerName) {
+      var p = team.players[i];
+      if (!p.tags) p.tags = [];
+      var tagInfo = tagMap[tagType];
+      if (tagInfo && !p.tags.some(function(t) { return t.cls === tagInfo.cls; })) {
+        p.tags.push({ label: tagInfo.label, cls: tagInfo.cls });
+      }
+      break;
+    }
+  }
+  saveRosterResult();
+  var totalSize = 0;
+  lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+  renderRoster(lastGeneratedTeams, totalSize);
+}
+
+function removeTagFromPlayer(playerName, teamIdx, tagCls) {
+  if (!lastGeneratedTeams) return;
+  var team = lastGeneratedTeams[teamIdx];
+  for (var i = 0; i < team.players.length; i++) {
+    if (team.players[i].name === playerName) {
+      var p = team.players[i];
+      if (p.tags) p.tags = p.tags.filter(function(t) { return t.cls !== tagCls; });
+      break;
+    }
+  }
+  saveRosterResult();
+  var totalSize = 0;
+  lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+  renderRoster(lastGeneratedTeams, totalSize);
+}
+
+function showBuildPicker(teamIdx) {
+  var sel = document.getElementById('addSel_' + teamIdx);
+  var picker = document.getElementById('buildPicker_' + teamIdx);
+  if (!sel || !picker) return;
+  var playerName = sel.value;
+  if (!playerName) { picker.style.display = 'none'; return; }
+  var rawText = document.getElementById('playerList').value;
+  var all = parsePlayers(rawText);
+  var player = null;
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].name === playerName) { player = all[i]; break; }
+  }
+  if (!player) { picker.style.display = 'none'; return; }
+  var html = '';
+  if (player.buildList && player.buildList.length > 0) {
+    html += '<div style="font-size:9px;color:#888;margin-bottom:2px;">Pick build:</div>';
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;">';
+    player.buildList.forEach(function(b, bi) {
+      html += '<button onclick="addPlayerToTeam(\'' + player.name.replace(/'/g,"\\'") + '\',' + teamIdx + ',\'' + b.replace(/'/g,"\\'") + '\')" style="font-size:10px;background:#1a1a33;border:1px inset #336699;color:#cc99ff;padding:3px 8px;cursor:pointer;border-radius:3px;">' + b + '</button>';
+    });
+    html += '</div>';
+  } else {
+    html += '<button onclick="addPlayerToTeam(\'' + player.name.replace(/'/g,"\\'") + '\',' + teamIdx + ')" style="font-size:10px;background:#1a1a33;border:1px inset #336699;color:#cc99ff;padding:3px 8px;cursor:pointer;border-radius:3px;">Add (no build)</button>';
+  }
+  picker.innerHTML = html;
+  picker.style.display = 'block';
+}
 
 function generateRoster() {
   var rawText = document.getElementById('playerList').value;
@@ -828,19 +1060,19 @@ function generateRoster() {
     var cfg = configs[t];
     for (var ti = 0; ti < cfg.tanks; ti++) {
       if (tIdx < teamTanks.length) {
-        team.players.push({ name: teamTanks[tIdx].name, role: 'tank', builds: teamTanks[tIdx].builds, tags: [] });
+        team.players.push({ name: teamTanks[tIdx].name, role: 'tank', builds: teamTanks[tIdx].builds, buildList: teamTanks[tIdx].buildList, selectedBuild: teamTanks[tIdx].selectedBuild, tags: [] });
         tIdx++;
       }
     }
     for (var di = 0; di < cfg.dps; di++) {
       if (dIdx < teamDps.length) {
-        team.players.push({ name: teamDps[dIdx].name, role: 'dps', builds: teamDps[dIdx].builds, tags: [] });
+        team.players.push({ name: teamDps[dIdx].name, role: 'dps', builds: teamDps[dIdx].builds, buildList: teamDps[dIdx].buildList, selectedBuild: teamDps[dIdx].selectedBuild, tags: [] });
         dIdx++;
       }
     }
     for (var hi = 0; hi < cfg.healers; hi++) {
       if (hIdx < teamHealers.length) {
-        team.players.push({ name: teamHealers[hIdx].name, role: 'healer', builds: teamHealers[hIdx].builds, tags: [] });
+        team.players.push({ name: teamHealers[hIdx].name, role: 'healer', builds: teamHealers[hIdx].builds, buildList: teamHealers[hIdx].buildList, selectedBuild: teamHealers[hIdx].selectedBuild, tags: [] });
         hIdx++;
       }
     }
@@ -849,6 +1081,8 @@ function generateRoster() {
 
   assignSpecialRoles(teams, treeWatcherIdx);
   assignReserves(tanks, healers, flex, dps, teamTanks, teamHealers, teamDps, resTanks, resHealers, resDps, totalNeeded);
+  lastGeneratedTeams = teams;
+  saveRosterResult();
   renderRoster(teams, totalNeeded);
 }
 
@@ -1078,7 +1312,7 @@ function renderRoster(teams, teamSize) {
 
   var totalTanks = 0, totalHealers = 0, totalDps = 0;
 
-  teams.forEach(function(team) {
+  teams.forEach(function(team, teamIdx) {
     var card = document.createElement('div');
     card.className = 'team-card ' + team.side;
     var sideText = team.side === 'offense' ? '⚔ Offense' : '🛡 Defense';
@@ -1087,29 +1321,108 @@ function renderRoster(teams, teamSize) {
 
     team.players.forEach(function(p) {
       var badgeText = p.role === 'tank' ? 'TANK' : p.role === 'healer' ? 'HEALER' : 'DPS';
-      var buildStr = p.builds ? '<span style="color:#556;font-size:10px;margin-left:4px;">(' + p.builds + ')</span>' : '';
-      var tagsHtml = '';
-      if (p.tags && p.tags.length > 0) {
-        p.tags.forEach(function(tag) {
-          tagsHtml += '<span class="role-tag ' + tag.cls + '">' + tag.label + '</span>';
-        });
+      var pNameSafe = p.name.replace(/'/g,"\\'");
+      if (editMode) {
+        html += '<div class="player-slot" style="flex-wrap:wrap;gap:4px;border:1px solid #222;padding:4px;margin-bottom:2px;">';
+        html += '<span class="role-badge ' + p.role + '">' + badgeText + '</span>';
+        html += '<span class="player-name" style="font-weight:bold;">' + p.name + '</span>';
+        if (p.tags && p.tags.length > 0) {
+          p.tags.forEach(function(tag) {
+            html += '<span class="role-tag ' + tag.cls + '" style="cursor:pointer;" title="Click to remove" onclick="removeTagFromPlayer(\'' + pNameSafe + '\',' + teamIdx + ',\'' + tag.cls + '\')">' + tag.label + ' ✕</span>';
+          });
+        }
+        html += '<div style="width:100%;display:flex;gap:4px;margin-top:2px;flex-wrap:wrap;">';
+        html += '<select onchange="changeRole(\'' + pNameSafe + '\',' + teamIdx + ',this.value)" style="font-size:10px;background:#0a0a1a;border:1px inset #336699;color:#ccc;padding:2px 4px;border-radius:3px;">';
+        html += '<option value="tank"' + (p.role==='tank'?' selected':'') + '>🛡 Tank</option>';
+        html += '<option value="healer"' + (p.role==='healer'?' selected':'') + '>💚 Healer</option>';
+        html += '<option value="dps"' + (p.role==='dps'?' selected':'') + '>⚔ DPS</option>';
+        html += '</select>';
+        if (p.buildList && p.buildList.length > 1) {
+          html += '<select onchange="changeBuild(\'' + pNameSafe + '\',' + teamIdx + ',this.value)" style="font-size:10px;background:#0a0a1a;border:1px inset #336699;color:#cc99ff;padding:2px 4px;border-radius:3px;">';
+          p.buildList.forEach(function(b) {
+            html += '<option value="' + b.replace(/"/g,'&quot;') + '"' + (p.selectedBuild === b ? ' selected' : '') + '>' + b + '</option>';
+          });
+          html += '</select>';
+        } else {
+          html += '<span style="font-size:9px;color:#556;">' + (p.selectedBuild || p.builds || 'no build') + '</span>';
+        }
+        html += '<select onchange="addTagToPlayer(\'' + pNameSafe + '\',' + teamIdx + ',this.value);this.selectedIndex=0;" style="font-size:10px;background:#0a0a1a;border:1px inset #336699;color:#66ff66;padding:2px 4px;border-radius:3px;">';
+        html += '<option value="">+ Tag...</option>';
+        html += '<option value="tree-carrier">🎒 Tree Carrier</option>';
+        html += '<option value="tree-watcher">🌳 Tree Watcher</option>';
+        html += '<option value="bulwark-top">🏰 Top Bulwark</option>';
+        html += '<option value="bulwark-mid">🏰 Mid Bulwark</option>';
+        html += '<option value="bulwark-bot">🏰 Bot Bulwark</option>';
+        html += '<option value="jungler">🌿 Jungler</option>';
+        html += '<option value="bomb-qi">💣 Bomb Qi Shielder</option>';
+        html += '<option value="ex-pull">⚔ EX Pull</option>';
+        html += '</select>';
+        html += '<select onchange="if(this.value!==\'\')movePlayer(\'' + pNameSafe + '\',' + teamIdx + ',parseInt(this.value));this.selectedIndex=0;" style="font-size:10px;background:#0a0a1a;border:1px inset #336699;color:#ccc;padding:2px 4px;border-radius:3px;">';
+        html += '<option value="">Move to...</option>';
+        teams.forEach(function(t, ti) { if (ti !== teamIdx) html += '<option value="'+ti+'">'+t.name+'</option>'; });
+        html += '</select>';
+        html += '<button onclick="removePlayer(\'' + pNameSafe + '\',' + teamIdx + ')" style="font-size:10px;background:#331111;border:1px inset #663333;color:#ff6666;padding:2px 6px;cursor:pointer;border-radius:3px;">✕</button>';
+        html += '</div></div>';
+      } else {
+        var buildDisplay = p.selectedBuild ? '<span style="color:#cc99ff;font-size:10px;margin-left:4px;">(' + p.selectedBuild + ')</span>' : (p.builds ? '<span style="color:#556;font-size:10px;margin-left:4px;">(' + p.builds + ')</span>' : '');
+        var tagsHtml = '';
+        if (p.tags && p.tags.length > 0) {
+          p.tags.forEach(function(tag) {
+            tagsHtml += '<span class="role-tag ' + tag.cls + '">' + tag.label + '</span>';
+          });
+        }
+        html += '<div class="player-slot"><span class="role-badge ' + p.role + '">' + badgeText + '</span><span class="player-name">' + p.name + buildDisplay + tagsHtml + '</span></div>';
       }
-      html += '<div class="player-slot"><span class="role-badge ' + p.role + '">' + badgeText + '</span><span class="player-name">' + p.name + buildStr + tagsHtml + '</span></div>';
       if (p.role === 'tank') totalTanks++;
       else if (p.role === 'healer') totalHealers++;
       else totalDps++;
     });
+
+    if (editMode) {
+      var unassigned = getUnassignedPlayers();
+      if (unassigned.length > 0) {
+        html += '<div style="margin-top:6px;border-top:1px dashed #333;padding-top:4px;" id="addArea_' + teamIdx + '">';
+        html += '<div style="display:flex;gap:4px;flex-wrap:wrap;">';
+        html += '<select id="addSel_' + teamIdx + '" onchange="showBuildPicker(' + teamIdx + ')" style="font-size:10px;background:#0a0a1a;border:1px inset #336699;color:#44ff88;padding:2px 4px;border-radius:3px;flex:1;">';
+        html += '<option value="">+ Add player...</option>';
+        unassigned.forEach(function(u) { html += '<option value="'+u.name.replace(/"/g,'&quot;')+'">'+u.name+' ('+u.role+')</option>'; });
+        html += '</select>';
+        html += '</div>';
+        html += '<div id="buildPicker_' + teamIdx + '" style="margin-top:4px;display:none;"></div>';
+        html += '</div>';
+      }
+    }
 
     card.innerHTML = html;
     if (team.side === 'offense') offenseDiv.appendChild(card);
     else defenseDiv.appendChild(card);
   });
 
+  if (editMode) {
+    var unassigned = getUnassignedPlayers();
+    if (unassigned.length > 0) {
+      var notice = document.createElement('div');
+      notice.style.cssText = 'background:#1a1a00;border:1px solid #666600;color:#cccc44;padding:8px;border-radius:5px;margin-bottom:8px;font-size:11px;text-align:center;';
+      notice.textContent = unassigned.length + ' unassigned player(s). Use the "+ Add player" dropdowns on each team to assign them.';
+      document.getElementById('rosterStats').parentNode.insertBefore(notice, document.getElementById('rosterStats'));
+    }
+  }
+
   var stats = document.getElementById('rosterStats');
   stats.innerHTML = 'Total: <span>' + teamSize + '</span> players — <span>' + totalTanks + '</span> Tanks — <span>' + totalHealers + '</span> Healers — <span>' + totalDps + '</span> DPS';
 
   document.getElementById('rosterOutput').classList.add('show');
   document.getElementById('rosterOutput').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function sendToMap() {
+  if (!lastGeneratedTeams) {
+    alert('Generate a roster first!');
+    return;
+  }
+  var data = JSON.parse(JSON.stringify(lastGeneratedTeams));
+  localStorage.setItem('gw-roster-data', JSON.stringify(data));
+  window.location.href = 'gw-strategy.html';
 }
 </script>
 

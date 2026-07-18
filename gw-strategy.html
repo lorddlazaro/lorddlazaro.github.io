@@ -240,6 +240,196 @@ body {
 }
 
 .bottom-bar span { color: #66ccff; }
+
+.panel-section .toggle-btn {
+  cursor: pointer;
+  user-select: none;
+}
+
+.panel-section .toggle-btn::before {
+  content: '▸ ';
+  font-size: 8px;
+}
+
+.panel-section.open .toggle-btn::before {
+  content: '▾ ';
+}
+
+.panel-section .panel-body {
+  display: none;
+}
+
+.panel-section.open .panel-body {
+  display: block;
+}
+
+.roster-team-header {
+  font-size: 9px;
+  font-weight: bold;
+  padding: 3px 5px;
+  margin-top: 4px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+}
+
+.roster-team-header.offense { color: #ff6666; background: rgba(255,50,50,0.1); }
+.roster-team-header.defense { color: #66aaff; background: rgba(50,100,255,0.1); }
+
+.roster-player {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 5px;
+  margin: 2px 0;
+  background: rgba(0,40,80,0.3);
+  border: 1px inset #336699;
+  cursor: grab;
+  font-size: 10px;
+  color: #ccddff;
+}
+
+.roster-player:hover {
+  border-color: #66ccff;
+  background: rgba(0,60,100,0.4);
+}
+
+.roster-player img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.roster-player .rp-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.roster-player .rp-role {
+  font-size: 7px;
+  font-weight: bold;
+  padding: 1px 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.roster-player .rp-role.tank { background: #334466; color: #66aaff; }
+.roster-player .rp-role.healer { background: #334433; color: #66ff66; }
+.roster-player .rp-role.dps { background: #443333; color: #ff6666; }
+
+.placed-player {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  z-index: 10;
+  text-align: center;
+}
+
+.placed-player img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
+  margin: 0 auto;
+}
+
+.placed-player .pp-name {
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+  white-space: nowrap;
+  pointer-events: none;
+  margin-top: -2px;
+}
+
+.placed-player.selected {
+  outline: 2px dashed #66ccff;
+  outline-offset: 2px;
+}
+
+.player-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: linear-gradient(180deg, #001a33, #000d1a);
+  border: 2px outset #3399cc;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #ccddff;
+  pointer-events: none;
+  max-width: 260px;
+  box-shadow: 3px 3px 0 #000;
+  display: none;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.player-tooltip .tt-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: #66ccff;
+  margin-bottom: 4px;
+}
+
+.player-tooltip .tt-team {
+  font-size: 9px;
+  color: #667799;
+  margin-bottom: 4px;
+}
+
+.player-tooltip .tt-roles {
+  margin-bottom: 4px;
+}
+
+.player-tooltip .tt-role-tag {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 1px 4px;
+  margin: 1px 2px;
+  border-radius: 2px;
+}
+
+.player-tooltip .tt-role-tag.tank { background: #334466; color: #66aaff; }
+.player-tooltip .tt-role-tag.healer { background: #334433; color: #66ff66; }
+.player-tooltip .tt-role-tag.dps { background: #443333; color: #ff6666; }
+
+.player-tooltip .tt-builds {
+  font-size: 10px;
+  color: #99bbdd;
+  margin-top: 3px;
+}
+
+.player-tooltip .tt-tags {
+  margin-top: 4px;
+}
+
+.player-tooltip .tt-tag {
+  display: inline-block;
+  font-size: 8px;
+  padding: 1px 4px;
+  margin: 1px;
+  border-radius: 2px;
+  background: rgba(0,40,80,0.5);
+  border: 1px solid #336699;
+  color: #66ccff;
+}
+
+.no-roster-msg {
+  font-size: 10px;
+  color: #667799;
+  text-align: center;
+  padding: 8px;
+}
+
+.no-roster-msg a {
+  color: #66ccff;
+}
 </style>
 </head>
 <body>
@@ -285,19 +475,32 @@ body {
   </div>
 
   <div class="icon-panel">
-    <div class="panel-section">
-      <div class="panel-title">🗺 MAP ICONS</div>
-      <div class="icon-grid" id="mapIcons"></div>
+    <div class="panel-section open">
+      <div class="panel-title toggle-btn" onclick="this.parentElement.classList.toggle('open')">🗺 MAP ICONS</div>
+      <div class="panel-body">
+        <div class="icon-grid" id="mapIcons"></div>
+      </div>
     </div>
-    <div class="panel-section">
-      <div class="panel-title">⚔ BUILD PATHS</div>
-      <div class="icon-grid" id="buildIcons"></div>
+    <div class="panel-section open">
+      <div class="panel-title toggle-btn" onclick="this.parentElement.classList.toggle('open')">⚔ BUILD PATHS</div>
+      <div class="panel-body">
+        <div class="icon-grid" id="buildIcons"></div>
+      </div>
     </div>
-    <div class="panel-section">
-      <div class="panel-title">🏷 CUSTOM LABEL</div>
-      <div style="display:flex;gap:4px;margin-top:4px;">
-        <input type="text" id="customLabel" placeholder="Label text" style="flex:1;background:#0a0a1a;border:1px inset #336699;color:#66ff66;font-size:10px;padding:3px 5px;font-family:'Courier New',monospace;">
-        <button class="tool-btn" onclick="addCustomLabel()" style="width:auto;padding:0 8px;font-size:10px;">+ Add</button>
+    <div class="panel-section open">
+      <div class="panel-title toggle-btn" onclick="this.parentElement.classList.toggle('open')">🏷 CUSTOM LABEL</div>
+      <div class="panel-body">
+        <div style="display:flex;gap:4px;margin-top:4px;">
+          <input type="text" id="customLabel" placeholder="Label text" style="flex:1;background:#0a0a1a;border:1px inset #336699;color:#66ff66;font-size:10px;padding:3px 5px;font-family:'Courier New',monospace;">
+          <button class="tool-btn" onclick="addCustomLabel()" style="width:auto;padding:0 8px;font-size:10px;">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel-section open" id="rosterSection">
+      <div class="panel-title toggle-btn" onclick="this.parentElement.classList.toggle('open')">🎮 ROSTER PLAYERS</div>
+      <div class="panel-body">
+        <a href="gvg-roster.html" style="display:block;text-align:center;font-size:9px;color:#66ccff;margin-bottom:4px;">← Open Roster Generator</a>
+        <div id="rosterPanel"></div>
       </div>
     </div>
   </div>
@@ -310,8 +513,10 @@ body {
   <span>|</span>
   <span>Drawings:</span> <span id="statusDrawings">0</span>
   <span>|</span>
-  <span>Drag</span> icons from the right panel • <span>Ctrl+Z</span> to undo • <span>Del</span> to remove selected
+  <span>Drag</span> icons/players from the right panel • <span>Ctrl+Z</span> to undo • <span>Del</span> to remove selected
 </div>
+
+<div class="player-tooltip" id="playerTooltip"></div>
 
 <script>
 var canvas = document.getElementById('mainCanvas');
@@ -348,7 +553,7 @@ var buildIconFiles = [
   { file: 'media/Paths/bellstrike-umbra.png', label: 'Bellstrike Um' },
   { file: 'media/Paths/bellstrike-splendor.png', label: 'Bellstrike Sp' },
   { file: 'media/Paths/bamboocut-wind.png', label: 'Bamboocut W' },
-  { file: 'media/Paths/bamboocut-dust-where-winds-meet-wiki-guide.webp', label: 'Bamboocut D' }
+  { file: 'media/Paths/bamboocut-dust.png', label: 'Bamboocut D' }
 ];
 
 function initIconPanel() {
@@ -551,16 +756,6 @@ canvasArea.addEventListener('mouseup', function() {
 });
 
 canvasArea.addEventListener('dragover', function(e) { e.preventDefault(); });
-
-canvasArea.addEventListener('drop', function(e) {
-  e.preventDefault();
-  var src = e.dataTransfer.getData('text/plain');
-  if (!src) return;
-  var rect = canvasArea.getBoundingClientRect();
-  var x = e.clientX - rect.left - 24;
-  var y = e.clientY - rect.top - 24;
-  placeIcon(src, x, y);
-});
 
 function placeIcon(src, x, y) {
   var el = document.createElement('div');
@@ -771,6 +966,164 @@ document.getElementById('drawSize').addEventListener('input', function() {
 window.addEventListener('resize', resizeCanvas);
 initIconPanel();
 resizeCanvas();
+loadRosterData();
+
+function getBuildIcon(builds) {
+  if (!builds) return 'media/Paths/bellstrike-splendor.png';
+  var b = builds.toLowerCase();
+  if (b.indexOf('strat') !== -1 && b.indexOf('hquaker') !== -1) return 'media/Paths/bellstrike-umbra.png';
+  if (b.indexOf('everspring') !== -1 && b.indexOf('dustrope') !== -1) return 'media/Paths/bamboocut-dust.png';
+  if (b.indexOf('twin') !== -1 && b.indexOf('ratrope') !== -1) return 'media/Paths/bamboocut-wind.png';
+  if (b.indexOf('hengdao') !== -1 && b.indexOf('phalanx') !== -1) return 'media/Paths/stonesplit-strength.png';
+  if (b.indexOf('vernal') !== -1 && b.indexOf('inkwell') !== -1) return 'media/Paths/silkbind-jade.png';
+  if (b.indexOf('nsword') !== -1) return 'media/Paths/bellstrike-splendor.png';
+  if (b.indexOf('panacea') !== -1) return 'media/Paths/silkbind-deluge.png';
+  if (b.indexOf('mo') !== -1) return 'media/Paths/stonesplit-might.png';
+  return 'media/Paths/bellstrike-splendor.png';
+}
+
+function loadRosterData() {
+  var panel = document.getElementById('rosterPanel');
+  var raw = localStorage.getItem('gw-roster-data');
+  if (!raw) {
+    panel.innerHTML = '<div class="no-roster-msg">No roster data found.<br><a href="gvg-roster.html">Generate a roster first →</a></div>';
+    return;
+  }
+
+  var teams;
+  try { teams = JSON.parse(raw); } catch(e) {
+    panel.innerHTML = '<div class="no-roster-msg">Invalid roster data.<br><a href="gvg-roster.html">Regenerate →</a></div>';
+    return;
+  }
+
+  var html = '';
+  teams.forEach(function(team) {
+    var side = team.side || (team.idx < 3 ? 'offense' : 'defense');
+    html += '<div class="roster-team-header ' + side + '">' + team.name + (team.treeWatcher ? ' 🌳' : '') + '</div>';
+    team.players.forEach(function(p) {
+      var displayBuild = p.selectedBuild || p.builds;
+      var icon = getBuildIcon(displayBuild);
+      var roleCls = p.role === 'tank' ? 'tank' : p.role === 'healer' ? 'healer' : 'dps';
+      var roleText = roleCls.toUpperCase();
+      var tagStr = '';
+      if (p.tags && p.tags.length > 0) {
+        tagStr = p.tags.map(function(t) { return t.label; }).join(', ');
+      }
+      html += '<div class="roster-player" draggable="true" data-src="' + icon + '" data-player="' + encodeURIComponent(JSON.stringify({ name: p.name, role: p.role, builds: displayBuild, tags: p.tags || [], teamName: team.name, side: side })) + '">' +
+        '<img src="' + icon + '">' +
+        '<span class="rp-name" title="' + (tagStr || displayBuild) + '">' + p.name + '</span>' +
+        '<span class="rp-role ' + roleCls + '">' + roleText + '</span>' +
+        '</div>';
+    });
+  });
+
+  panel.innerHTML = html;
+
+  panel.querySelectorAll('.roster-player').forEach(function(el) {
+    el.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text/plain', this.getAttribute('data-src'));
+      e.dataTransfer.setData('application/player-data', this.getAttribute('data-player'));
+    });
+
+    el.addEventListener('mouseenter', function(e) {
+      var data = JSON.parse(decodeURIComponent(this.getAttribute('data-player')));
+      showTooltip(e, data);
+    });
+    el.addEventListener('mousemove', function(e) {
+      moveTooltip(e);
+    });
+    el.addEventListener('mouseleave', function() {
+      hideTooltip();
+    });
+  });
+}
+
+function showTooltip(e, data) {
+  var tt = document.getElementById('playerTooltip');
+  var roleCls = data.role === 'tank' ? 'tank' : data.role === 'healer' ? 'healer' : 'dps';
+  var html = '<div class="tt-name">' + data.name + '</div>';
+  html += '<div class="tt-team">' + data.teamName + ' (' + data.side + ')</div>';
+  html += '<div class="tt-roles"><span class="tt-role-tag ' + roleCls + '">' + roleCls.toUpperCase() + '</span></div>';
+  html += '<div class="tt-builds">Builds: ' + (data.builds || 'none') + '</div>';
+  if (data.tags && data.tags.length > 0) {
+    html += '<div class="tt-tags">';
+    data.tags.forEach(function(t) { html += '<span class="tt-tag">' + t.label + '</span>'; });
+    html += '</div>';
+  }
+  tt.innerHTML = html;
+  tt.style.display = 'block';
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  var tt = document.getElementById('playerTooltip');
+  var x = e.clientX + 12;
+  var y = e.clientY + 12;
+  if (x + 260 > window.innerWidth) x = e.clientX - 270;
+  if (y + 200 > window.innerHeight) y = e.clientY - 200;
+  tt.style.left = x + 'px';
+  tt.style.top = y + 'px';
+}
+
+function hideTooltip() {
+  document.getElementById('playerTooltip').style.display = 'none';
+}
+
+canvasArea.addEventListener('drop', function(e) {
+  e.preventDefault();
+  var src = e.dataTransfer.getData('text/plain');
+  if (!src) return;
+  var rect = canvasArea.getBoundingClientRect();
+  var x = e.clientX - rect.left - 40;
+  var y = e.clientY - rect.top - 40;
+
+  var playerData = e.dataTransfer.getData('application/player-data');
+  if (playerData) {
+    var pdata = JSON.parse(decodeURIComponent(playerData));
+    placePlayer(src, x, y, pdata);
+  } else {
+    placeIcon(src, x, y);
+  }
+});
+
+function placePlayer(src, x, y, pdata) {
+  var el = document.createElement('div');
+  el.className = 'placed-icon placed-player';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.innerHTML = '<img src="' + src + '"><div class="pp-name">' + pdata.name + '</div>';
+
+  var iconData = { element: el, src: src, x: x, y: y, isPlayer: true, playerData: pdata };
+
+  el.addEventListener('mousedown', function(e) {
+    e.stopPropagation();
+    if (currentTool === 'eraser') {
+      removeIcon(iconData);
+      return;
+    }
+    deselectIcon();
+    selectedIcon = iconData;
+    el.classList.add('selected');
+    dragOffset.x = e.offsetX;
+    dragOffset.y = e.offsetY;
+    isDraggingIcon = true;
+  });
+
+  el.addEventListener('mouseenter', function(e) {
+    showTooltip(e, pdata);
+  });
+  el.addEventListener('mousemove', function(e) {
+    moveTooltip(e);
+  });
+  el.addEventListener('mouseleave', function() {
+    hideTooltip();
+  });
+
+  canvasArea.appendChild(el);
+  placedIcons.push(iconData);
+  undoStack.push({ action: 'icon', iconData: iconData });
+  updateStatus();
+}
 </script>
 
 </body>
