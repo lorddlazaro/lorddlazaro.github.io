@@ -376,6 +376,141 @@ body {
   cursor: pointer;
 }
 
+.profile-bar {
+  background: linear-gradient(180deg, #0a1a2e 0%, #06101e 100%);
+  border: 2px inset #336699;
+  padding: 8px 12px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-bar label {
+  color: #66ccff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.profile-bar select {
+  background: #0a0a1a;
+  border: 2px inset #336699;
+  color: #66ff99;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 3px 6px;
+  min-width: 160px;
+}
+
+.profile-bar .prof-btn {
+  background: linear-gradient(180deg, #003355 0%, #002233 100%);
+  border: 2px outset #336699;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.profile-bar .prof-btn:hover {
+  background: linear-gradient(180deg, #004466 0%, #003344 100%);
+  color: #99ddff;
+}
+
+.profile-bar .prof-btn:active { border-style: inset; }
+
+.profile-bar .prof-btn.export-btn {
+  background: linear-gradient(180deg, #333366 0%, #222244 100%);
+  border-color: #6666cc;
+  color: #9999ff;
+}
+
+.profile-bar .prof-btn.import-btn {
+  background: linear-gradient(180deg, #333366 0%, #222244 100%);
+  border-color: #6666cc;
+  color: #9999ff;
+}
+
+.profile-bar .prof-btn.del-btn {
+  background: linear-gradient(180deg, #442222 0%, #331111 100%);
+  border-color: #993333;
+  color: #ff6666;
+}
+
+.profile-bar .prof-btn.del-btn:hover {
+  background: linear-gradient(180deg, #553333 0%, #442222 100%);
+}
+
+.profile-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #003322 0%, #002211 100%);
+  border: 2px outset #33cc66;
+  color: #66ff99;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  padding: 8px 20px;
+  z-index: 9999;
+  animation: toastIn 0.3s ease-out;
+  pointer-events: none;
+}
+
+@keyframes toastIn {
+  0% { opacity: 0; bottom: 40px; }
+  100% { opacity: 1; bottom: 20px; }
+}
+
+.import-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 9998;
+  justify-content: center;
+  align-items: center;
+}
+
+.import-modal-overlay.open { display: flex; }
+
+.import-modal {
+  background: linear-gradient(180deg, #0a1a2e 0%, #060e1a 100%);
+  border: 3px outset #3399cc;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+}
+
+.import-modal h3 {
+  color: #66ccff;
+  font-size: 14px;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.import-modal textarea {
+  width: 100%;
+  height: 120px;
+  background: #0a0a1a;
+  border: 2px inset #336699;
+  color: #66ff99;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  padding: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.import-modal .modal-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
 .role-tag {
   display: inline-block;
   font-size: 8px;
@@ -517,6 +652,18 @@ Sunther	NSword-NSpear, NSword-Strat"></textarea>
     </div>
   </div>
 
+  <div class="profile-bar" id="profileBar">
+    <label>📂 Profile:</label>
+    <select id="profileSelect" onchange="onProfileSelect()">
+      <option value="">— No profiles saved —</option>
+    </select>
+    <button class="prof-btn" onclick="newProfile()">🆕 New</button>
+    <button class="prof-btn" onclick="saveCurrentProfile()">💾 Save</button>
+    <button class="prof-btn del-btn" onclick="deleteCurrentProfile()">🗑 Delete</button>
+    <button class="prof-btn export-btn" onclick="exportProfile()">📤 Export</button>
+    <button class="prof-btn import-btn" onclick="openImportModal()">📥 Import</button>
+  </div>
+
   <div class="roster-output" id="rosterOutput">
     <h2>⚔ GENERATED ROSTER ⚔</h2>
 
@@ -631,10 +778,12 @@ function clearAll() {
   document.getElementById('rosterOutput').classList.remove('show');
   localStorage.removeItem('gvg-player-list');
   localStorage.removeItem('gvg-roster-result');
+  localStorage.removeItem('gvg-profiles-active');
   lastGeneratedTeams = null;
   editMode = false;
   var btn = document.getElementById('editModeBtn');
   if (btn) { btn.textContent = '✏️ EDIT ROSTER'; btn.className = 'gen-btn'; }
+  renderProfileBar();
 }
 
 function savePlayerList() {
@@ -648,6 +797,14 @@ function saveRosterResult() {
 }
 
 function loadSavedData() {
+  var activeName = localStorage.getItem('gvg-profiles-active');
+  if (activeName) {
+    var profiles = getProfiles();
+    if (profiles[activeName]) {
+      loadProfile(activeName);
+      return;
+    }
+  }
   var savedList = localStorage.getItem('gvg-player-list');
   if (savedList) {
     document.getElementById('playerList').value = savedList;
@@ -661,6 +818,204 @@ function loadSavedData() {
       renderRoster(lastGeneratedTeams, totalSize);
     } catch(e) {}
   }
+  renderProfileBar();
+}
+
+function getProfiles() {
+  try {
+    return JSON.parse(localStorage.getItem('gvg-profiles')) || {};
+  } catch(e) { return {}; }
+}
+
+function setProfiles(profiles) {
+  localStorage.setItem('gvg-profiles', JSON.stringify(profiles));
+}
+
+function renderProfileBar() {
+  var profiles = getProfiles();
+  var sel = document.getElementById('profileSelect');
+  var activeName = localStorage.getItem('gvg-profiles-active') || '';
+  var names = Object.keys(profiles).sort();
+  var html = '<option value="">— Unsaved —</option>';
+  names.forEach(function(n) {
+    html += '<option value="' + n.replace(/"/g,'&quot;') + '"' + (n === activeName ? ' selected' : '') + '>' + n + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
+function onProfileSelect() {
+  var sel = document.getElementById('profileSelect');
+  var name = sel.value;
+  if (!name) return;
+  loadProfile(name);
+}
+
+function loadProfile(name) {
+  var profiles = getProfiles();
+  var p = profiles[name];
+  if (!p) return;
+  localStorage.setItem('gvg-profiles-active', name);
+  document.getElementById('playerList').value = p.playerList || '';
+  if (p.teamConfigs) {
+    for (var i = 0; i < 6 && i < p.teamConfigs.length; i++) {
+      teamConfigs[i] = { tanks: p.teamConfigs[i].tanks, healers: p.teamConfigs[i].healers, dps: p.teamConfigs[i].dps };
+    }
+    buildTeamConfigGrid();
+    syncAllSliders();
+  }
+  if (typeof p.treeWatcherTeam !== 'undefined') {
+    document.getElementById('treeWatcherTeam').value = p.treeWatcherTeam;
+  }
+  if (p.roster) {
+    lastGeneratedTeams = p.roster;
+    var totalSize = 0;
+    lastGeneratedTeams.forEach(function(t) { totalSize += t.players.length; });
+    renderRoster(lastGeneratedTeams, totalSize);
+  } else {
+    lastGeneratedTeams = null;
+    document.getElementById('rosterOutput').classList.remove('show');
+  }
+  editMode = false;
+  var btn = document.getElementById('editModeBtn');
+  if (btn) { btn.textContent = '✏️ EDIT ROSTER'; btn.className = 'gen-btn'; }
+  savePlayerList();
+  saveRosterResult();
+  renderProfileBar();
+}
+
+function captureCurrentState() {
+  return {
+    playerList: document.getElementById('playerList').value,
+    teamConfigs: teamConfigs.map(function(c) { return { tanks: c.tanks, healers: c.healers, dps: c.dps }; }),
+    treeWatcherTeam: parseInt(document.getElementById('treeWatcherTeam').value) || -1,
+    roster: lastGeneratedTeams ? JSON.parse(JSON.stringify(lastGeneratedTeams)) : null
+  };
+}
+
+function saveCurrentProfile() {
+  var sel = document.getElementById('profileSelect');
+  var name = sel.value;
+  if (!name) {
+    name = prompt('Profile name:');
+    if (!name || !name.trim()) return;
+    name = name.trim();
+  }
+  var profiles = getProfiles();
+  profiles[name] = captureCurrentState();
+  profiles[name].name = name;
+  setProfiles(profiles);
+  localStorage.setItem('gvg-profiles-active', name);
+  renderProfileBar();
+  showToast('Profile "' + name + '" saved!');
+}
+
+function newProfile() {
+  var name = prompt('New profile name:');
+  if (!name || !name.trim()) return;
+  name = name.trim();
+  var profiles = getProfiles();
+  if (profiles[name]) {
+    if (!confirm('Profile "' + name + '" already exists. Overwrite?')) return;
+  }
+  profiles[name] = captureCurrentState();
+  profiles[name].name = name;
+  setProfiles(profiles);
+  localStorage.setItem('gvg-profiles-active', name);
+  renderProfileBar();
+  showToast('Profile "' + name + '" created!');
+}
+
+function deleteCurrentProfile() {
+  var sel = document.getElementById('profileSelect');
+  var name = sel.value;
+  if (!name) { alert('No profile selected.'); return; }
+  if (!confirm('Delete profile "' + name + '"?')) return;
+  var profiles = getProfiles();
+  delete profiles[name];
+  setProfiles(profiles);
+  localStorage.removeItem('gvg-profiles-active');
+  renderProfileBar();
+  showToast('Profile "' + name + '" deleted.');
+}
+
+function exportProfile() {
+  var state = captureCurrentState();
+  state.name = document.getElementById('profileSelect').value || 'Unnamed Profile';
+  var json = JSON.stringify(state);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(json).then(function() {
+      showToast('Profile copied to clipboard!');
+    }).catch(function() {
+      prompt('Copy this profile data:', json);
+    });
+  } else {
+    prompt('Copy this profile data:', json);
+  }
+}
+
+function openImportModal() {
+  document.getElementById('importText').value = '';
+  document.getElementById('importModal').classList.add('open');
+}
+
+function closeImportModal() {
+  document.getElementById('importModal').classList.remove('open');
+}
+
+function doImport() {
+  var raw = document.getElementById('importText').value.trim();
+  if (!raw) { alert('Paste a profile first.'); return; }
+  var data;
+  try { data = JSON.parse(raw); } catch(e) { alert('Invalid JSON. Make sure the export was copied correctly.'); return; }
+  if (!data.playerList && !data.roster) { alert('Invalid profile data — missing player list and roster.'); return; }
+  var name = data.name || 'Imported Profile';
+  var profiles = getProfiles();
+  if (profiles[name]) {
+    var overwrite = confirm('A profile named "' + name + '" already exists. Overwrite it?');
+    if (!overwrite) {
+      name = prompt('Enter a different name:', name + ' (copy)');
+      if (!name || !name.trim()) return;
+      name = name.trim();
+    }
+  }
+  data.name = name;
+  profiles[name] = data;
+  setProfiles(profiles);
+  localStorage.setItem('gvg-profiles-active', name);
+  closeImportModal();
+  loadProfile(name);
+  showToast('Profile "' + name + '" imported!');
+}
+
+function syncAllSliders() {
+  var sliders = document.querySelectorAll('#teamConfigGrid input[type="range"]');
+  sliders.forEach(function(input) {
+    var t = parseInt(input.getAttribute('data-team'));
+    var role = input.getAttribute('data-role');
+    input.value = teamConfigs[t][role];
+    input.parentElement.querySelector('.tc-val').textContent = teamConfigs[t][role];
+  });
+  document.querySelectorAll('#teamConfigGrid .team-config').forEach(function(el, i) {
+    if (i < teamConfigs.length) {
+      el.querySelector('.tc-total').textContent = 'Per team: ' + (teamConfigs[i].tanks + teamConfigs[i].healers + teamConfigs[i].dps);
+    }
+  });
+  var at = parseInt(document.getElementById('allTanks').value) || 0;
+  var ah = parseInt(document.getElementById('allHealers').value) || 0;
+  var ad = parseInt(document.getElementById('allDps').value) || 0;
+  document.getElementById('allTanksVal').textContent = at;
+  document.getElementById('allHealersVal').textContent = ah;
+  document.getElementById('allDpsVal').textContent = ad;
+}
+
+function showToast(msg) {
+  var existing = document.querySelector('.profile-toast');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.className = 'profile-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 2000);
 }
 
 function shuffle(arr) {
@@ -1425,6 +1780,18 @@ function sendToMap() {
   window.location.href = 'gw-strategy.html';
 }
 </script>
+
+<div class="import-modal-overlay" id="importModal">
+  <div class="import-modal">
+    <h3>📥 IMPORT PROFILE</h3>
+    <p style="color:#667799;font-size:10px;text-align:center;margin:0 0 8px 0;">Paste an exported profile below. It will be added as a new profile.</p>
+    <textarea id="importText" placeholder="Paste exported profile JSON here..."></textarea>
+    <div class="modal-btns">
+      <button class="prof-btn" onclick="doImport()">✅ Import</button>
+      <button class="prof-btn del-btn" onclick="closeImportModal()">✕ Cancel</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
