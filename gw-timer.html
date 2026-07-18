@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guild War Timer — Aethersea</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.top-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-bar h1 {
+  font-size: 16px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366;
+}
+
+.top-bar .subtitle {
+  font-size: 10px;
+  color: #99ccee;
+}
+
+.back-link {
+  color: #66ccff;
+  text-decoration: none;
+  font-size: 11px;
+  padding: 4px 10px;
+  background: linear-gradient(180deg, #003366, #001a33);
+  border: 2px outset #3399cc;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.back-link:hover { background: linear-gradient(180deg, #004488, #002244); }
+
+.timer-container {
+  width: 100%;
+  max-width: 900px;
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.col-left { flex: 1 1 340px; display: flex; flex-direction: column; gap: 12px; }
+.col-right { flex: 1 1 340px; display: flex; flex-direction: column; gap: 12px; }
+
+/* PHASE INDICATOR */
+.phase-indicator {
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  padding: 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.phase-indicator.idle {
+  color: #667799;
+  background: rgba(0,0,0,0.3);
+  border: 2px inset #333;
+}
+
+.phase-indicator.prep {
+  color: #ffcc00;
+  background: rgba(100,80,0,0.2);
+  border: 2px outset #ccaa33;
+  animation: phasePulse 1.5s ease-in-out infinite;
+}
+
+.phase-indicator.war {
+  color: #ff4444;
+  background: rgba(100,0,0,0.2);
+  border: 2px outset #cc3333;
+  animation: phasePulse 1s ease-in-out infinite;
+}
+
+.phase-indicator.ended {
+  color: #66ff66;
+  background: rgba(0,80,0,0.2);
+  border: 2px inset #339933;
+}
+
+@keyframes phasePulse {
+  0%, 100% { box-shadow: 0 0 5px currentColor; }
+  50% { box-shadow: 0 0 20px currentColor; }
+}
+
+/* MAIN TIMER DISPLAY */
+.timer-display {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 3px outset #3399cc;
+  position: relative;
+}
+
+.timer-display.prep-flash {
+  animation: prepFlash 1s step-end infinite;
+}
+
+.timer-display.war-flash {
+  animation: warFlash 0.5s ease-in-out infinite;
+}
+
+.timer-display.event-flash {
+  animation: eventFlash 0.3s ease-in-out infinite;
+}
+
+@keyframes prepFlash {
+  0%, 49% { border-color: #ccaa33; }
+  50%, 100% { border-color: #665500; }
+}
+
+@keyframes warFlash {
+  0%, 49% { border-color: #cc3333; box-shadow: 0 0 15px rgba(255,0,0,0.4); }
+  50%, 100% { border-color: #661111; box-shadow: none; }
+}
+
+@keyframes eventFlash {
+  0%, 49% { border-color: #33cc66; box-shadow: 0 0 20px rgba(0,255,100,0.5); }
+  50%, 100% { border-color: #116633; box-shadow: none; }
+}
+
+.timer-time {
+  font-size: 72px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  color: #66ccff;
+  text-shadow: 0 0 10px #3399cc, 0 0 20px #3399cc;
+  letter-spacing: 4px;
+}
+
+.timer-time.prep { color: #ffcc00; text-shadow: 0 0 10px #ccaa33; }
+.timer-time.war { color: #ff4444; text-shadow: 0 0 10px #cc3333; }
+.timer-time.ended { color: #33cc66; text-shadow: 0 0 10px #339933; }
+
+.timer-sub {
+  font-size: 11px;
+  color: #667799;
+  margin-top: 4px;
+}
+
+/* CONTROLS */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ctrl-btn {
+  background: linear-gradient(180deg, #005588 0%, #003366 100%);
+  border: 3px outset #3399cc;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 24px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  min-width: 100px;
+}
+
+.ctrl-btn:hover {
+  background: linear-gradient(180deg, #006699 0%, #004477 100%);
+  color: #99ddff;
+}
+
+.ctrl-btn:active { border-style: inset; }
+
+.ctrl-btn.start { border-color: #33cc66; color: #66ff99; }
+.ctrl-btn.pause { border-color: #ccaa33; color: #ffdd66; }
+.ctrl-btn.reset { border-color: #cc6666; color: #ff9999; }
+
+/* NEXT EVENT */
+.next-event {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 10px 14px;
+}
+
+.next-event .label {
+  font-size: 10px;
+  color: #667799;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.next-event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(51,51,102,0.3);
+}
+.next-event-row:last-child { border-bottom: none; }
+
+.next-event-row .ev-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: #66ff99;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.next-event-row:first-child .ev-name {
+  font-size: 18px;
+}
+
+.next-event-row:first-child .ev-time {
+  font-size: 18px;
+}
+
+.next-event-row .ev-name.w1 {
+  color: #ffcc00;
+  animation: warnPulse 1s ease-in-out infinite;
+}
+
+.next-event-row .ev-name.w2 {
+  color: #ff8800;
+  animation: warnPulse 0.5s ease-in-out infinite;
+}
+
+.next-event-row .ev-name.now {
+  color: #33ff66;
+  animation: spawnFlash 0.5s ease-in-out 6;
+}
+
+.next-event-row .ev-time {
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  color: #99bbdd;
+  white-space: nowrap;
+}
+
+@keyframes warnPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spawnFlash {
+  0%, 49% { opacity: 1; text-shadow: 0 0 15px currentColor; }
+  50%, 100% { opacity: 0.4; text-shadow: none; }
+}
+
+/* EVENT HISTORY */
+.history-section {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 8px 12px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.history-section::-webkit-scrollbar { width: 6px; }
+.history-section::-webkit-scrollbar-track { background: #0a0a1a; }
+.history-section::-webkit-scrollbar-thumb { background: #334466; border-radius: 3px; }
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(51,51,102,0.2);
+}
+.history-row:last-child { border-bottom: none; }
+.history-row .h-icon { font-size: 12px; min-width: 18px; text-align: center; }
+.history-row .h-name { flex: 1; color: #88aacc; }
+.history-row .h-time { color: #556688; font-family: 'Courier New', monospace; font-size: 10px; }
+
+/* BOSS WINDOWS */
+.section-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #66ccff;
+  border-bottom: 1px solid #333366;
+  padding-bottom: 3px;
+  letter-spacing: 2px;
+}
+
+.boss-window {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 10px 14px;
+}
+
+.boss-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.boss-row:last-child { margin-bottom: 0; }
+
+.boss-label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffcc00;
+  min-width: 110px;
+}
+
+.boss-bar-container {
+  flex: 1;
+  height: 16px;
+  background: #0a0a1a;
+  border: 1px inset #333;
+  position: relative;
+  overflow: hidden;
+}
+
+.boss-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #664400, #cc8800);
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.boss-bar.active {
+  background: linear-gradient(90deg, #cc8800, #ffcc00);
+  animation: bossGlow 0.8s ease-in-out infinite;
+}
+
+.boss-bar.done {
+  background: #333;
+  width: 100% !important;
+}
+
+@keyframes bossGlow {
+  0%, 100% { box-shadow: inset 0 0 5px rgba(255,200,0,0.5); }
+  50% { box-shadow: inset 0 0 15px rgba(255,200,0,0.8); }
+}
+
+.boss-status {
+  font-size: 10px;
+  font-weight: bold;
+  min-width: 80px;
+  text-align: right;
+}
+
+.boss-status.upcoming { color: #667799; }
+.boss-status.active { color: #ffcc00; animation: warnPulse 1s ease-in-out infinite; }
+.boss-status.done { color: #336633; }
+
+/* JUNGLE CAMPS */
+.jungle-section {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 10px 14px;
+}
+
+.jungle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(51,51,102,0.3);
+  transition: background 0.3s;
+}
+
+.jungle-row:last-child { border-bottom: none; }
+
+.jungle-row.warning-1 {
+  background: rgba(100,80,0,0.2);
+  border: 1px solid #665500;
+  animation: jungleWarn 1s ease-in-out infinite;
+}
+
+.jungle-row.warning-2 {
+  background: rgba(100,50,0,0.3);
+  border: 1px solid #996600;
+  animation: jungleWarn 0.5s ease-in-out infinite;
+}
+
+.jungle-row.spawned {
+  background: rgba(0,80,30,0.2);
+  border: 1px solid #339933;
+}
+
+@keyframes jungleWarn {
+  0%, 100% { background-color: rgba(100,80,0,0.2); }
+  50% { background-color: rgba(100,80,0,0.4); }
+}
+
+.jungle-num {
+  font-size: 16px;
+  font-weight: bold;
+  color: #33cc66;
+  min-width: 40px;
+}
+
+.jungle-time {
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  color: #99bbdd;
+  min-width: 60px;
+}
+
+.jungle-status {
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+.jungle-status.waiting { color: #667799; }
+.jungle-status.incoming-1 { color: #ffcc00; }
+.jungle-status.incoming-2 { color: #ff8800; }
+.jungle-status.spawned { color: #33ff66; }
+
+/* ALERT OVERLAY */
+.alert-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.alert-overlay.active {
+  display: block;
+  animation: overlayFlash 0.5s ease-out;
+}
+
+@keyframes overlayFlash {
+  0% { background: rgba(255,200,0,0.3); }
+  100% { background: transparent; }
+}
+
+.alert-overlay.war-start {
+  display: block;
+  animation: warOverlayFlash 1s ease-out;
+}
+
+@keyframes warOverlayFlash {
+  0% { background: rgba(255,0,0,0.4); }
+  100% { background: transparent; }
+}
+
+/* MANUAL CONTROLS */
+.manual-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -4px;
+}
+.manual-btn {
+  background: linear-gradient(180deg, #1a1a44 0%, #0a0a2e 100%);
+  border: 2px outset #445577;
+  color: #88aacc;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 4px 16px;
+  cursor: pointer;
+  min-width: 60px;
+}
+.manual-btn:hover { background: linear-gradient(180deg, #222266 0%, #111144 100%); color: #aaccdd; }
+.manual-btn:active { border-style: inset; }
+
+/* COMMANDER SKILLS */
+.cmd-section {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 10px 14px;
+}
+.cmd-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cmd-skill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid #223355;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+.cmd-skill.ready {
+  border-color: #339966;
+}
+.cmd-skill.on-cooldown {
+  border-color: #996633;
+}
+.cmd-skill.warn {
+  border-color: #ccaa33;
+  animation: cmdWarn 0.5s ease-in-out infinite;
+}
+.cmd-skill.firing {
+  border-color: #33cc66;
+  animation: cmdFire 0.3s ease-in-out 3;
+}
+@keyframes cmdWarn {
+  0%, 100% { border-color: #ccaa33; box-shadow: 0 0 3px rgba(200,170,50,0.3); }
+  50% { border-color: #ffcc00; box-shadow: 0 0 10px rgba(255,200,0,0.5); }
+}
+@keyframes cmdFire {
+  0%, 100% { border-color: #33cc66; box-shadow: 0 0 5px rgba(50,200,100,0.3); }
+  50% { border-color: #66ff99; box-shadow: 0 0 15px rgba(100,255,150,0.6); }
+}
+.cmd-icon {
+  font-size: 20px;
+  min-width: 28px;
+  text-align: center;
+}
+.cmd-info {
+  flex: 1;
+  min-width: 0;
+}
+.cmd-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #aaccdd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cmd-cost {
+  font-size: 10px;
+  color: #997744;
+}
+.cmd-cd-text {
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  min-width: 50px;
+  text-align: center;
+}
+.cmd-cd-text.ready { color: #66ff99; }
+.cmd-cd-text.cooldown { color: #cc8844; }
+.cmd-cd-text.warn { color: #ffcc00; animation: warnPulse 0.5s ease-in-out infinite; }
+.cmd-use-btn {
+  background: linear-gradient(180deg, #337744 0%, #225533 100%);
+  border: 2px outset #44aa66;
+  color: #66ff99;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: center;
+}
+.cmd-use-btn:hover { background: linear-gradient(180deg, #448855 0%, #336644 100%); }
+.cmd-use-btn:active { border-style: inset; }
+.cmd-use-btn:disabled {
+  background: linear-gradient(180deg, #333 0%, #222 100%);
+  border-color: #555;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* BOSS RUMOR */
+.boss-rumor-section .section-title { margin-bottom: 6px; }
+.boss-rumor-box {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 10px 14px;
+}
+.rumor-bar-container {
+  height: 14px;
+  background: #0a0a1a;
+  border: 1px inset #333;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.rumor-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #882200, #ff6600);
+  transition: width 0.1s linear;
+}
+.rumor-bar.warn {
+  background: linear-gradient(90deg, #cc4400, #ffaa00);
+  animation: rumourWarn 0.5s ease-in-out infinite;
+}
+@keyframes rumourWarn {
+  0%, 100% { box-shadow: inset 0 0 3px rgba(255,150,0,0.5); }
+  50% { box-shadow: inset 0 0 12px rgba(255,150,0,0.9); }
+}
+.rumor-bar.done {
+  background: linear-gradient(90deg, #cc2200, #ff4400);
+  width: 100% !important;
+  animation: rumourDone 0.4s ease-in-out 4;
+}
+@keyframes rumourDone {
+  0%, 100% { box-shadow: inset 0 0 5px rgba(255,50,0,0.5); }
+  50% { box-shadow: inset 0 0 20px rgba(255,50,0,1); }
+}
+.rumor-timer {
+  text-align: center;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #995533;
+  margin-bottom: 6px;
+}
+.rumor-timer.active { color: #ff8844; }
+.rumor-timer.warn { color: #ffcc00; animation: warnPulse 0.5s ease-in-out infinite; }
+.rumor-timer.done { color: #ff4400; font-size: 14px; }
+.rumor-btn {
+  width: 100%;
+  background: linear-gradient(180deg, #773300 0%, #552200 100%);
+  border: 3px outset #cc6600;
+  color: #ffaa44;
+}
+.rumor-btn:hover { background: linear-gradient(180deg, #884400 0%, #663300 100%); color: #ffcc66; }
+.rumor-btn:disabled {
+  background: linear-gradient(180deg, #333 0%, #222 100%);
+  border-color: #555;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* FRONTLINE ZEAL */
+.zeal-section {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699;
+  padding: 10px 14px;
+}
+.zeal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.zeal-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ff9944;
+}
+.zeal-count {
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #ffcc66;
+}
+.zeal-bar-container {
+  height: 14px;
+  background: #0a0a1a;
+  border: 1px inset #333;
+  position: relative;
+  overflow: hidden;
+}
+.zeal-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #994400, #ff8800);
+  width: 0%;
+  transition: width 0.1s linear;
+}
+.zeal-bar.ready {
+  background: linear-gradient(90deg, #44aa00, #88ff00);
+  animation: zealReady 0.5s ease-in-out infinite;
+}
+@keyframes zealReady {
+  0%, 100% { box-shadow: inset 0 0 3px rgba(150,255,0,0.5); }
+  50% { box-shadow: inset 0 0 10px rgba(150,255,0,0.8); }
+}
+.zeal-bar.done {
+  background: #333;
+  width: 100% !important;
+}
+.zeal-status {
+  font-size: 11px;
+  color: #667799;
+  margin-top: 4px;
+  text-align: center;
+}
+.zeal-status.active { color: #ff8800; }
+.zeal-status.maxed { color: #66ff66; }
+
+/* BOSS 30S NOTIFICATION FLASH */
+.boss-countdown-flash {
+  animation: bossCountdownPulse 0.5s ease-in-out infinite;
+}
+@keyframes bossCountdownPulse {
+  0%, 100% { text-shadow: 0 0 5px currentColor; }
+  50% { text-shadow: 0 0 20px currentColor; }
+}
+
+/* FOOTER */
+.footer {
+  width: 100%;
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border-top: 3px outset #3399cc;
+  padding: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: #336699;
+  margin-top: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="jayus-calc.html">← jayus calc</a>
+  <a class="back-link" href="gw-strategy.html">🗺 GW Strategy</a>
+  <div>
+    <h1>⏱ Guild War Timer</h1>
+    <div class="subtitle">AETHERSEA — Where Winds Meet</div>
+  </div>
+</div>
+
+<div class="timer-container">
+  <div class="col-left">
+    <div class="phase-indicator idle" id="phaseIndicator">WAITING TO START</div>
+
+    <div class="timer-display" id="timerDisplay">
+      <div class="timer-time" id="timerTime">31:00</div>
+      <div class="timer-sub" id="timerSub">Press Start to begin</div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn start" id="btnStart" onclick="startTimer()">▶ Start</button>
+      <button class="ctrl-btn pause" id="btnPause" onclick="pauseTimer()" style="display:none;">⏸ Pause</button>
+      <button class="ctrl-btn reset" onclick="resetTimer()">↺ Reset</button>
+    </div>
+  <div class="manual-controls">
+    <button class="manual-btn" onclick="shiftTime(5)" title="Backward 5 seconds">◀◀ +5s</button>
+    <button class="manual-btn" onclick="shiftTime(1)" title="Backward 1 second">◀ +1s</button>
+    <button class="manual-btn" onclick="shiftTime(-1)" title="Forward 1 second">-1s ▶</button>
+    <button class="manual-btn" onclick="shiftTime(-5)" title="Forward 5 seconds">-5s ▶▶</button>
+  </div>
+
+    <div class="next-event" id="nextEventBox">
+      <div class="label">NEXT 3 EVENTS</div>
+      <div id="nextEventRows">
+        <div class="next-event-row"><div class="ev-name" id="evName0">—</div><div class="ev-time" id="evTime0"></div></div>
+        <div class="next-event-row"><div class="ev-name" id="evName1"></div><div class="ev-time" id="evTime1"></div></div>
+        <div class="next-event-row"><div class="ev-name" id="evName2"></div><div class="ev-time" id="evTime2"></div></div>
+      </div>
+    </div>
+
+    <div class="section-title">LAST EVENTS</div>
+    <div class="history-section" id="historySection">
+      <div class="history-row"><div class="h-name" style="color:#556688;">No events yet</div></div>
+    </div>
+  </div>
+
+  <div class="col-right">
+    <div class="section-title">BOSS WINDOWS</div>
+    <div class="boss-window">
+      <div class="boss-row">
+        <div class="boss-label">🟡 Boss 1</div>
+        <div class="boss-bar-container"><div class="boss-bar" id="bossBar1"></div></div>
+        <div class="boss-status upcoming" id="bossStatus1">26:00</div>
+      </div>
+      <div class="boss-row">
+        <div class="boss-label">🟡 Boss 2</div>
+        <div class="boss-bar-container"><div class="boss-bar" id="bossBar2"></div></div>
+        <div class="boss-status upcoming" id="bossStatus2">16:00</div>
+      </div>
+    </div>
+
+    <div class="boss-rumor-section" id="bossRumorSection">
+      <div class="section-title">BOSS SPAWN RUMOR</div>
+      <div class="boss-rumor-box" id="bossRumorBox">
+        <div class="rumor-bar-container"><div class="rumor-bar" id="rumorBar"></div></div>
+        <div class="rumor-timer" id="rumorTimer">—</div>
+        <button class="ctrl-btn rumor-btn" id="rumorBtn" onclick="triggerRumor()">🔊 Boss Rumor — 1:00</button>
+      </div>
+    </div>
+
+    <div class="section-title">JUNGLE CAMPS</div>
+    <div class="jungle-section" id="jungleSection">
+      <div class="jungle-row" id="jungle1">
+        <div class="jungle-num">🌿 1</div>
+        <div class="jungle-time">25:00</div>
+        <div class="jungle-status waiting" id="jungleStatus1">WAITING</div>
+      </div>
+      <div class="jungle-row" id="jungle2">
+        <div class="jungle-num">🌿 2</div>
+        <div class="jungle-time">20:00</div>
+        <div class="jungle-status waiting" id="jungleStatus2">WAITING</div>
+      </div>
+      <div class="jungle-row" id="jungle3">
+        <div class="jungle-num">🌿 3</div>
+        <div class="jungle-time">15:00</div>
+        <div class="jungle-status waiting" id="jungleStatus3">WAITING</div>
+      </div>
+      <div class="jungle-row" id="jungle4">
+        <div class="jungle-num">🌿 4</div>
+        <div class="jungle-time">10:00</div>
+        <div class="jungle-status waiting" id="jungleStatus4">WAITING</div>
+      </div>
+      <div class="jungle-row" id="jungle5">
+        <div class="jungle-num">🌿 5</div>
+        <div class="jungle-time">5:00</div>
+        <div class="jungle-status waiting" id="jungleStatus5">WAITING</div>
+      </div>
+    </div>
+
+    <div class="section-title">COMMANDER SKILLS</div>
+    <div class="cmd-section">
+      <div class="cmd-grid" id="cmdGrid"></div>
+    </div>
+
+    <div class="section-title">FRONTLINE ZEAL</div>
+    <div class="zeal-section">
+      <div class="zeal-top">
+        <div class="zeal-label">🛡 Frontline Zeal — every 3:00</div>
+        <div class="zeal-count" id="zealCount">0 / 7</div>
+      </div>
+      <div class="zeal-bar-container"><div class="zeal-bar" id="zealBar"></div></div>
+      <div class="zeal-status" id="zealStatus">Waiting to start</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>AETHERSEA — Guild War Timer</span>
+</div>
+
+<div class="alert-overlay" id="alertOverlay"></div>
+
+<script>
+var TOTAL_SECONDS = 31 * 60;
+var remaining = TOTAL_SECONDS;
+var timerInterval = null;
+var running = false;
+
+var jungleTimes = [25*60, 20*60, 15*60, 10*60, 5*60];
+var jungleSpawned = [false, false, false, false, false];
+var jungleWarned1 = [false, false, false, false, false];
+var jungleWarned2 = [false, false, false, false, false];
+
+var bossWindows = [
+  { open: 26*60, close: 24*60 },
+  { open: 16*60, close: 14*60 }
+];
+var bossActive = [false, false];
+var bossDone = [false, false];
+var bossWarned = [false, false];
+var bossTickFired = {};
+var bossPreWarnFired = {};
+
+var warStarted = false;
+var warEnded = false;
+var eventHistory = [];
+
+// ====== BOSS RUMOR ======
+var RUMOR_DURATION = 60;
+var rumorRemaining = 0;
+var rumorActive = false;
+var rumorFired = false;
+var rumorWarned = false;
+
+var audioCtx = null;
+
+// ====== COMMANDER SKILLS ======
+var cmdSkills = [
+  { id: 'sprint', name: 'Sprint / Relentless Advance', icon: '💨', cd: 120, cost: 1500 },
+  { id: 'surge', name: 'Desperate Surge', icon: '⚡', cd: 120, cost: 500 },
+  { id: 'cp', name: 'City Protection (CP)', icon: '🛡', cd: 180, cost: 1000 },
+  { id: 'goose', name: 'Hair Pulling (2x Goose Dmg)', icon: '🪿', cd: 90, cost: 300 },
+  { id: 'bulwark', name: 'You Got A Problem (2x Bulwark Dmg)', icon: '💥', cd: 90, cost: 300 }
+];
+var cmdState = {};
+
+// ====== FRONTLINE ZEAL ======
+var ZEAL_INTERVAL = 180;
+var ZEAL_MAX = 8;
+var zealUsed = 0;
+var zealTimer = 0;
+var zealStarted = false;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playBeep(freq, duration, vol) {
+  try {
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    gain.gain.value = vol || 0.15;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+function playJungleSpawn() {
+  playBeep(880, 0.15, 0.15);
+  setTimeout(function() { playBeep(1100, 0.15, 0.15); }, 150);
+  setTimeout(function() { playBeep(1320, 0.2, 0.15); }, 300);
+}
+
+function playBossAlert() {
+  playBeep(440, 0.3, 0.2);
+  setTimeout(function() { playBeep(550, 0.3, 0.2); }, 300);
+  setTimeout(function() { playBeep(660, 0.4, 0.2); }, 600);
+}
+
+function playWarStart() {
+  playBeep(660, 0.2, 0.2);
+  setTimeout(function() { playBeep(880, 0.2, 0.2); }, 200);
+  setTimeout(function() { playBeep(1100, 0.3, 0.2); }, 400);
+  setTimeout(function() { playBeep(1320, 0.5, 0.25); }, 600);
+}
+
+function playWarEnd() {
+  playBeep(880, 0.3, 0.2);
+  setTimeout(function() { playBeep(660, 0.3, 0.2); }, 300);
+  setTimeout(function() { playBeep(440, 0.5, 0.2); }, 600);
+}
+
+function playCmdReady() {
+  playBeep(1200, 0.1, 0.12);
+  setTimeout(function() { playBeep(1500, 0.15, 0.12); }, 100);
+}
+
+function playCmdWarn() {
+  playBeep(700, 0.08, 0.1);
+}
+
+function playBossTick() {
+  playBeep(550, 0.12, 0.12);
+}
+
+function playBossPreWarn() {
+  playBeep(770, 0.08, 0.1);
+}
+
+function playZealAlert() {
+  playBeep(880, 0.15, 0.15);
+  setTimeout(function() { playBeep(1100, 0.2, 0.15); }, 150);
+  setTimeout(function() { playBeep(1320, 0.25, 0.15); }, 300);
+}
+
+function playRumorWarn() {
+  playBeep(660, 0.15, 0.15);
+  setTimeout(function() { playBeep(660, 0.15, 0.15); }, 200);
+}
+
+function playRumorDone() {
+  playBeep(880, 0.2, 0.2);
+  setTimeout(function() { playBeep(1100, 0.2, 0.2); }, 200);
+  setTimeout(function() { playBeep(1320, 0.3, 0.2); }, 400);
+  setTimeout(function() { playBeep(1650, 0.4, 0.2); }, 600);
+}
+
+function triggerRumor() {
+  if (rumorActive) return;
+  rumorActive = true;
+  rumorRemaining = RUMOR_DURATION;
+  rumorFired = false;
+  rumorWarned = false;
+  updateRumorDisplay();
+}
+
+function tickRumor() {
+  if (!rumorActive || rumorRemaining <= 0) return;
+  rumorRemaining--;
+  if (rumorRemaining === 10 && !rumorWarned) {
+    rumorWarned = true;
+    playRumorWarn();
+  }
+  if (rumorRemaining <= 0) {
+    rumorActive = false;
+    rumorFired = true;
+    playRumorDone();
+  }
+  updateRumorDisplay();
+}
+
+function updateRumorDisplay() {
+  var bar = document.getElementById('rumorBar');
+  var timerEl = document.getElementById('rumorTimer');
+  var btn = document.getElementById('rumorBtn');
+
+  bar.className = 'rumor-bar';
+  timerEl.className = 'rumor-timer';
+
+  if (rumorFired) {
+    bar.classList.add('done');
+    bar.style.width = '100%';
+    timerEl.textContent = '⚠ BOSS INCOMING ⚠';
+    timerEl.classList.add('done');
+    btn.disabled = true;
+    btn.textContent = '🔊 RUMOR SENT!';
+  } else if (rumorActive) {
+    var pct = ((RUMOR_DURATION - rumorRemaining) / RUMOR_DURATION) * 100;
+    bar.style.width = pct + '%';
+    timerEl.textContent = formatTime(rumorRemaining) + ' until rumor ends';
+    timerEl.classList.add('active');
+    btn.disabled = true;
+    btn.textContent = '🔊 RUMOR ACTIVE...';
+    if (rumorRemaining <= 10) {
+      bar.classList.add('warn');
+      timerEl.classList.add('warn');
+    }
+  } else {
+    bar.style.width = '0%';
+    timerEl.textContent = '—';
+    btn.disabled = false;
+    btn.textContent = '🔊 Boss Rumor — 1:00';
+  }
+}
+
+function formatTime(secs) {
+  var m = Math.floor(secs / 60);
+  var s = secs % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function logHistory(icon, name) {
+  var timeStr = formatTime(remaining);
+  eventHistory.unshift({ icon: icon, name: name, time: timeStr });
+  if (eventHistory.length > 50) eventHistory.pop();
+  updateHistory();
+}
+
+function updateHistory() {
+  var el = document.getElementById('historySection');
+  if (eventHistory.length === 0) {
+    el.innerHTML = '<div class="history-row"><div class="h-name" style="color:#556688;">No events yet</div></div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < eventHistory.length; i++) {
+    var h = eventHistory[i];
+    html += '<div class="history-row"><div class="h-icon">' + h.icon + '</div><div class="h-name">' + h.name + '</div><div class="h-time">' + h.time + '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+function flashOverlay(cls) {
+  var el = document.getElementById('alertOverlay');
+  el.className = 'alert-overlay ' + cls;
+  setTimeout(function() { el.className = 'alert-overlay'; }, 1000);
+}
+
+// ====== COMMANDER SKILL UI ======
+function initCmdSkills() {
+  var grid = document.getElementById('cmdGrid');
+  grid.innerHTML = '';
+  for (var i = 0; i < cmdSkills.length; i++) {
+    var sk = cmdSkills[i];
+    cmdState[sk.id] = { remaining: 0, ready: true, warned: false };
+    var div = document.createElement('div');
+    div.className = 'cmd-skill ready';
+    div.id = 'cmd-' + sk.id;
+    div.innerHTML =
+      '<div class="cmd-icon">' + sk.icon + '</div>' +
+      '<div class="cmd-info">' +
+        '<div class="cmd-name">' + sk.name + '</div>' +
+        '<div class="cmd-cost">' + sk.cost + ' Fun Coins · ' + sk.cd + 's CD</div>' +
+      '</div>' +
+      '<div class="cmd-cd-text ready" id="cmd-cd-' + sk.id + '">READY</div>' +
+      '<button class="cmd-use-btn" id="cmd-btn-' + sk.id + '" onclick="useCmdSkill(\'' + sk.id + '\')">USE SKILL</button>';
+    grid.appendChild(div);
+  }
+}
+
+function useCmdSkill(id) {
+  if (!cmdState[id].ready) return;
+  var sk = cmdSkills.filter(function(s){return s.id===id})[0];
+  cmdState[id].remaining = sk.cd;
+  cmdState[id].ready = false;
+  cmdState[id].warned = false;
+  logHistory(sk.icon, sk.name + ' USED');
+  updateCmdDisplay();
+}
+
+function tickCmdSkills() {
+  for (var i = 0; i < cmdSkills.length; i++) {
+    var sk = cmdSkills[i];
+    var st = cmdState[sk.id];
+    if (!st.ready) {
+      st.remaining--;
+      if (st.remaining === 10 && !st.warned) {
+        st.warned = true;
+        playCmdWarn();
+      }
+      if (st.remaining <= 0) {
+        st.remaining = 0;
+        st.ready = true;
+        st.warned = false;
+        playCmdReady();
+      }
+    }
+  }
+}
+
+function updateCmdDisplay() {
+  for (var i = 0; i < cmdSkills.length; i++) {
+    var sk = cmdSkills[i];
+    var st = cmdState[sk.id];
+    var row = document.getElementById('cmd-' + sk.id);
+    var cdEl = document.getElementById('cmd-cd-' + sk.id);
+    var btn = document.getElementById('cmd-btn-' + sk.id);
+
+    row.className = 'cmd-skill';
+    cdEl.className = 'cmd-cd-text';
+
+    if (st.ready) {
+      row.classList.add('ready');
+      cdEl.classList.add('ready');
+      cdEl.textContent = 'READY';
+      btn.disabled = false;
+    } else {
+      row.classList.add('on-cooldown');
+      cdEl.classList.add('cooldown');
+      cdEl.textContent = st.remaining + 's';
+      btn.disabled = true;
+      if (st.remaining <= 10) {
+        row.classList.add('warn');
+        cdEl.classList.add('warn');
+      }
+    }
+  }
+}
+
+// ====== FRONTLINE ZEAL ======
+function resetZeal() {
+  zealUsed = 0;
+  zealTimer = 0;
+  zealStarted = false;
+  updateZealDisplay();
+}
+
+function tickZeal() {
+  if (zealUsed >= ZEAL_MAX) return;
+  zealTimer++;
+  if (zealTimer >= ZEAL_INTERVAL) {
+    zealTimer = 0;
+    zealUsed++;
+    playZealAlert();
+    logHistory('🛡', 'Frontline Zeal #' + zealUsed + ' Available');
+  }
+  updateZealDisplay();
+}
+
+function updateZealDisplay() {
+  var countEl = document.getElementById('zealCount');
+  var bar = document.getElementById('zealBar');
+  var status = document.getElementById('zealStatus');
+  countEl.textContent = zealUsed + ' / ' + ZEAL_MAX;
+
+  if (zealUsed >= ZEAL_MAX) {
+    bar.className = 'zeal-bar done';
+    bar.style.width = '100%';
+    status.textContent = 'ALL ZEALS USED';
+    status.className = 'zeal-status maxed';
+  } else {
+    var pct = (zealTimer / ZEAL_INTERVAL) * 100;
+    bar.className = 'zeal-bar';
+    bar.style.width = pct + '%';
+    var secsLeft = ZEAL_INTERVAL - zealTimer;
+    status.textContent = 'Next zeal in ' + formatTime(secsLeft) + ' — Zeal #' + (zealUsed + 1) + ' incoming';
+    status.className = 'zeal-status active';
+  }
+}
+
+// ====== BOSS 30S TICKS ======
+function checkBossTicks(t) {
+  for (var b = 0; b < 2; b++) {
+    var bw = bossWindows[b];
+    if (!bossDone[b] && bossActive[b]) {
+      var elapsed = bw.open - t;
+      var mod30 = elapsed % 30;
+      var key = b + '-' + elapsed;
+
+      if (mod30 === 0 && elapsed > 0 && !bossTickFired[key]) {
+        bossTickFired[key] = true;
+        playBossTick();
+      }
+      if (mod30 === 25 && elapsed > 5 && !bossPreWarnFired[key]) {
+        bossPreWarnFired[key] = true;
+        playBossPreWarn();
+      }
+    }
+  }
+}
+
+// ====== MAIN TIMER ======
+function startTimer() {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  running = true;
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('btnPause').style.display = '';
+  if (remaining <= 0) {
+    resetTimer();
+    return;
+  }
+  timerInterval = setInterval(tick, 1000);
+}
+
+function pauseTimer() {
+  running = false;
+  clearInterval(timerInterval);
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnStart').textContent = '▶ Resume';
+  document.getElementById('btnPause').style.display = 'none';
+}
+
+function resetTimer() {
+  running = false;
+  clearInterval(timerInterval);
+  remaining = TOTAL_SECONDS;
+  jungleSpawned = [false, false, false, false, false];
+  jungleWarned1 = [false, false, false, false, false];
+  jungleWarned2 = [false, false, false, false, false];
+  bossActive = [false, false];
+  bossDone = [false, false];
+  bossWarned = [false, false];
+  bossTickFired = {};
+  bossPreWarnFired = {};
+  warStarted = false;
+  warEnded = false;
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnStart').textContent = '▶ Start';
+  document.getElementById('btnPause').style.display = 'none';
+  resetZeal();
+  initCmdSkills();
+  rumorActive = false;
+  rumorFired = false;
+  rumorWarned = false;
+  rumorRemaining = 0;
+  eventHistory = [];
+  updateRumorDisplay();
+  updateHistory();
+  updateDisplay();
+}
+
+function shiftTime(delta) {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  var absDelta = Math.abs(delta);
+  var dir = delta > 0 ? 1 : -1;
+
+  for (var i = 0; i < absDelta; i++) {
+    remaining += dir;
+    if (remaining < 0) { remaining = 0; break; }
+    if (remaining > TOTAL_SECONDS) { remaining = TOTAL_SECONDS; break; }
+    checkEvents();
+    shiftCmdSkills(dir);
+    shiftRumor(dir);
+    checkBossTicks(remaining);
+    if (zealUsed < ZEAL_MAX && warStarted) shiftZeal(dir);
+  }
+
+  updateDisplay();
+}
+
+function shiftCmdSkills(dir) {
+  for (var i = 0; i < cmdSkills.length; i++) {
+    var sk = cmdSkills[i];
+    var st = cmdState[sk.id];
+    if (!st.ready) {
+      st.remaining += dir;
+      if (st.remaining <= 0) {
+        st.remaining = 0;
+        st.ready = true;
+        st.warned = false;
+        playCmdReady();
+      } else if (st.remaining > sk.cd) {
+        st.remaining = sk.cd;
+      }
+      if (st.remaining <= 10 && st.remaining > 0 && !st.warned) {
+        st.warned = true;
+        playCmdWarn();
+      }
+    }
+  }
+}
+
+function shiftRumor(dir) {
+  if (!rumorActive || rumorRemaining <= 0) return;
+  rumorRemaining += dir;
+  if (rumorRemaining <= 0) {
+    rumorRemaining = 0;
+    rumorActive = false;
+    rumorFired = true;
+    playRumorDone();
+    logHistory('🔊', 'Boss Rumor SENT — Boss Incoming!');
+  } else if (rumorRemaining > RUMOR_DURATION) {
+    rumorRemaining = RUMOR_DURATION;
+  }
+  if (rumorRemaining <= 10 && rumorRemaining > 0 && !rumorWarned) {
+    rumorWarned = true;
+    playRumorWarn();
+  }
+}
+
+function shiftZeal(dir) {
+  zealTimer -= dir;
+  if (zealTimer >= ZEAL_INTERVAL) {
+    zealTimer = 0;
+    zealUsed++;
+    playZealAlert();
+    logHistory('🛡', 'Frontline Zeal #' + zealUsed + ' Available');
+  } else if (zealTimer < 0) {
+    zealTimer = ZEAL_INTERVAL - 1;
+    if (zealUsed > 0) zealUsed--;
+  }
+}
+
+function tick() {
+  if (!running) return;
+  remaining--;
+  if (remaining < 0) remaining = 0;
+  checkEvents();
+  tickCmdSkills();
+  tickRumor();
+  checkBossTicks(remaining);
+  if (zealUsed < ZEAL_MAX && warStarted) tickZeal();
+  updateDisplay();
+  if (remaining <= 0) {
+    pauseTimer();
+  }
+}
+
+function checkEvents() {
+  var t = remaining;
+
+  if (!warStarted && t <= 30*60) {
+    warStarted = true;
+    playWarStart();
+    flashOverlay('war-start');
+    zealStarted = true;
+    zealUsed = 1;
+    playZealAlert();
+    logHistory('⚔', 'War Started');
+  }
+
+  for (var i = 0; i < 5; i++) {
+    if (!jungleSpawned[i]) {
+      if (!jungleWarned1[i] && t <= jungleTimes[i] + 60 && t > jungleTimes[i] + 30) {
+        jungleWarned1[i] = true;
+        playBeep(660, 0.1, 0.1);
+      }
+      if (!jungleWarned2[i] && t <= jungleTimes[i] + 30 && t > jungleTimes[i]) {
+        jungleWarned2[i] = true;
+        playBeep(880, 0.15, 0.12);
+      }
+      if (t <= jungleTimes[i]) {
+        jungleSpawned[i] = true;
+        playJungleSpawn();
+        flashOverlay('active');
+        logHistory('🌿', 'Jungle ' + (i+1) + ' Spawned');
+      }
+    }
+  }
+
+  for (var b = 0; b < 2; b++) {
+    var bw = bossWindows[b];
+    if (!bossDone[b]) {
+      if (t <= bw.open && t > bw.close) {
+        if (!bossActive[b]) {
+          bossActive[b] = true;
+          if (!bossWarned[b]) {
+            bossWarned[b] = true;
+            playBossAlert();
+            flashOverlay('active');
+            logHistory('🟡', 'Boss ' + (b+1) + ' Window OPEN');
+          }
+        }
+      } else if (t <= bw.close) {
+        bossDone[b] = true;
+        bossActive[b] = false;
+        playBeep(330, 0.2, 0.1);
+        logHistory('🟡', 'Boss ' + (b+1) + ' Window CLOSED');
+      }
+    }
+  }
+
+  if (t === 0 && !warEnded) {
+    warEnded = true;
+    playWarEnd();
+    flashOverlay('war-start');
+    logHistory('🏁', 'Battle Over');
+  }
+}
+
+function updateDisplay() {
+  var t = remaining;
+  var phaseEl = document.getElementById('phaseIndicator');
+  var timeEl = document.getElementById('timerTime');
+  var displayEl = document.getElementById('timerDisplay');
+  var subEl = document.getElementById('timerSub');
+
+  displayEl.className = 'timer-display';
+
+  if (!running && t === TOTAL_SECONDS) {
+    phaseEl.className = 'phase-indicator idle';
+    phaseEl.textContent = 'WAITING TO START';
+    timeEl.className = 'timer-time';
+    subEl.textContent = 'Press Start to begin';
+  } else if (t > 30*60) {
+    phaseEl.className = 'phase-indicator prep';
+    phaseEl.textContent = 'PREP TIME';
+    timeEl.className = 'timer-time prep';
+    displayEl.classList.add('prep-flash');
+    subEl.textContent = 'War starts in ' + formatTime(t - 30*60);
+  } else if (t > 0) {
+    phaseEl.className = 'phase-indicator war';
+    phaseEl.textContent = '⚔ WAR TIME ⚔';
+    timeEl.className = 'timer-time war';
+    displayEl.classList.add('war-flash');
+    subEl.textContent = formatTime(t) + ' remaining';
+  } else {
+    phaseEl.className = 'phase-indicator ended';
+    phaseEl.textContent = 'BATTLE OVER';
+    timeEl.className = 'timer-time ended';
+    subEl.textContent = 'GG WP';
+  }
+
+  timeEl.textContent = formatTime(t);
+
+  updateNextEvent(t);
+  updateBossBars(t);
+  updateJungle(t);
+  updateCmdDisplay();
+  updateRumorDisplay();
+  updateZealDisplay();
+}
+
+function updateNextEvent(t) {
+  for (var r = 0; r < 3; r++) {
+    document.getElementById('evName' + r).textContent = '';
+    document.getElementById('evTime' + r).textContent = '';
+    document.getElementById('evName' + r).className = 'ev-name';
+  }
+
+  if (t <= 0) {
+    document.getElementById('evName0').textContent = 'BATTLE OVER';
+    document.getElementById('evName0').className = 'ev-name now';
+    return;
+  }
+
+  var events = [];
+
+  if (!warStarted || t === 30*60) {
+    events.push({ name: '⚔ War Starts', time: 30*60, type: 'war', icon: '⚔' });
+  }
+
+  for (var b = 0; b < 2; b++) {
+    if (!bossDone[b]) {
+      events.push({ name: '🟡 Boss ' + (b+1) + ' Window', time: bossWindows[b].open, type: 'boss', idx: b, icon: '🟡' });
+    }
+  }
+
+  for (var i = 0; i < 5; i++) {
+    if (!jungleSpawned[i]) {
+      events.push({ name: '🌿 Jungle ' + (i+1), time: jungleTimes[i], type: 'jungle', idx: i, icon: '🌿' });
+    }
+  }
+
+  if (zealUsed < ZEAL_MAX) {
+    var zealNext = zealUsed * ZEAL_INTERVAL + ZEAL_INTERVAL;
+    events.push({ name: '🛡 Zeal #' + (zealUsed + 1) + ' Available', time: zealNext, type: 'zeal', icon: '🛡' });
+  }
+
+  if (warStarted) {
+    for (var s = 0; s < cmdSkills.length; s++) {
+      var sk = cmdSkills[s];
+      var st = cmdState[sk.id];
+      if (!st.ready && st.remaining > 0) {
+        events.push({ name: sk.icon + ' ' + sk.name + ' Ready', time: t - st.remaining, type: 'skill', icon: sk.icon });
+      }
+    }
+  }
+
+  if (events.length === 0) {
+    document.getElementById('evName0').textContent = 'All events complete';
+    return;
+  }
+
+  events.sort(function(a, b) { return b.time - a.time; });
+
+  for (var r = 0; r < Math.min(3, events.length); r++) {
+    var ev = events[r];
+    var diff = ev.time - t;
+    var nameEl = document.getElementById('evName' + r);
+    var timeEl = document.getElementById('evTime' + r);
+
+    nameEl.textContent = ev.name;
+
+    if (diff <= 0) {
+      nameEl.className = 'ev-name now';
+      timeEl.textContent = 'NOW';
+    } else {
+      timeEl.textContent = formatTime(diff) + ' until';
+      if (ev.type === 'jungle') {
+        nameEl.className = diff <= 30 ? 'ev-name w2' : diff <= 60 ? 'ev-name w1' : 'ev-name';
+      } else if (ev.type === 'boss') {
+        nameEl.className = bossActive[ev.idx] ? 'ev-name w1' : 'ev-name';
+        if (bossActive[ev.idx]) timeEl.textContent = 'ACTIVE NOW';
+      } else if (ev.type === 'skill') {
+        nameEl.className = diff <= 10 ? 'ev-name w1' : 'ev-name';
+      } else {
+        nameEl.className = 'ev-name';
+      }
+    }
+  }
+}
+
+function updateBossBars(t) {
+  for (var b = 0; b < 2; b++) {
+    var bw = bossWindows[b];
+    var bar = document.getElementById('bossBar' + (b+1));
+    var status = document.getElementById('bossStatus' + (b+1));
+
+    var windowLen = bw.open - bw.close;
+
+    if (bossDone[b]) {
+      bar.className = 'boss-bar done';
+      bar.style.width = '100%';
+      status.className = 'boss-status done';
+      status.textContent = 'CLOSED';
+    } else if (bossActive[b]) {
+      var elapsed = bw.open - t;
+      var pct = Math.min(100, (elapsed / windowLen) * 100);
+      bar.className = 'boss-bar active';
+      bar.style.width = pct + '%';
+      status.className = 'boss-status active';
+      status.textContent = 'ACTIVE';
+      var secsLeft = t - bw.close;
+      if (secsLeft <= 30) {
+        status.classList.add('boss-countdown-flash');
+      }
+    } else {
+      bar.className = 'boss-bar';
+      bar.style.width = '0%';
+      status.className = 'boss-status upcoming';
+      status.textContent = 'at ' + formatTime(bw.open);
+    }
+  }
+}
+
+function updateJungle(t) {
+  for (var i = 0; i < 5; i++) {
+    var row = document.getElementById('jungle' + (i+1));
+    var status = document.getElementById('jungleStatus' + (i+1));
+
+    row.className = 'jungle-row';
+
+    if (jungleSpawned[i]) {
+      status.className = 'jungle-status spawned';
+      status.textContent = '✓ SPAWNED';
+      row.classList.add('spawned');
+    } else {
+      var diff = t - jungleTimes[i];
+      if (diff <= 0) {
+        status.className = 'jungle-status spawned';
+        status.textContent = '✓ SPAWNED';
+        row.classList.add('spawned');
+      } else if (diff <= 30) {
+        status.className = 'jungle-status incoming-2';
+        status.textContent = '⚠ ' + diff + 's!';
+        row.classList.add('warning-2');
+      } else if (diff <= 60) {
+        status.className = 'jungle-status incoming-1';
+        status.textContent = '⏰ ' + diff + 's';
+        row.classList.add('warning-1');
+      } else {
+        status.className = 'jungle-status waiting';
+        status.textContent = 'in ' + formatTime(diff);
+      }
+    }
+  }
+}
+
+initCmdSkills();
+updateRumorDisplay();
+updateDisplay();
+</script>
+
+</body>
+</html>
