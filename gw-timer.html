@@ -578,6 +578,16 @@ body {
   color: #666;
   cursor: not-allowed;
 }
+.cmd-reset-btn {
+  background: linear-gradient(180deg, #662222 0%, #441111 100%);
+  border: 2px outset #aa4444;
+  color: #ff9999;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.cmd-reset-btn:hover { background: linear-gradient(180deg, #883333 0%, #552222 100%); color: #ffbbbb; }
 
 /* BOSS RUMOR */
 .boss-rumor-section .section-title { margin-bottom: 6px; }
@@ -815,7 +825,7 @@ body {
     <div class="phase-indicator idle" id="phaseIndicator">WAITING TO START</div>
 
     <div class="timer-display" id="timerDisplay">
-      <div class="timer-time" id="timerTime">31:00</div>
+      <div class="timer-time" id="timerTime">35:00</div>
       <div class="timer-sub" id="timerSub">Press Start to begin</div>
     </div>
 
@@ -923,7 +933,7 @@ body {
 <div class="alert-overlay" id="alertOverlay"></div>
 
 <script>
-var TOTAL_SECONDS = 31 * 60;
+var TOTAL_SECONDS = 35 * 60;
 var remaining = TOTAL_SECONDS;
 var timerInterval = null;
 var running = false;
@@ -989,6 +999,7 @@ function saveVoiceSettings() {
   voiceSettings.skill = document.getElementById('vSkill').checked;
   voiceSettings.rumor = document.getElementById('vRumor').checked;
   voiceSettings.forceEn = document.getElementById('vForceEn').checked;
+  voiceSettings.forceFil = document.getElementById('vForceFil').checked;
   localStorage.setItem('gw-timer-voice', JSON.stringify({ enabled: voiceEnabled, war: voiceSettings.war, boss: voiceSettings.boss, jungle: voiceSettings.jungle, jungleWarn: voiceSettings.jungleWarn, zeal: voiceSettings.zeal, skill: voiceSettings.skill, rumor: voiceSettings.rumor, forceEn: voiceSettings.forceEn }));
 }
 
@@ -1252,6 +1263,7 @@ function initCmdSkills() {
         '<div class="cmd-cost">' + sk.cost + ' Fun Coins · ' + sk.cd + 's CD</div>' +
       '</div>' +
       '<div class="cmd-cd-text ready" id="cmd-cd-' + sk.id + '">READY</div>' +
+      '<button class="cmd-reset-btn" id="cmd-rst-' + sk.id + '" onclick="resetCmdSkill(\'' + sk.id + '\')" style="display:none;" title="Reset cooldown">✕</button>' +
       '<button class="cmd-use-btn" id="cmd-btn-' + sk.id + '" onclick="useCmdSkill(\'' + sk.id + '\')">USE SKILL</button>';
     grid.appendChild(div);
   }
@@ -1264,6 +1276,15 @@ function useCmdSkill(id) {
   cmdState[id].ready = false;
   cmdState[id].warned = false;
   logHistory(sk.icon, sk.name + ' USED');
+  updateCmdDisplay();
+}
+
+function resetCmdSkill(id) {
+  var st = cmdState[id];
+  if (st.ready) return;
+  st.remaining = 0;
+  st.ready = true;
+  st.warned = false;
   updateCmdDisplay();
 }
 
@@ -1299,6 +1320,7 @@ function updateCmdDisplay() {
     var row = document.getElementById('cmd-' + sk.id);
     var cdEl = document.getElementById('cmd-cd-' + sk.id);
     var btn = document.getElementById('cmd-btn-' + sk.id);
+    var rst = document.getElementById('cmd-rst-' + sk.id);
 
     row.className = 'cmd-skill';
     cdEl.className = 'cmd-cd-text';
@@ -1308,11 +1330,13 @@ function updateCmdDisplay() {
       cdEl.classList.add('ready');
       cdEl.textContent = 'READY';
       btn.disabled = false;
+      rst.style.display = 'none';
     } else {
       row.classList.add('on-cooldown');
       cdEl.classList.add('cooldown');
       cdEl.textContent = st.remaining + 's';
       btn.disabled = true;
+      rst.style.display = '';
       if (st.remaining <= 10) {
         row.classList.add('warn');
         cdEl.classList.add('warn');
@@ -1514,7 +1538,7 @@ function shiftRumor(dir) {
     rumorFired = true;
     playRumorDone();
     logHistory('🔊', 'Boss Rumor SENT — Boss Incoming!');
-    speak('Rumor Sent', 'rumor');
+    speak('Rumor', 'rumor');
   } else if (rumorRemaining > RUMOR_DURATION) {
     rumorRemaining = RUMOR_DURATION;
   }
