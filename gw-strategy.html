@@ -58,9 +58,145 @@ body {
 
 .back-link:hover { background: linear-gradient(180deg, #004488, #002244); }
 
+.profile-bar {
+  background: linear-gradient(180deg, #001a33 0%, #002244 100%);
+  border-bottom: 2px inset #336699;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  z-index: 99;
+  position: relative;
+}
+
+.profile-bar label {
+  color: #66ccff;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.profile-bar select {
+  background: #0a0a1a;
+  border: 2px inset #336699;
+  color: #66ff99;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  min-width: 140px;
+}
+
+.profile-bar .prof-btn {
+  background: linear-gradient(180deg, #003355 0%, #002233 100%);
+  border: 2px outset #336699;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.profile-bar .prof-btn:hover {
+  background: linear-gradient(180deg, #004466 0%, #003344 100%);
+  color: #99ddff;
+}
+
+.profile-bar .prof-btn:active { border-style: inset; }
+
+.profile-bar .prof-btn.export-btn {
+  background: linear-gradient(180deg, #333366 0%, #222244 100%);
+  border-color: #6666cc;
+  color: #9999ff;
+}
+
+.profile-bar .prof-btn.import-btn {
+  background: linear-gradient(180deg, #333366 0%, #222244 100%);
+  border-color: #6666cc;
+  color: #9999ff;
+}
+
+.profile-bar .prof-btn.del-btn {
+  background: linear-gradient(180deg, #442222 0%, #331111 100%);
+  border-color: #993333;
+  color: #ff6666;
+}
+
+.profile-bar .prof-btn.del-btn:hover {
+  background: linear-gradient(180deg, #553333 0%, #442222 100%);
+}
+
+.profile-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #003322 0%, #002211 100%);
+  border: 2px outset #33cc66;
+  color: #66ff99;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 11px;
+  padding: 6px 16px;
+  z-index: 9999;
+  animation: toastIn 0.3s ease-out;
+  pointer-events: none;
+}
+
+@keyframes toastIn {
+  0% { opacity: 0; bottom: 50px; }
+  100% { opacity: 1; bottom: 30px; }
+}
+
+.import-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 9998;
+  justify-content: center;
+  align-items: center;
+}
+
+.import-modal-overlay.open { display: flex; }
+
+.import-modal {
+  background: linear-gradient(180deg, #0a1a2e 0%, #060e1a 100%);
+  border: 3px outset #3399cc;
+  padding: 16px;
+  width: 90%;
+  max-width: 450px;
+}
+
+.import-modal h3 {
+  color: #66ccff;
+  font-size: 13px;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.import-modal textarea {
+  width: 100%;
+  height: 100px;
+  background: #0a0a1a;
+  border: 2px inset #336699;
+  color: #66ff99;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  padding: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.import-modal .modal-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
 .app-layout {
   display: flex;
-  height: calc(100vh - 42px);
+  height: calc(100vh - 72px);
 }
 
 .toolbar {
@@ -447,6 +583,18 @@ body {
     <button class="back-link" onclick="clearIcons()" title="Clear icons only">Clear Icons</button>
     <button class="back-link" style="color:#ff9999;border-color:#cc6666;" onclick="clearAll()" title="Clear everything">✕ Clear All</button>
   </div>
+</div>
+
+<div class="profile-bar" id="profileBar">
+  <label>📂 Map:</label>
+  <select id="profileSelect" onchange="onProfileSelect()">
+    <option value="">— No profiles saved —</option>
+  </select>
+  <button class="prof-btn" onclick="newProfile()">🆕 New</button>
+  <button class="prof-btn" onclick="saveCurrentProfile()">💾 Save</button>
+  <button class="prof-btn del-btn" onclick="deleteCurrentProfile()">🗑 Del</button>
+  <button class="prof-btn export-btn" onclick="exportProfile()">📤 Export</button>
+  <button class="prof-btn import-btn" onclick="openImportModal()">📥 Import</button>
 </div>
 
 <div class="app-layout">
@@ -1053,23 +1201,7 @@ function loadRosterData() {
 
   panel.innerHTML = html;
 
-  panel.querySelectorAll('.roster-player').forEach(function(el) {
-    el.addEventListener('dragstart', function(e) {
-      e.dataTransfer.setData('text/plain', this.getAttribute('data-src'));
-      e.dataTransfer.setData('application/player-data', this.getAttribute('data-player'));
-    });
-
-    el.addEventListener('mouseenter', function(e) {
-      var data = JSON.parse(decodeURIComponent(this.getAttribute('data-player')));
-      showTooltip(e, data);
-    });
-    el.addEventListener('mousemove', function(e) {
-      moveTooltip(e);
-    });
-    el.addEventListener('mouseleave', function() {
-      hideTooltip();
-    });
-  });
+  bindRosterDrag();
 }
 
 function showTooltip(e, data) {
@@ -1162,7 +1294,237 @@ function placePlayer(src, x, y, pdata) {
   undoStack.push({ action: 'icon', iconData: iconData });
   updateStatus();
 }
+
+function getProfiles() {
+  try { return JSON.parse(localStorage.getItem('gw-strategy-profiles')) || {}; }
+  catch(e) { return {}; }
+}
+
+function setProfiles(profiles) {
+  localStorage.setItem('gw-strategy-profiles', JSON.stringify(profiles));
+}
+
+function renderProfileBar() {
+  var profiles = getProfiles();
+  var sel = document.getElementById('profileSelect');
+  var activeName = localStorage.getItem('gw-strategy-active') || '';
+  var names = Object.keys(profiles).sort();
+  var html = '<option value="">— Unsaved —</option>';
+  names.forEach(function(n) {
+    html += '<option value="' + n.replace(/"/g,'&quot;') + '"' + (n === activeName ? ' selected' : '') + '>' + n + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
+function onProfileSelect() {
+  var name = document.getElementById('profileSelect').value;
+  if (!name) return;
+  loadProfile(name);
+}
+
+function captureState() {
+  var rect = canvasArea.getBoundingClientRect();
+  var icons = placedIcons.map(function(icon) {
+    var data = { src: icon.src, xPct: icon.xPct, yPct: icon.yPct };
+    if (icon.isPlayer) { data.isPlayer = true; data.playerData = icon.playerData; }
+    if (icon.isLabel) { data.isLabel = true; data.text = icon.text; }
+    if (icon.element && icon.element.querySelector('img') && icon.element.querySelector('img').style.filter) {
+      data.invFilter = true;
+    }
+    return data;
+  });
+  return {
+    name: '',
+    icons: icons,
+    drawings: JSON.parse(JSON.stringify(drawingHistory)),
+    rosterHTML: document.getElementById('rosterPanel') ? document.getElementById('rosterPanel').innerHTML : ''
+  };
+}
+
+function loadProfile(name) {
+  var profiles = getProfiles();
+  var p = profiles[name];
+  if (!p) return;
+  localStorage.setItem('gw-strategy-active', name);
+  clearAll();
+  if (p.drawings) {
+    drawingHistory = p.drawings;
+    redrawAll();
+  }
+  if (p.icons) {
+    var rect = canvasArea.getBoundingClientRect();
+    p.icons.forEach(function(data) {
+      var x = data.xPct * rect.width;
+      var y = data.yPct * rect.height;
+      if (data.isPlayer) {
+        placePlayer(data.src, x, y, data.playerData);
+      } else {
+        var type = data.invFilter ? 'build-inv' : (data.src && data.src.indexOf('Paths/') !== -1 ? 'build' : 'map');
+        placeIcon(data.src, x, y, type);
+      }
+    });
+  }
+  if (p.rosterHTML) {
+    var panel = document.getElementById('rosterPanel');
+    if (panel) panel.innerHTML = p.rosterHTML;
+    bindRosterDrag();
+  }
+  renderProfileBar();
+  updateStatus();
+}
+
+function saveCurrentProfile() {
+  var sel = document.getElementById('profileSelect');
+  var name = sel.value;
+  if (!name) {
+    name = prompt('Profile name:');
+    if (!name || !name.trim()) return;
+    name = name.trim();
+  }
+  var profiles = getProfiles();
+  var state = captureState();
+  state.name = name;
+  profiles[name] = state;
+  setProfiles(profiles);
+  localStorage.setItem('gw-strategy-active', name);
+  renderProfileBar();
+  showToast('Strategy "' + name + '" saved!');
+}
+
+function newProfile() {
+  var name = prompt('New strategy name:');
+  if (!name || !name.trim()) return;
+  name = name.trim();
+  var profiles = getProfiles();
+  if (profiles[name]) {
+    if (!confirm('Strategy "' + name + '" already exists. Overwrite?')) return;
+  }
+  var state = captureState();
+  state.name = name;
+  profiles[name] = state;
+  setProfiles(profiles);
+  localStorage.setItem('gw-strategy-active', name);
+  renderProfileBar();
+  showToast('Strategy "' + name + '" created!');
+}
+
+function deleteCurrentProfile() {
+  var sel = document.getElementById('profileSelect');
+  var name = sel.value;
+  if (!name) { alert('No strategy selected.'); return; }
+  if (!confirm('Delete strategy "' + name + '"?')) return;
+  var profiles = getProfiles();
+  delete profiles[name];
+  setProfiles(profiles);
+  localStorage.removeItem('gw-strategy-active');
+  renderProfileBar();
+  showToast('Strategy "' + name + '" deleted.');
+}
+
+function exportProfile() {
+  var state = captureState();
+  state.name = document.getElementById('profileSelect').value || 'Unnamed Strategy';
+  var json = JSON.stringify(state);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(json).then(function() {
+      showToast('Strategy copied to clipboard!');
+    }).catch(function() {
+      prompt('Copy this strategy data:', json);
+    });
+  } else {
+    prompt('Copy this strategy data:', json);
+  }
+}
+
+function openImportModal() {
+  document.getElementById('importText').value = '';
+  document.getElementById('importModal').classList.add('open');
+}
+
+function closeImportModal() {
+  document.getElementById('importModal').classList.remove('open');
+}
+
+function doImport() {
+  var raw = document.getElementById('importText').value.trim();
+  if (!raw) { alert('Paste a strategy first.'); return; }
+  var data;
+  try { data = JSON.parse(raw); } catch(e) { alert('Invalid JSON.'); return; }
+  if (!data.icons && !data.drawings) { alert('Invalid strategy data.'); return; }
+  var name = data.name || 'Imported Strategy';
+  var profiles = getProfiles();
+  if (profiles[name]) {
+    var overwrite = confirm('A strategy named "' + name + '" already exists. Overwrite it?');
+    if (!overwrite) {
+      name = prompt('Enter a different name:', name + ' (copy)');
+      if (!name || !name.trim()) return;
+      name = name.trim();
+    }
+  }
+  data.name = name;
+  profiles[name] = data;
+  setProfiles(profiles);
+  localStorage.setItem('gw-strategy-active', name);
+  closeImportModal();
+  loadProfile(name);
+  showToast('Strategy "' + name + '" imported!');
+}
+
+function bindRosterDrag() {
+  document.querySelectorAll('.roster-player').forEach(function(el) {
+    el.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text/plain', this.getAttribute('data-src'));
+      e.dataTransfer.setData('application/player-data', this.getAttribute('data-player'));
+    });
+    el.addEventListener('mouseenter', function(e) {
+      var data = JSON.parse(decodeURIComponent(this.getAttribute('data-player')));
+      showTooltip(e, data);
+    });
+    el.addEventListener('mousemove', function(e) {
+      moveTooltip(e);
+    });
+    el.addEventListener('mouseleave', function() {
+      hideTooltip();
+    });
+  });
+}
+
+function showToast(msg) {
+  var existing = document.querySelector('.profile-toast');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.className = 'profile-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 2000);
+}
+
+function initProfiles() {
+  var activeName = localStorage.getItem('gw-strategy-active');
+  if (activeName) {
+    var profiles = getProfiles();
+    if (profiles[activeName]) {
+      loadProfile(activeName);
+      return;
+    }
+  }
+  renderProfileBar();
+}
+
+initProfiles();
 </script>
+
+<div class="import-modal-overlay" id="importModal">
+  <div class="import-modal">
+    <h3>📥 IMPORT STRATEGY</h3>
+    <p style="color:#667799;font-size:10px;text-align:center;margin:0 0 6px 0;">Paste an exported strategy below.</p>
+    <textarea id="importText" placeholder="Paste exported strategy JSON here..."></textarea>
+    <div class="modal-btns">
+      <button class="prof-btn" onclick="doImport()">✅ Import</button>
+      <button class="prof-btn del-btn" onclick="closeImportModal()">✕ Cancel</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
