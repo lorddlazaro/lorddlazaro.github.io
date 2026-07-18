@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GvG War Stats — Aethersea</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+
+/* TOP BAR */
+.top-bar {
+  width: 100%; background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc; padding: 8px 15px;
+  display: flex; align-items: center; gap: 12px; z-index: 100; position: relative;
+}
+.top-bar h1 { font-size: 16px; color: #66ccff; text-shadow: 2px 2px 0 #003366; }
+.top-bar .subtitle { font-size: 10px; color: #99ccee; }
+.back-link {
+  color: #66ccff; text-decoration: none; font-size: 11px;
+  padding: 4px 10px; background: linear-gradient(180deg, #003366, #001a33);
+  border: 2px outset #3399cc; cursor: pointer; white-space: nowrap;
+}
+.back-link:hover { background: linear-gradient(180deg, #004488, #002244); }
+
+/* MAIN CONTAINER */
+.container {
+  width: 100%; max-width: 1100px; padding: 15px;
+  display: flex; flex-wrap: wrap; gap: 12px;
+}
+.col-left { flex: 1 1 320px; display: flex; flex-direction: column; gap: 12px; }
+.col-right { flex: 1 1 500px; display: flex; flex-direction: column; gap: 12px; }
+
+/* PANELS */
+.panel {
+  background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
+  border: 2px inset #336699; padding: 12px 14px;
+}
+.panel-title {
+  font-size: 12px; font-weight: bold; color: #66ccff;
+  border-bottom: 1px solid #333366; padding-bottom: 4px;
+  letter-spacing: 2px; margin-bottom: 8px;
+}
+
+/* UPLOAD ZONE */
+.upload-zone {
+  border: 3px dashed #334466; border-radius: 8px;
+  padding: 30px 20px; text-align: center; cursor: pointer;
+  transition: all 0.3s; background: rgba(0,0,0,0.2);
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: #66ccff; background: rgba(0,50,100,0.2);
+}
+.upload-zone .icon { font-size: 36px; margin-bottom: 8px; }
+.upload-zone .label { font-size: 13px; color: #88aacc; }
+.upload-zone .hint { font-size: 10px; color: #556677; margin-top: 4px; }
+.upload-zone input[type="file"] { display: none; }
+
+/* IMAGE QUEUE */
+.image-queue { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+.image-queue::-webkit-scrollbar { width: 6px; }
+.image-queue::-webkit-scrollbar-track { background: #0a0a1a; }
+.image-queue::-webkit-scrollbar-thumb { background: #334466; border-radius: 3px; }
+.queue-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; background: rgba(0,0,0,0.3);
+  border: 1px solid #223355; border-radius: 4px;
+}
+.queue-thumb {
+  width: 40px; height: 40px; object-fit: cover; border-radius: 3px;
+  border: 1px solid #334466;
+}
+.queue-info { flex: 1; min-width: 0; }
+.queue-name { font-size: 10px; color: #88aacc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.queue-status { font-size: 9px; color: #556677; margin-top: 2px; }
+.queue-status.processing { color: #ffcc00; }
+.queue-status.done { color: #33ff66; }
+.queue-status.error { color: #ff6666; }
+.queue-bar {
+  height: 3px; background: #1a1a33; border-radius: 2px; margin-top: 3px; overflow: hidden;
+}
+.queue-bar-fill {
+  height: 100%; background: linear-gradient(90deg, #3399cc, #66ccff);
+  width: 0%; transition: width 0.2s;
+}
+.queue-bar-fill.done { background: #33cc66; width: 100%; }
+.queue-bar-fill.error { background: #cc3333; width: 100%; }
+.queue-remove {
+  background: none; border: 1px solid #663333; color: #996666;
+  font-size: 10px; padding: 2px 6px; cursor: pointer; border-radius: 3px;
+}
+.queue-remove:hover { border-color: #cc4444; color: #ff8888; }
+
+/* ACTION BUTTONS */
+.action-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.action-btn {
+  background: linear-gradient(180deg, #005588 0%, #003366 100%);
+  border: 3px outset #3399cc; color: #66ccff;
+  font-family: 'Comic Sans MS', cursive; font-size: 13px; font-weight: bold;
+  padding: 8px 18px; cursor: pointer; letter-spacing: 1px;
+}
+.action-btn:hover { background: linear-gradient(180deg, #006699 0%, #004477 100%); color: #99ddff; }
+.action-btn:active { border-style: inset; }
+.action-btn:disabled {
+  background: linear-gradient(180deg, #333 0%, #222 100%);
+  border-color: #555; color: #666; cursor: not-allowed;
+}
+.action-btn.processing {
+  border-color: #ccaa33; color: #ffcc00;
+  animation: procPulse 1s ease-in-out infinite;
+}
+@keyframes procPulse {
+  0%, 100% { box-shadow: 0 0 3px rgba(255,200,0,0.3); }
+  50% { box-shadow: 0 0 12px rgba(255,200,0,0.6); }
+}
+.action-btn.export { border-color: #33cc66; color: #66ff99; }
+.action-btn.export:hover { background: linear-gradient(180deg, #337744 0%, #225533 100%); }
+.action-btn.clear { border-color: #cc6666; color: #ff9999; }
+.action-btn.clear:hover { background: linear-gradient(180deg, #662222 0%, #441111 100%); }
+
+/* SUMMARY TABLE */
+.table-wrap {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.table-wrap::-webkit-scrollbar { height: 6px; }
+.table-wrap::-webkit-scrollbar-track { background: #0a0a1a; }
+.table-wrap::-webkit-scrollbar-thumb { background: #334466; border-radius: 3px; }
+.summary-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.summary-table th {
+  background: linear-gradient(180deg, #001a33, #002244);
+  border: 1px solid #334466; padding: 6px 10px;
+  font-size: 10px; color: #66ccff; letter-spacing: 1px;
+  cursor: pointer; white-space: nowrap; text-align: left;
+  position: sticky; top: 0; z-index: 2;
+  user-select: none;
+}
+.summary-table th:hover { background: linear-gradient(180deg, #002244, #003366); }
+.summary-table th .sort-arrow { font-size: 8px; margin-left: 3px; opacity: 0.4; }
+.summary-table th.sorted .sort-arrow { opacity: 1; color: #ffcc00; }
+.summary-table td {
+  border: 1px solid #1a2233; padding: 5px 8px;
+  font-family: 'Courier New', monospace; font-size: 11px;
+}
+.summary-table tr:nth-child(even) { background: rgba(0,0,0,0.15); }
+.summary-table tr:hover { background: rgba(0,50,100,0.2); }
+.summary-table td.name-cell {
+  font-family: 'Comic Sans MS', cursive; font-weight: bold; color: #aaccdd;
+  max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.summary-table td.best { color: #33ff66; text-shadow: 0 0 5px rgba(50,255,100,0.3); }
+.summary-table td.worst { color: #ff6666; text-shadow: 0 0 5px rgba(255,100,100,0.3); }
+.summary-table td.source-col { font-size: 9px; color: #556677; }
+.summary-table td.editable {
+  cursor: text; position: relative;
+}
+.summary-table td.editable:hover { background: rgba(100,150,200,0.1); }
+.summary-table td.editing {
+  padding: 0;
+}
+.summary-table td.editing input {
+  width: 100%; background: #0a0a2e; border: 1px solid #66ccff;
+  color: #ccddff; font-family: 'Courier New', monospace; font-size: 11px;
+  padding: 4px 6px; outline: none;
+}
+.no-data {
+  text-align: center; padding: 30px; color: #556677; font-size: 13px;
+}
+
+/* ANALYTICS */
+.analytics-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.stat-card {
+  background: rgba(0,0,0,0.3); border: 1px solid #223355;
+  border-radius: 4px; padding: 10px; text-align: center;
+}
+.stat-card .stat-label { font-size: 9px; color: #667799; letter-spacing: 1px; margin-bottom: 4px; }
+.stat-card .stat-value {
+  font-size: 20px; font-family: 'Courier New', monospace;
+  font-weight: bold; color: #66ccff;
+}
+.stat-card .stat-value.gold { color: #ffcc00; }
+.stat-card .stat-value.green { color: #33ff66; }
+.stat-card .stat-value.red { color: #ff6666; }
+.stat-card .stat-value.orange { color: #ff9944; }
+.stat-card .stat-sub { font-size: 9px; color: #556677; margin-top: 2px; }
+
+/* TOP PERFORMERS */
+.performers-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.performer-card {
+  background: rgba(0,0,0,0.3); border: 1px solid #223355;
+  border-radius: 4px; padding: 10px;
+}
+.performer-card .perf-title {
+  font-size: 9px; color: #667799; letter-spacing: 1px; margin-bottom: 6px;
+}
+.performer-card .perf-player {
+  font-size: 13px; font-weight: bold; color: #ffcc00;
+}
+.performer-card .perf-value {
+  font-size: 11px; color: #88aacc; font-family: 'Courier New', monospace;
+}
+
+/* FOOTER */
+.footer {
+  width: 100%; background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border-top: 3px outset #3399cc; padding: 8px;
+  text-align: center; font-size: 11px; color: #336699; margin-top: auto;
+}
+.footer .hearts { margin-bottom: 4px; }
+
+/* MERGE MODE TOGGLE */
+.merge-toggle {
+  display: flex; align-items: center; gap: 8px; font-size: 11px; color: #88aacc;
+}
+.merge-toggle select {
+  background: #0a0a2e; border: 2px outset #3399cc; color: #66ccff;
+  font-family: 'Comic Sans MS', cursive; font-size: 11px; padding: 3px 6px;
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+  .top-bar { flex-wrap: wrap; padding: 6px 10px; gap: 6px; }
+  .top-bar h1 { font-size: 14px; }
+  .top-bar .subtitle { font-size: 9px; }
+  .container { flex-direction: column; padding: 8px; gap: 8px; }
+  .col-left, .col-right { flex: 1 1 100%; }
+  .upload-zone { padding: 20px 12px; }
+  .upload-zone .icon { font-size: 28px; }
+  .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+  .performers-grid { grid-template-columns: 1fr; }
+  .summary-table { font-size: 11px; }
+  .summary-table th { font-size: 9px; padding: 5px 6px; }
+  .summary-table td { font-size: 10px; padding: 4px 5px; }
+}
+@media (max-width: 400px) {
+  .analytics-grid { grid-template-columns: 1fr 1fr; }
+  .stat-card .stat-value { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="jayus-calc.html">← jayus calc</a>
+  <a class="back-link" href="gvg-roster.html">⚔ GvG Roster</a>
+  <a class="back-link" href="gw-timer.html">⏱ GW Timer</a>
+  <div>
+    <h1>📊 GvG War Stats</h1>
+    <div class="subtitle">AETHERSEA — Where Winds Meet — Made by lorddy</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- LEFT COLUMN -->
+  <div class="col-left">
+    <!-- Upload -->
+    <div class="panel">
+      <div class="panel-title">📸 UPLOAD SCREENSHOTS</div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="icon">📁</div>
+        <div class="label">Drop screenshots here or click to select</div>
+        <div class="hint">PNG, JPG, WebP — multiple files supported</div>
+        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple>
+      </div>
+    </div>
+
+    <!-- Queue -->
+    <div class="panel" id="queuePanel" style="display:none;">
+      <div class="panel-title">📋 QUEUE</div>
+      <div class="image-queue" id="imageQueue"></div>
+      <div style="margin-top:8px;">
+        <div class="action-bar">
+          <button class="action-btn" id="processBtn" onclick="processAll()" disabled>▶ Process All</button>
+          <button class="action-btn clear" onclick="clearAll()">✕ Clear All</button>
+        </div>
+        <div id="globalProgress" style="display:none;margin-top:8px;">
+          <div style="font-size:10px;color:#667799;margin-bottom:3px;" id="globalProgressLabel">Processing...</div>
+          <div class="queue-bar"><div class="queue-bar-fill" id="globalBar"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="panel" id="settingsPanel" style="display:none;">
+      <div class="panel-title">⚙ OPTIONS</div>
+      <div class="merge-toggle">
+        <span>Duplicate players:</span>
+        <select id="mergeMode" onchange="refreshTable()">
+          <option value="sum">Sum values</option>
+          <option value="avg">Average values</option>
+          <option value="latest">Keep latest</option>
+          <option value="keep">Keep first</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col-right">
+    <!-- Table -->
+    <div class="panel">
+      <div class="panel-title">📊 SUMMARY TABLE <span id="tableCount" style="font-weight:normal;font-size:10px;color:#556677;"></span></div>
+      <div class="table-wrap" id="tableWrap">
+        <div class="no-data">Upload screenshots to see stats</div>
+      </div>
+    </div>
+
+    <!-- Analytics -->
+    <div class="panel" id="analyticsPanel" style="display:none;">
+      <div class="panel-title">📈 ANALYTICS</div>
+      <div class="analytics-grid" id="analyticsGrid"></div>
+    </div>
+
+    <!-- Top Performers -->
+    <div class="panel" id="performersPanel" style="display:none;">
+      <div class="panel-title">🏆 TOP PERFORMERS</div>
+      <div class="performers-grid" id="performersGrid"></div>
+    </div>
+
+    <!-- Export -->
+    <div class="panel" id="exportPanel" style="display:none;">
+      <div class="action-bar">
+        <button class="action-btn export" onclick="exportCSV()">📥 Export CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="hearts">⚔ ⚔ ⚔</div>
+  <p>AETHERSEA — GvG War Stats</p>
+  <p style="margin-top:4px;">Made by lorddy</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+var allRows = [];
+var imageFiles = [];
+var isProcessing = false;
+
+// --- Upload Zone ---
+var uploadZone = document.getElementById('uploadZone');
+var fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', function() { uploadZone.classList.remove('dragover'); });
+uploadZone.addEventListener('drop', function(e) {
+  e.preventDefault(); uploadZone.classList.remove('dragover');
+  addFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', function() { addFiles(fileInput.files); fileInput.value = ''; });
+
+function addFiles(files) {
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (!f.type.match(/^image\/(png|jpeg|webp)$/)) continue;
+    imageFiles.push({ file: f, status: 'queued', progress: 0, rows: [] });
+  }
+  renderQueue();
+}
+
+function renderQueue() {
+  var panel = document.getElementById('queuePanel');
+  var queue = document.getElementById('imageQueue');
+  var btn = document.getElementById('processBtn');
+  if (imageFiles.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  btn.disabled = isProcessing || imageFiles.length === 0;
+  var html = '';
+  for (var i = 0; i < imageFiles.length; i++) {
+    var item = imageFiles[i];
+    var thumb = item.dataUrl || '';
+    var statusClass = item.status === 'processing' ? 'processing' : item.status === 'done' ? 'done' : item.status === 'error' ? 'error' : '';
+    var statusText = item.status === 'queued' ? 'Queued' : item.status === 'processing' ? 'OCR Processing... ' + item.progress + '%' : item.status === 'done' ? 'Done — ' + item.rows.length + ' players' : 'Error';
+    var barClass = item.status === 'done' ? 'done' : item.status === 'error' ? 'error' : '';
+    html += '<div class="queue-item">' +
+      (thumb ? '<img class="queue-thumb" src="' + thumb + '">' : '') +
+      '<div class="queue-info"><div class="queue-name">' + item.file.name + '</div>' +
+      '<div class="queue-status ' + statusClass + '">' + statusText + '</div>' +
+      '<div class="queue-bar"><div class="queue-bar-fill ' + barClass + '" style="width:' + item.progress + '%"></div></div>' +
+      '</div>' +
+      (item.status === 'queued' ? '<button class="queue-remove" onclick="removeImage(' + i + ')">✕</button>' : '') +
+      '</div>';
+  }
+  queue.innerHTML = html;
+}
+
+function removeImage(i) {
+  imageFiles.splice(i, 1);
+  renderQueue();
+}
+
+function clearAll() {
+  if (isProcessing) return;
+  imageFiles = [];
+  allRows = [];
+  renderQueue();
+  refreshTable();
+  localStorage.removeItem('gvg-stats-data');
+}
+
+// --- OCR Processing ---
+function processAll() {
+  if (isProcessing) return;
+  isProcessing = true;
+  var btn = document.getElementById('processBtn');
+  btn.disabled = true; btn.classList.add('processing'); btn.textContent = '⏳ Processing...';
+  document.getElementById('globalProgress').style.display = '';
+  var idx = 0;
+  function next() {
+    if (idx >= imageFiles.length) {
+      isProcessing = false;
+      btn.disabled = false; btn.classList.remove('processing'); btn.textContent = '▶ Process All';
+      document.getElementById('globalProgress').style.display = 'none';
+      mergeAndDisplay();
+      return;
+    }
+    var item = imageFiles[idx];
+    if (item.status === 'done') { idx++; next(); return; }
+    item.status = 'processing';
+    renderQueue();
+    document.getElementById('globalProgressLabel').textContent = 'Processing ' + (idx + 1) + '/' + imageFiles.length + ': ' + item.file.name;
+    document.getElementById('globalBar').style.width = Math.round((idx / imageFiles.length) * 100) + '%';
+    processImage(item, function() {
+      idx++; renderQueue(); next();
+    });
+  }
+  next();
+}
+
+function processImage(item, callback) {
+  if (!item.dataUrl) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      item.dataUrl = e.target.result;
+      runTesseract(item, callback);
+    };
+    reader.readAsDataURL(item.file);
+  } else {
+    runTesseract(item, callback);
+  }
+}
+
+function runTesseract(item, callback) {
+  Tesseract.recognize(item.file, 'eng', {
+    logger: function(m) {
+      if (m.status === 'recognizing text') {
+        item.progress = Math.round(m.progress * 100);
+        renderQueue();
+      }
+    }
+  }).then(function(result) {
+    item.status = 'done';
+    item.progress = 100;
+    item.ocrText = result.data.text;
+    item.rows = parseOCRText(result.data.text, item.file.name);
+    renderQueue();
+    callback();
+  }).catch(function(err) {
+    item.status = 'error';
+    item.errorMsg = err.message || 'OCR failed';
+    renderQueue();
+    callback();
+  });
+}
+
+// --- Text Parsing ---
+function parseOCRText(text, sourceName) {
+  var lines = text.split('\n');
+  var rows = [];
+  var headerIdx = -1;
+  for (var i = 0; i < lines.length; i++) {
+    var lower = lines[i].toLowerCase();
+    if ((lower.indexOf('player') >= 0 && lower.indexOf('kill') >= 0) ||
+        (lower.indexOf('player') >= 0 && lower.indexOf('assists') >= 0) ||
+        (lower.indexOf('player') >= 0 && lower.indexOf('damage') >= 0)) {
+      headerIdx = i; break;
+    }
+  }
+  var startLine = headerIdx >= 0 ? headerIdx + 1 : 0;
+  for (var i = startLine; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
+    var row = parseLine(line, sourceName);
+    if (row) rows.push(row);
+  }
+  return rows;
+}
+
+function parseLine(line, sourceName) {
+  var nums = [];
+  var parts = line.split(/[\t\s]{2,}/);
+  if (parts.length < 3) {
+    parts = line.split(/\s+/);
+  }
+  if (parts.length < 3) return null;
+  var nameParts = [];
+  var numStart = -1;
+  for (var i = 0; i < parts.length; i++) {
+    var cleaned = parts[i].replace(/,/g, '').replace(/\./g, '');
+    if (/^\d+$/.test(cleaned)) {
+      if (numStart === -1) numStart = i;
+      nums.push(parseInt(cleaned, 10));
+    } else if (numStart === -1) {
+      nameParts.push(parts[i]);
+    }
+  }
+  if (nums.length < 5 || nameParts.length === 0) return null;
+  var name = nameParts.join(' ').trim();
+  if (!name || name.length < 2) return null;
+  var skipWords = ['player', 'name', 'total', 'team', 'sum', 'avg', 'average', 'kills', 'deaths', 'assists'];
+  if (skipWords.indexOf(name.toLowerCase()) >= 0) return null;
+  var pad = [0, 0, 0, 0, 0, 0, 0, 0];
+  for (var i = 0; i < Math.min(nums.length, 8); i++) pad[i] = nums[i];
+  return {
+    player: name,
+    kills: pad[0],
+    assists: pad[1],
+    deaths: pad[2],
+    funcoin: pad[3],
+    damage: pad[4],
+    tank: pad[5],
+    heal: pad[6],
+    siegeDamage: pad[7],
+    source: sourceName
+  };
+}
+
+// --- Merge & Display ---
+function mergeAndDisplay() {
+  var merged = {};
+  var order = [];
+  for (var i = 0; i < allRows.length; i++) merged = {};
+  allRows = [];
+  for (var i = 0; i < imageFiles.length; i++) {
+    for (var j = 0; j < imageFiles[i].rows.length; j++) {
+      allRows.push(imageFiles[i].rows[j]);
+    }
+  }
+  var mode = document.getElementById('mergeMode').value;
+  for (var i = 0; i < allRows.length; i++) {
+    var r = allRows[i];
+    var key = r.player.toLowerCase();
+    if (!merged[key]) {
+      merged[key] = Object.assign({}, r);
+      merged[key]._count = 1;
+      order.push(key);
+    } else {
+      var m = merged[key];
+      m._count++;
+      if (mode === 'sum') {
+        m.kills += r.kills; m.assists += r.assists; m.deaths += r.deaths;
+        m.funcoin += r.funcoin; m.damage += r.damage; m.tank += r.tank;
+        m.heal += r.heal; m.siegeDamage += r.siegeDamage;
+      } else if (mode === 'avg') {
+        m.kills += r.kills; m.assists += r.assists; m.deaths += r.deaths;
+        m.funcoin += r.funcoin; m.damage += r.damage; m.tank += r.tank;
+        m.heal += r.heal; m.siegeDamage += r.siegeDamage;
+      } else if (mode === 'latest') {
+        Object.assign(m, r);
+      }
+    }
+  }
+  if (mode === 'avg') {
+    for (var k in merged) {
+      var m = merged[k];
+      if (m._count > 1) {
+        m.kills = Math.round(m.kills / m._count);
+        m.assists = Math.round(m.assists / m._count);
+        m.deaths = Math.round(m.deaths / m._count);
+        m.funcoin = Math.round(m.funcoin / m._count);
+        m.damage = Math.round(m.damage / m._count);
+        m.tank = Math.round(m.tank / m._count);
+        m.heal = Math.round(m.heal / m._count);
+        m.siegeDamage = Math.round(m.siegeDamage / m._count);
+      }
+    }
+  }
+  var mergedRows = [];
+  for (var i = 0; i < order.length; i++) mergedRows.push(merged[order[i]]);
+  refreshTableWithData(mergedRows);
+  saveToStorage(mergedRows);
+}
+
+var currentSort = { col: null, asc: true };
+var displayRows = [];
+
+function refreshTable() { mergeAndDisplay(); }
+function refreshTableWithData(rows) {
+  displayRows = rows;
+  renderSummaryTable();
+  renderAnalytics(rows);
+  renderPerformers(rows);
+  var ep = document.getElementById('exportPanel');
+  var sp = document.getElementById('settingsPanel');
+  ep.style.display = rows.length ? '' : 'none';
+  sp.style.display = rows.length ? '' : 'none';
+}
+
+function sortTable(col) {
+  if (currentSort.col === col) currentSort.asc = !currentSort.asc;
+  else { currentSort.col = col; currentSort.asc = true; }
+  displayRows.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (typeof va === 'string') return currentSort.asc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return currentSort.asc ? va - vb : vb - va;
+  });
+  renderSummaryTable();
+}
+
+var columns = [
+  { key: 'player', label: 'Player', fmt: null },
+  { key: 'kills', label: 'Kills', fmt: numFmt },
+  { key: 'assists', label: 'Assists', fmt: numFmt },
+  { key: 'deaths', label: 'Deaths', fmt: numFmt },
+  { key: 'funcoin', label: 'FunCoin', fmt: numFmt },
+  { key: 'damage', label: 'Damage', fmt: numFmt },
+  { key: 'tank', label: 'Tank', fmt: numFmt },
+  { key: 'heal', label: 'Heal', fmt: numFmt },
+  { key: 'siegeDamage', label: 'Siege', fmt: numFmt },
+];
+var numCols = ['kills','assists','deaths','funcoin','damage','tank','heal','siegeDamage'];
+
+function numFmt(n) { return n.toLocaleString(); }
+
+function renderSummaryTable() {
+  var wrap = document.getElementById('tableWrap');
+  var count = document.getElementById('tableCount');
+  if (!displayRows.length) {
+    wrap.innerHTML = '<div class="no-data">Upload screenshots to see stats</div>';
+    count.textContent = '';
+    return;
+  }
+  count.textContent = '(' + displayRows.length + ' players)';
+  // Find best/worst per numeric col
+  var stats = {};
+  for (var c = 0; c < numCols.length; c++) {
+    var col = numCols[c];
+    var vals = displayRows.map(function(r) { return r[col]; });
+    stats[col] = { max: Math.max.apply(null, vals), min: Math.min.apply(null, vals) };
+  }
+  var html = '<table class="summary-table"><thead><tr>';
+  for (var c = 0; c < columns.length; c++) {
+    var col = columns[c];
+    var sorted = currentSort.col === col.key;
+    var arrow = sorted ? (currentSort.asc ? '▲' : '▼') : '▼';
+    html += '<th class="' + (sorted ? 'sorted' : '') + '" onclick="sortTable(\'' + col.key + '\')">' +
+      col.label + ' <span class="sort-arrow">' + arrow + '</span></th>';
+  }
+  html += '</tr></thead><tbody>';
+  for (var i = 0; i < displayRows.length; i++) {
+    var r = displayRows[i];
+    html += '<tr>';
+    for (var c = 0; c < columns.length; c++) {
+      var col = columns[c];
+      var val = r[col.key];
+      var cls = '';
+      if (col.key === 'player') cls = 'name-cell';
+      else if (stats[col.key] && val === stats[col.key].max && val > 0) cls = 'best';
+      else if (stats[col.key] && val === stats[col.key].min && val < 0) cls = 'worst';
+      var display = col.fmt ? col.fmt(val) : val;
+      if (col.key === 'player') {
+        html += '<td class="' + cls + '" title="' + escapeHtml(val) + '">' + escapeHtml(display) + '</td>';
+      } else {
+        html += '<td class="editable ' + cls + '" onclick="editCell(this,\'' + r.player + '\',\'' + col.key + '\')">' + display + '</td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function editCell(td, playerName, colKey) {
+  if (td.classList.contains('editing')) return;
+  var currentVal = 0;
+  for (var i = 0; i < displayRows.length; i++) {
+    if (displayRows[i].player === playerName) { currentVal = displayRows[i][colKey]; break; }
+  }
+  td.classList.add('editing');
+  td.innerHTML = '<input type="number" value="' + currentVal + '">';
+  var input = td.querySelector('input');
+  input.focus(); input.select();
+  function finish() {
+    var newVal = parseInt(input.value, 10) || 0;
+    for (var i = 0; i < displayRows.length; i++) {
+      if (displayRows[i].player === playerName) { displayRows[i][colKey] = newVal; break; }
+    }
+    for (var i = 0; i < allRows.length; i++) {
+      if (allRows[i].player === playerName) { allRows[i][colKey] = newVal; break; }
+    }
+    td.classList.remove('editing');
+    renderSummaryTable();
+    renderAnalytics(displayRows);
+    renderPerformers(displayRows);
+    saveToStorage(displayRows);
+  }
+  input.addEventListener('blur', finish);
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') finish(); });
+}
+
+// --- Analytics ---
+function renderAnalytics(rows) {
+  var panel = document.getElementById('analyticsPanel');
+  if (!rows.length) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  var totals = { kills: 0, assists: 0, deaths: 0, funcoin: 0, damage: 0, tank: 0, heal: 0, siegeDamage: 0 };
+  for (var i = 0; i < rows.length; i++) {
+    for (var k in totals) totals[k] += rows[i][k];
+  }
+  var n = rows.length;
+  var avgKDA = totals.deaths > 0 ? ((totals.kills + totals.assists) / totals.deaths).toFixed(2) : '∞';
+  var avgKD = totals.deaths > 0 ? (totals.kills / totals.deaths).toFixed(2) : '∞';
+  var avgFCperDeath = totals.deaths > 0 ? Math.round(totals.funcoin / totals.deaths) : 0;
+  var html = '';
+  html += statCard('TOTALS', '', '');
+  html += statCard('Players', n, '');
+  html += statCard('Kills', numFmt(totals.kills), '');
+  html += statCard('Assists', numFmt(totals.assists), '');
+  html += statCard('Deaths', numFmt(totals.deaths), '');
+  html += statCard('FunCoin', numFmt(totals.funcoin), 'gold');
+  html += statCard('Damage', numFmt(totals.damage), '');
+  html += statCard('Heal', numFmt(totals.heal), 'green');
+  html += statCard('Siege', numFmt(totals.siegeDamage), 'orange');
+  html += '<div style="grid-column:1/-1;border-top:1px solid #223355;margin:4px 0;"></div>';
+  html += statCard('AVG', '', '');
+  html += statCard('Avg K/D', avgKD, 'green');
+  html += statCard('Avg KDA', avgKDA, 'green');
+  html += statCard('Avg Kills', (totals.kills / n).toFixed(1), '');
+  html += statCard('Avg Deaths', (totals.deaths / n).toFixed(1), '');
+  html += statCard('Avg Damage', numFmt(Math.round(totals.damage / n)), '');
+  html += statCard('Avg Heal', numFmt(Math.round(totals.heal / n)), 'green');
+  html += statCard('Avg Siege', numFmt(Math.round(totals.siegeDamage / n)), 'orange');
+  html += statCard('FC/Death', numFmt(avgFCperDeath), 'gold');
+  document.getElementById('analyticsGrid').innerHTML = html;
+}
+
+function statCard(label, value, colorClass) {
+  return '<div class="stat-card"><div class="stat-label">' + label + '</div>' +
+    '<div class="stat-value ' + (colorClass || '') + '">' + value + '</div></div>';
+}
+
+// --- Top Performers ---
+function renderPerformers(rows) {
+  var panel = document.getElementById('performersPanel');
+  if (!rows.length) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  var items = [
+    { title: '🏆 HIGHEST K/D', col: 'kills', calc: function(r) { return r.deaths > 0 ? (r.kills / r.deaths) : r.kills * 100; }, fmt: function(v) { return v === Infinity ? '∞' : v.toFixed(2); } },
+    { title: '⚔ MOST KILLS', col: 'kills', calc: function(r) { return r.kills; }, fmt: function(v) { return numFmt(v); } },
+    { title: '💀 LOWEST DEATHS', col: 'deaths', calc: function(r) { return 10000 - r.deaths; }, fmt: function(v, r) { return numFmt(r.deaths); }, invert: true },
+    { title: '💥 MOST DAMAGE', col: 'damage', calc: function(r) { return r.damage; }, fmt: function(v) { return numFmt(v); } },
+    { title: '💚 MOST HEALING', col: 'heal', calc: function(r) { return r.heal; }, fmt: function(v) { return numFmt(v); } },
+    { title: '🏰 MOST SIEGE', col: 'siegeDamage', calc: function(r) { return r.siegeDamage; }, fmt: function(v) { return numFmt(v); } },
+    { title: '🪙 MOST FUNCOIN', col: 'funcoin', calc: function(r) { return r.funcoin; }, fmt: function(v) { return numFmt(v); } },
+    { title: '🤝 MOST ASSISTS', col: 'assists', calc: function(r) { return r.assists; }, fmt: function(v) { return numFmt(v); } },
+  ];
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    var it = items[i];
+    var best = null, bestVal = -Infinity;
+    for (var j = 0; j < rows.length; j++) {
+      var v = it.calc(rows[j]);
+      if (v > bestVal) { bestVal = v; best = rows[j]; }
+    }
+    if (best) {
+      html += '<div class="performer-card"><div class="perf-title">' + it.title + '</div>' +
+        '<div class="perf-player">' + escapeHtml(best.player) + '</div>' +
+        '<div class="perf-value">' + it.fmt(bestVal, best) + '</div></div>';
+    }
+  }
+  document.getElementById('performersGrid').innerHTML = html;
+}
+
+// --- Export ---
+function exportCSV() {
+  if (!displayRows.length) return;
+  var headers = ['Player','Kills','Assists','Deaths','FunCoin','Damage','Tank','Heal','SiegeDamage'];
+  var csv = headers.join(',') + '\n';
+  for (var i = 0; i < displayRows.length; i++) {
+    var r = displayRows[i];
+    csv += '"' + r.player.replace(/"/g,'""') + '",' +
+      [r.kills,r.assists,r.deaths,r.funcoin,r.damage,r.tank,r.heal,r.siegeDamage].join(',') + '\n';
+  }
+  // Analytics summary
+  csv += '\n--- ANALYTICS ---\n';
+  var totals = { kills:0, assists:0, deaths:0, funcoin:0, damage:0, tank:0, heal:0, siegeDamage:0 };
+  for (var i = 0; i < displayRows.length; i++) {
+    for (var k in totals) totals[k] += displayRows[i][k];
+  }
+  csv += 'Total Players,' + displayRows.length + '\n';
+  csv += 'Total Kills,' + totals.kills + '\n';
+  csv += 'Total Deaths,' + totals.deaths + '\n';
+  csv += 'Total Damage,' + totals.damage + '\n';
+  csv += 'Total Heal,' + totals.heal + '\n';
+  csv += 'Total Siege,' + totals.siegeDamage + '\n';
+  csv += 'Avg K/D,' + (totals.deaths > 0 ? (totals.kills/totals.deaths).toFixed(2) : '∞') + '\n';
+  csv += 'Avg KDA,' + (totals.deaths > 0 ? ((totals.kills+totals.assists)/totals.deaths).toFixed(2) : '∞') + '\n';
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gvg-stats-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// --- localStorage ---
+function saveToStorage(rows) {
+  try { localStorage.setItem('gvg-stats-data', JSON.stringify(rows)); } catch(e) {}
+}
+function loadFromStorage() {
+  try {
+    var d = localStorage.getItem('gvg-stats-data');
+    if (d) {
+      displayRows = JSON.parse(d);
+      if (displayRows.length) {
+        refreshTableWithData(displayRows);
+      }
+    }
+  } catch(e) {}
+}
+loadFromStorage();
+</script>
+</body>
+</html>

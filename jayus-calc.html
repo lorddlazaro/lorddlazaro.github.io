@@ -1388,7 +1388,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
   color: #00ff00;
   font-size: 10px;
   white-space: nowrap;
-  animation: musicScroll 10s linear infinite;
+  animation: musicScroll 20s linear infinite;
   display: inline-block;
   line-height: 20px;
 }
@@ -1787,6 +1787,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
         <a href="gvg-roster.html">GvG Roster Generator</a>
         <a href="gw-strategy.html">GW Strategy Planner</a>
         <a href="gw-timer.html">GW Timer</a>
+        <a href="gvg-stats.html">GvG War Stats</a>
       </div>
     </div>
     <div class="sidebar-box">
@@ -2809,6 +2810,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
       <button class="ctrl-btn" onclick="musicAction('play')" id="playBtn" title="Play">▶</button>
       <button class="ctrl-btn" onclick="musicAction('pause')" id="pauseBtn" title="Pause">⏸</button>
       <button class="ctrl-btn" onclick="musicAction('stop')" title="Stop">⏹</button>
+      <button class="ctrl-btn" onclick="musicAction('shuffle')" title="Shuffle">🔀</button>
       <button class="ctrl-btn" onclick="musicAction('next')" title="Next">⏭</button>
     </div>
     <div class="music-volume">
@@ -3782,7 +3784,8 @@ const playlist = [
   { src: 'media/songs/Jet Set Radio Future - Funky Dealer.mp3', title: 'Funky Dealer' },
   { src: 'media/songs/Jason Derulo - Whatcha Say [Official Music Video].mp3', title: 'Whatcha Say' },
   { src: 'media/songs/HEYYEYAAEYAAAEYAEYAA.mp3', title: 'He-Man - What\'s Up' },
-  { src: 'media/songs/Aladdin - Friend Like Me [High Quality].mp3', title: 'Friend Like Me' }
+  { src: 'media/songs/Aladdin - Friend Like Me [High Quality].mp3', title: 'Friend Like Me' },
+  { src: 'media/songs/Storm, Earth and Fire.mp3', title: 'Storm, Earth and Fire' }
 ];
 let currentTrack = 0;
 
@@ -3846,6 +3849,12 @@ function musicAction(action) {
       break;
     case 'next':
       loadTrack(currentTrack + 1);
+      musicAction('play');
+      break;
+    case 'shuffle':
+      var next;
+      do { next = Math.floor(Math.random() * playlist.length); } while (next === currentTrack && playlist.length > 1);
+      loadTrack(next);
       musicAction('play');
       break;
   }
