@@ -236,6 +236,32 @@ body {
 }
 
 /* MOBILE */
+
+/* CROP TOOL */
+.crop-canvas-wrap {
+  position: relative; display: inline-block; width: 100%;
+  user-select: none; touch-action: none;
+}
+.crop-overlay-left, .crop-overlay-right {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(255,0,0,0.15);
+  pointer-events: none; transition: width 0.05s;
+}
+.crop-overlay-left { left: 0; width: 8%; }
+.crop-overlay-right { right: 0; width: 0%; }
+.crop-line {
+  position: absolute; top: 0; bottom: 0; width: 3px;
+  background: #ff3333; cursor: ew-resize; z-index: 10;
+}
+.crop-line-left { left: 8%; }
+.crop-line-right { right: 0%; }
+.crop-handle {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: #ff3333; color: #fff; font-size: 8px; padding: 2px 3px;
+  border-radius: 3px; white-space: nowrap; pointer-events: none;
+}
+
+/* MOBILE */
 @media (max-width: 700px) {
   .top-bar { flex-wrap: wrap; padding: 6px 10px; gap: 6px; }
   .top-bar h1 { font-size: 14px; }
@@ -310,6 +336,24 @@ body {
           <option value="keep">Keep first</option>
         </select>
       </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:11px;color:#88aacc;margin-bottom:4px;">Drag the red lines to crop profile pictures & UI icons:</div>
+        <div class="crop-canvas-wrap" id="cropWrap">
+          <canvas id="cropPreview" style="width:100%;display:block;border:1px solid #223355;border-radius:3px;"></canvas>
+          <div class="crop-overlay-left" id="cropOverlayLeft"></div>
+          <div class="crop-overlay-right" id="cropOverlayRight"></div>
+          <div class="crop-line crop-line-left" id="cropLineLeft">
+            <div class="crop-handle">◄►</div>
+          </div>
+          <div class="crop-line crop-line-right" id="cropLineRight">
+            <div class="crop-handle">◄►</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;">
+          <span style="font-size:10px;color:#ffcc00;">Left: <span id="cropLeftVal">8</span>%</span>
+          <span style="font-size:10px;color:#ffcc00;">Right: <span id="cropRightVal">0</span>%</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -369,12 +413,31 @@ uploadZone.addEventListener('drop', function(e) {
 fileInput.addEventListener('change', function() { addFiles(fileInput.files); fileInput.value = ''; });
 
 function addFiles(files) {
+  var hadNew = false;
   for (var i = 0; i < files.length; i++) {
     var f = files[i];
     if (!f.type.match(/^image\/(png|jpeg|webp)$/)) continue;
-    imageFiles.push({ file: f, status: 'queued', progress: 0, rows: [] });
+    imageFiles.push({ file: f, status: 'queued', progress: 0, rows: [], cropLeft: null, cropRight: null });
+    hadNew = true;
   }
-  renderQueue();
+  if (hadNew) {
+    renderQueue();
+    if (cropPreviewIdx < 0) {
+      for (var i = 0; i < imageFiles.length; i++) {
+        if (imageFiles[i].status === 'queued' && !imageFiles[i].dataUrl) {
+          (function(idx) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              imageFiles[idx].dataUrl = e.target.result;
+              selectCropImage(idx);
+            };
+            reader.readAsDataURL(imageFiles[idx].file);
+          })(i);
+          break;
+        }
+      }
+    }
+  }
 }
 
 function renderQueue() {
@@ -383,18 +446,24 @@ function renderQueue() {
   var btn = document.getElementById('processBtn');
   if (imageFiles.length === 0) { panel.style.display = 'none'; return; }
   panel.style.display = '';
+  document.getElementById('settingsPanel').style.display = '';
   btn.disabled = isProcessing || imageFiles.length === 0;
   var html = '';
   for (var i = 0; i < imageFiles.length; i++) {
     var item = imageFiles[i];
     var thumb = item.dataUrl || '';
     var statusClass = item.status === 'processing' ? 'processing' : item.status === 'done' ? 'done' : item.status === 'error' ? 'error' : '';
-    var statusText = item.status === 'queued' ? 'Queued' : item.status === 'processing' ? 'OCR Processing... ' + item.progress + '%' : item.status === 'done' ? 'Done — ' + item.rows.length + ' players' : 'Error';
+    var statusText = item.status === 'queued' ? 'Queued' : item.status === 'processing' ? (item._statusText || ('OCR Processing... ' + item.progress + '%')) : item.status === 'done' ? 'Done — ' + item.rows.length + ' players' : 'Error';
+    var cl = item.cropLeft != null ? item.cropLeft : '—';
+    var cropInfo = item.status === 'queued' ? '<div style="font-size:8px;color:#445566;margin-top:2px;">Crop: L' + cl + '%</div>' : '';
     var barClass = item.status === 'done' ? 'done' : item.status === 'error' ? 'error' : '';
-    html += '<div class="queue-item">' +
-      (thumb ? '<img class="queue-thumb" src="' + thumb + '">' : '') +
+    var isActive = i === cropPreviewIdx;
+    var thumbClick = item.dataUrl && item.status === 'queued' ? ' onclick="selectCropImage(' + i + ')" style="cursor:pointer;" title="Click to preview & adjust crop"' : '';
+    var thumbStyle = isActive ? ' style="border-color:#66ccff;box-shadow:0 0 6px rgba(100,200,255,0.4);"' : '';
+    html += '<div class="queue-item" style="' + (isActive ? 'background:rgba(0,40,80,0.3);' : '') + '">' +
+      (thumb ? '<img class="queue-thumb" src="' + thumb + '"' + thumbClick + thumbStyle + '>' : '') +
       '<div class="queue-info"><div class="queue-name">' + item.file.name + '</div>' +
-      '<div class="queue-status ' + statusClass + '">' + statusText + '</div>' +
+      '<div class="queue-status ' + statusClass + '">' + statusText + '</div>' + cropInfo +
       '<div class="queue-bar"><div class="queue-bar-fill ' + barClass + '" style="width:' + item.progress + '%"></div></div>' +
       '</div>' +
       (item.status === 'queued' ? '<button class="queue-remove" onclick="removeImage(' + i + ')">✕</button>' : '') +
@@ -412,6 +481,9 @@ function clearAll() {
   if (isProcessing) return;
   imageFiles = [];
   allRows = [];
+  cropPreviewIdx = -1;
+  cropLeftPct = 8;
+  cropRightPct = 0;
   renderQueue();
   refreshTable();
   localStorage.removeItem('gvg-stats-data');
@@ -436,6 +508,8 @@ function processAll() {
     var item = imageFiles[idx];
     if (item.status === 'done') { idx++; next(); return; }
     item.status = 'processing';
+    item.progress = 0;
+    item._statusText = 'Downloading language data (first time only)...';
     renderQueue();
     document.getElementById('globalProgressLabel').textContent = 'Processing ' + (idx + 1) + '/' + imageFiles.length + ': ' + item.file.name;
     document.getElementById('globalBar').style.width = Math.round((idx / imageFiles.length) * 100) + '%';
@@ -447,23 +521,152 @@ function processAll() {
 }
 
 function processImage(item, callback) {
-  if (!item.dataUrl) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      item.dataUrl = e.target.result;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    item.dataUrl = e.target.result;
+    var cl = item.cropLeft != null ? item.cropLeft : 0;
+    var cr = item.cropRight != null ? item.cropRight : 0;
+    if (cl > 0 || cr > 0) {
+      cropImage(item.dataUrl, cl, cr, function(croppedBlob) {
+        item.croppedBlob = croppedBlob;
+        runTesseract(item, callback);
+      });
+    } else {
       runTesseract(item, callback);
-    };
-    reader.readAsDataURL(item.file);
-  } else {
-    runTesseract(item, callback);
+    }
+  };
+  reader.readAsDataURL(item.file);
+}
+
+var cropLeftPct = 8, cropRightPct = 0;
+var cropPreviewIdx = -1;
+
+function getGlobalCropLeft() { return cropLeftPct; }
+function getGlobalCropRight() { return cropRightPct; }
+function updateGlobalCrop() {}
+
+function selectCropImage(idx) {
+  cropPreviewIdx = idx;
+  var item = imageFiles[idx];
+  cropLeftPct = item.cropLeft != null ? item.cropLeft : 8;
+  cropRightPct = item.cropRight != null ? item.cropRight : 0;
+  updateCropVisuals();
+  updateCropPreview();
+}
+
+function updateCropVisuals() {
+  var lineL = document.getElementById('cropLineLeft');
+  var lineR = document.getElementById('cropLineRight');
+  var overlayL = document.getElementById('cropOverlayLeft');
+  var overlayR = document.getElementById('cropOverlayRight');
+  lineL.style.left = cropLeftPct + '%';
+  overlayL.style.width = cropLeftPct + '%';
+  lineR.style.right = cropRightPct + '%';
+  overlayR.style.width = cropRightPct + '%';
+  document.getElementById('cropLeftVal').textContent = cropLeftPct;
+  document.getElementById('cropRightVal').textContent = cropRightPct;
+}
+
+function initCropDrag() {
+  var wrap = document.getElementById('cropWrap');
+  var lineL = document.getElementById('cropLineLeft');
+  var lineR = document.getElementById('cropLineRight');
+  var overlayL = document.getElementById('cropOverlayLeft');
+  var overlayR = document.getElementById('cropOverlayRight');
+
+  function startDrag(side, e) {
+    e.preventDefault();
+    var wrapRect = wrap.getBoundingClientRect();
+    function onMove(ev) {
+      var cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      var pct = ((cx - wrapRect.left) / wrapRect.width) * 100;
+      pct = Math.max(0, Math.min(100, pct));
+      if (side === 'left') {
+        cropLeftPct = Math.max(0, Math.min(95, Math.round(pct)));
+        if (cropLeftPct + cropRightPct > 95) cropLeftPct = 95 - cropRightPct;
+        lineL.style.left = cropLeftPct + '%';
+        overlayL.style.width = cropLeftPct + '%';
+        document.getElementById('cropLeftVal').textContent = cropLeftPct;
+      } else {
+        cropRightPct = Math.max(0, Math.min(95, Math.round(100 - pct)));
+        if (cropLeftPct + cropRightPct > 95) cropRightPct = 95 - cropLeftPct;
+        lineR.style.right = cropRightPct + '%';
+        overlayR.style.width = cropRightPct + '%';
+        document.getElementById('cropRightVal').textContent = cropRightPct;
+      }
+      if (cropPreviewIdx >= 0 && cropPreviewIdx < imageFiles.length) {
+        imageFiles[cropPreviewIdx].cropLeft = cropLeftPct;
+        imageFiles[cropPreviewIdx].cropRight = cropRightPct;
+      }
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onUp);
   }
+
+  lineL.addEventListener('mousedown', function(e) { startDrag('left', e); });
+  lineL.addEventListener('touchstart', function(e) { startDrag('left', e); }, { passive: false });
+  lineR.addEventListener('mousedown', function(e) { startDrag('right', e); });
+  lineR.addEventListener('touchstart', function(e) { startDrag('right', e); }, { passive: false });
+}
+
+function updateCropPreview() {
+  var canvas = document.getElementById('cropPreview');
+  if (cropPreviewIdx < 0 || cropPreviewIdx >= imageFiles.length) { canvas.style.display = 'none'; return; }
+  var item = imageFiles[cropPreviewIdx];
+  if (!item.dataUrl) { canvas.style.display = 'none'; return; }
+  canvas.style.display = '';
+  var img = new Image();
+  img.onload = function() {
+    var maxH = 120;
+    var scale = Math.min(1, maxH / img.height);
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  };
+  img.src = item.dataUrl;
+}
+initCropDrag();
+
+function cropImage(dataUrl, cropLeftPct, cropRightPct, callback) {
+  var img = new Image();
+  img.onload = function() {
+    var canvas = document.createElement('canvas');
+    var leftPx = Math.round(img.width * cropLeftPct / 100);
+    var rightPx = Math.round(img.width * cropRightPct / 100);
+    var newWidth = img.width - leftPx - rightPx;
+    if (newWidth < 10) { callback(null); return; }
+    canvas.width = newWidth;
+    canvas.height = img.height;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, leftPx, 0, newWidth, img.height, 0, 0, newWidth, img.height);
+    canvas.toBlob(function(blob) { callback(blob); }, 'image/png');
+  };
+  img.onerror = function() { callback(null); };
+  img.src = dataUrl;
 }
 
 function runTesseract(item, callback) {
-  Tesseract.recognize(item.file, 'eng', {
+  var src = item.croppedBlob || item.file;
+  Tesseract.recognize(src, 'eng+chi_sim+jpn+kor', {
     logger: function(m) {
       if (m.status === 'recognizing text') {
         item.progress = Math.round(m.progress * 100);
+        item._statusText = '';
+        renderQueue();
+      } else if (m.status === 'loading language traineddata') {
+        item._statusText = 'Loading language data...';
+        renderQueue();
+      } else if (m.status === 'initializing api') {
+        item._statusText = 'Initializing OCR engine...';
         renderQueue();
       }
     }
@@ -471,7 +674,11 @@ function runTesseract(item, callback) {
     item.status = 'done';
     item.progress = 100;
     item.ocrText = result.data.text;
-    item.rows = parseOCRText(result.data.text, item.file.name);
+    if (result.data.words && result.data.words.length > 0) {
+      item.rows = parseOCRWords(result.data.words, item.file.name);
+    } else {
+      item.rows = parseOCRText(result.data.text, item.file.name);
+    }
     renderQueue();
     callback();
   }).catch(function(err) {
@@ -482,7 +689,99 @@ function runTesseract(item, callback) {
   });
 }
 
-// --- Text Parsing ---
+function parseOCRWords(words, sourceName) {
+  var rows = [];
+  var HEADER_KEYWORDS = ['player', 'kills', 'assists', 'deaths', 'funcoin', 'damage', 'tank', 'heal', 'siege'];
+  var rowsByY = {};
+  var yTolerance = 12;
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i];
+    if (!w.text || !w.text.trim()) continue;
+    var yCenter = Math.round((w.bbox.y0 + w.bbox.y1) / 2);
+    var placed = false;
+    for (var key in rowsByY) {
+      if (Math.abs(yCenter - parseInt(key)) < yTolerance) {
+        rowsByY[key].push(w);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) rowsByY[yCenter] = [w];
+  }
+
+  var yKeys = Object.keys(rowsByY).map(Number).sort(function(a, b) { return a - b; });
+
+  var headerRow = null;
+  var headerY = -1;
+  for (var i = 0; i < yKeys.length; i++) {
+    var rowWords = rowsByY[yKeys[i]];
+    var joined = rowWords.map(function(w) { return w.text.toLowerCase(); }).join(' ');
+    var matchCount = 0;
+    for (var k = 0; k < HEADER_KEYWORDS.length; k++) {
+      if (joined.indexOf(HEADER_KEYWORDS[k]) >= 0) matchCount++;
+    }
+    if (matchCount >= 3) {
+      headerRow = rowWords;
+      headerY = yKeys[i];
+      break;
+    }
+  }
+
+  var dataRows = [];
+  var startIdx = headerRow ? yKeys.indexOf(headerY) + 1 : 0;
+  for (var i = startIdx; i < yKeys.length; i++) {
+    if (yKeys[i] - (headerY >= 0 ? headerY : yKeys[0]) > 600) continue;
+    dataRows.push(rowsByY[yKeys[i]]);
+  }
+  if (dataRows.length === 0) return [];
+
+  var allDataWords = [];
+  for (var i = 0; i < dataRows.length; i++) {
+    for (var j = 0; j < dataRows[i].length; j++) {
+      allDataWords.push(dataRows[i][j]);
+    }
+  }
+  if (allDataWords.length === 0) return [];
+
+  var xPositions = allDataWords.map(function(w) { return w.bbox.x0; }).sort(function(a, b) { return a - b; });
+  var clusters = [];
+  var cluster = [xPositions[0]];
+  for (var i = 1; i < xPositions.length; i++) {
+    if (xPositions[i] - xPositions[i - 1] < 30) {
+      cluster.push(xPositions[i]);
+    } else {
+      clusters.push(cluster);
+      cluster = [xPositions[i]];
+    }
+  }
+  clusters.push(cluster);
+
+  var sortedClusters = clusters.slice().sort(function(a, b) { return b.length - a.length; });
+  var majorThreshold = Math.max(3, Math.floor(dataRows.length * 0.4));
+  var majorXPositions = [];
+  for (var i = 0; i < sortedClusters.length; i++) {
+    if (sortedClusters[i].length >= majorThreshold) {
+      majorXPositions.push(sortedClusters[i][0]);
+    }
+  }
+  majorXPositions.sort(function(a, b) { return a - b; });
+
+  var nameXStart = majorXPositions.length > 0 ? majorXPositions[0] - 20 : 0;
+
+  for (var i = 0; i < dataRows.length; i++) {
+    var rowWords = dataRows[i].filter(function(w) {
+      return w.bbox.x0 >= nameXStart;
+    });
+    if (rowWords.length < 3) continue;
+    rowWords.sort(function(a, b) { return a.bbox.x0 - b.bbox.x0; });
+    var line = rowWords.map(function(w) { return w.text; }).join(' ');
+    var row = parseLine(line, sourceName);
+    if (row) rows.push(row);
+  }
+  return rows;
+}
+
+// --- Text Parsing (fallback) ---
 function parseOCRText(text, sourceName) {
   var lines = text.split('\n');
   var rows = [];
@@ -491,7 +790,8 @@ function parseOCRText(text, sourceName) {
     var lower = lines[i].toLowerCase();
     if ((lower.indexOf('player') >= 0 && lower.indexOf('kill') >= 0) ||
         (lower.indexOf('player') >= 0 && lower.indexOf('assists') >= 0) ||
-        (lower.indexOf('player') >= 0 && lower.indexOf('damage') >= 0)) {
+        (lower.indexOf('player') >= 0 && lower.indexOf('damage') >= 0) ||
+        (lower.indexOf('player') >= 0 && lower.indexOf('funcoin') >= 0)) {
       headerIdx = i; break;
     }
   }
@@ -505,6 +805,24 @@ function parseOCRText(text, sourceName) {
   return rows;
 }
 
+function cleanPlayerName(raw) {
+  var name = raw
+    .replace(/[|\\\/\[\]{}()<>@#$%^&*_+=~`'"!?;:.,]/g, ' ')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  var words = name.split(' ');
+  var clean = [];
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i];
+    if (!w) continue;
+    if (/^\d+$/.test(w.replace(/[０-９]/g, ''))) continue;
+    if (w.length <= 1 && !/[\u4e00-\u9fff\u3400-\u4dbf\uac00-\ud7af]/.test(w)) continue;
+    clean.push(w);
+  }
+  return clean.join(' ').trim();
+}
+
 function parseLine(line, sourceName) {
   var nums = [];
   var parts = line.split(/[\t\s]{2,}/);
@@ -515,7 +833,10 @@ function parseLine(line, sourceName) {
   var nameParts = [];
   var numStart = -1;
   for (var i = 0; i < parts.length; i++) {
-    var cleaned = parts[i].replace(/,/g, '').replace(/\./g, '');
+    var p = parts[i].replace(/[,，.。、]/g, '');
+    var cleaned = p.replace(/[０-９]/g, function(ch) {
+      return String.fromCharCode(ch.charCodeAt(0) - 0xFF10 + 0x30);
+    });
     if (/^\d+$/.test(cleaned)) {
       if (numStart === -1) numStart = i;
       nums.push(parseInt(cleaned, 10));
@@ -524,8 +845,8 @@ function parseLine(line, sourceName) {
     }
   }
   if (nums.length < 5 || nameParts.length === 0) return null;
-  var name = nameParts.join(' ').trim();
-  if (!name || name.length < 2) return null;
+  var name = cleanPlayerName(nameParts.join(' ').trim());
+  if (!name || name.length < 1) return null;
   var skipWords = ['player', 'name', 'total', 'team', 'sum', 'avg', 'average', 'kills', 'deaths', 'assists'];
   if (skipWords.indexOf(name.toLowerCase()) >= 0) return null;
   var pad = [0, 0, 0, 0, 0, 0, 0, 0];
