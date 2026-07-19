@@ -200,7 +200,12 @@ body {
   background: linear-gradient(180deg, #0a0a2e 0%, #060618 100%);
   border: 2px inset #336699;
   padding: 10px 14px;
+  max-height: 220px;
+  overflow-y: auto;
 }
+.next-event::-webkit-scrollbar { width: 6px; }
+.next-event::-webkit-scrollbar-track { background: #0a0a1a; }
+.next-event::-webkit-scrollbar-thumb { background: #334466; border-radius: 3px; }
 
 .next-event .label {
   font-size: 10px;
@@ -972,12 +977,15 @@ body {
     <button class="manual-btn" onclick="shiftTime(-5)" title="Forward 5 seconds">-5s ▶▶</button>
   </div>
 
-    <div class="next-event" id="nextEventBox">
-      <div class="label">NEXT 3 EVENTS</div>
-      <div id="nextEventRows">
-        <div class="next-event-row"><div class="ev-name" id="evName0">—</div><div class="ev-time" id="evTime0"></div></div>
-        <div class="next-event-row"><div class="ev-name" id="evName1"></div><div class="ev-time" id="evTime1"></div></div>
-        <div class="next-event-row"><div class="ev-name" id="evName2"></div><div class="ev-time" id="evTime2"></div></div>
+      <div class="next-event" id="nextEventBox">
+        <div class="label">NEXT EVENTS</div>
+        <div id="nextEventRows">
+          <div class="next-event-row"><span class="ev-name" id="evName0"></span><span class="ev-time" id="evTime0"></span></div>
+          <div class="next-event-row"><span class="ev-name" id="evName1"></span><span class="ev-time" id="evTime1"></span></div>
+          <div class="next-event-row"><span class="ev-name" id="evName2"></span><span class="ev-time" id="evTime2"></span></div>
+          <div class="next-event-row"><span class="ev-name" id="evName3"></span><span class="ev-time" id="evTime3"></span></div>
+          <div class="next-event-row"><span class="ev-name" id="evName4"></span><span class="ev-time" id="evTime4"></span></div>
+          <div class="next-event-row"><span class="ev-name" id="evName5"></span><span class="ev-time" id="evTime5"></span></div>
       </div>
     </div>
 
@@ -1828,10 +1836,12 @@ function updateDisplay() {
 }
 
 function updateNextEvent(t) {
-  for (var r = 0; r < 3; r++) {
-    document.getElementById('evName' + r).textContent = '';
+  for (var r = 0; r < 6; r++) {
+    var el = document.getElementById('evName' + r);
+    if (!el) break;
+    el.textContent = '';
     document.getElementById('evTime' + r).textContent = '';
-    document.getElementById('evName' + r).className = 'ev-name';
+    el.className = 'ev-name';
   }
 
   if (t <= 0) {
@@ -1880,7 +1890,7 @@ function updateNextEvent(t) {
 
   events.sort(function(a, b) { return b.time - a.time; });
 
-  for (var r = 0; r < Math.min(3, events.length); r++) {
+  for (var r = 0; r < Math.min(6, events.length); r++) {
     var ev = events[r];
     var diff = t - ev.time;
     var nameEl = document.getElementById('evName' + r);
