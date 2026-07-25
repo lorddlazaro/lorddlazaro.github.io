@@ -474,6 +474,7 @@ body {
   justify-content: center;
   gap: 8px;
   margin-top: -4px;
+  flex-wrap: wrap;
 }
 .manual-btn {
   background: linear-gradient(180deg, #1a1a44 0%, #0a0a2e 100%);
@@ -971,10 +972,12 @@ body {
       <button class="ctrl-btn reset" id="btnReset" onclick="resetTimer()">↺ Reset</button>
     </div>
   <div class="manual-controls">
+    <button class="manual-btn" onclick="shiftTime(30)" title="Backward 30 seconds">◀◀ +30s</button>
     <button class="manual-btn" onclick="shiftTime(5)" title="Backward 5 seconds">◀◀ +5s</button>
     <button class="manual-btn" onclick="shiftTime(1)" title="Backward 1 second">◀ +1s</button>
     <button class="manual-btn" onclick="shiftTime(-1)" title="Forward 1 second">-1s ▶</button>
     <button class="manual-btn" onclick="shiftTime(-5)" title="Forward 5 seconds">-5s ▶▶</button>
+    <button class="manual-btn" onclick="shiftTime(-30)" title="Forward 30 seconds">-30s ▶▶</button>
   </div>
 
       <div class="next-event" id="nextEventBox">
@@ -1076,6 +1079,10 @@ var TOTAL_SECONDS = 35 * 60;
 var remaining = TOTAL_SECONDS;
 var timerInterval = null;
 var running = false;
+var startTime = 0;
+var startRemaining = 0;
+var lastTickTime = 0;
+var catchingUp = false;
 
 var jungleTimes = [25*60, 20*60, 15*60, 10*60, 5*60];
 var jungleSpawned = [false, false, false, false, false];
@@ -1301,6 +1308,7 @@ function triggerRumor() {
   rumorFired = false;
   rumorWarned = false;
   updateRumorDisplay();
+  saveTimerState();
 }
 
 function tickRumor() {
@@ -1353,6 +1361,7 @@ function updateRumorDisplay() {
 }
 
 function formatTime(secs) {
+  secs = Math.floor(secs);
   var m = Math.floor(secs / 60);
   var s = secs % 60;
   return m + ':' + (s < 10 ? '0' : '') + s;
@@ -1416,6 +1425,7 @@ function useCmdSkill(id) {
   cmdState[id].warned = false;
   logHistory(sk.icon, sk.name + ' USED');
   updateCmdDisplay();
+  saveTimerState();
 }
 
 function resetCmdSkill(id) {
@@ -1425,6 +1435,7 @@ function resetCmdSkill(id) {
   st.ready = true;
   st.warned = false;
   updateCmdDisplay();
+  saveTimerState();
 }
 
 function tickCmdSkills() {
@@ -1558,15 +1569,28 @@ function startTimer() {
     doReset();
     return;
   }
-  timerInterval = setInterval(tick, 1000);
+  startTime = Date.now();
+  startRemaining = remaining;
+  lastTickTime = Date.now();
+  timerInterval = setInterval(tick, 250);
+  saveTimerState();
 }
 
 function pauseTimer() {
+  remaining = calcRemaining();
   running = false;
   clearInterval(timerInterval);
   document.getElementById('btnStart').style.display = '';
   document.getElementById('btnStart').textContent = '▶ Resume';
   document.getElementById('btnPause').style.display = 'none';
+  saveTimerState();
+}
+
+function calcRemaining() {
+  if (!running) return remaining;
+  var elapsed = (Date.now() - startTime) / 1000;
+  var r = startRemaining - elapsed;
+  return Math.max(0, Math.min(TOTAL_SECONDS, r));
 }
 
 var resetPending = false;
@@ -1576,6 +1600,9 @@ function doReset() {
   running = false;
   clearInterval(timerInterval);
   remaining = TOTAL_SECONDS;
+  startTime = 0;
+  startRemaining = 0;
+  lastTickTime = 0;
   jungleSpawned = [false, false, false, false, false];
   jungleWarned1 = [false, false, false, false, false];
   jungleWarned2 = [false, false, false, false, false];
@@ -1601,6 +1628,7 @@ function doReset() {
   updateRumorDisplay();
   updateHistory();
   updateDisplay();
+  try { localStorage.removeItem('gw-timer-state'); } catch(e) {}
 }
 
 function resetTimer() {
@@ -1632,9 +1660,12 @@ function shiftTime(delta) {
   var dir = delta > 0 ? 1 : -1;
 
   for (var i = 0; i < absDelta; i++) {
+    remaining = calcRemaining();
     remaining += dir;
     if (remaining < 0) { remaining = 0; break; }
     if (remaining > TOTAL_SECONDS) { remaining = TOTAL_SECONDS; break; }
+    startRemaining = remaining;
+    startTime = Date.now();
     checkEvents();
     shiftCmdSkills(dir);
     shiftRumor(dir);
@@ -1643,6 +1674,7 @@ function shiftTime(delta) {
   }
 
   updateDisplay();
+  saveTimerState();
 }
 
 function shiftCmdSkills(dir) {
@@ -1702,17 +1734,25 @@ function shiftZeal(dir) {
 
 function tick() {
   if (!running) return;
-  remaining--;
-  if (remaining < 0) remaining = 0;
+  var now = Date.now();
+  var elapsedSecs = Math.floor((now - lastTickTime) / 1000);
+  if (elapsedSecs < 1) return;
+  lastTickTime = now;
+  remaining = calcRemaining();
+  if (!catchingUp) {
+    for (var i = 0; i < elapsedSecs; i++) {
+      tickCmdSkills();
+      tickRumor();
+      if (zealUsed < ZEAL_MAX && warStarted) tickZeal();
+    }
+  }
   checkEvents();
-  tickCmdSkills();
-  tickRumor();
   checkBossTicks(remaining);
-  if (zealUsed < ZEAL_MAX && warStarted) tickZeal();
   updateDisplay();
   if (remaining <= 0) {
     pauseTimer();
   }
+  saveTimerState();
 }
 
 function checkEvents() {
@@ -1962,7 +2002,7 @@ function updateJungle(t) {
       status.textContent = '✓ SPAWNED';
       row.classList.add('spawned');
     } else {
-      var diff = t - jungleTimes[i];
+      var diff = Math.ceil(t - jungleTimes[i]);
       if (diff <= 0) {
         status.className = 'jungle-status spawned';
         status.textContent = '✓ SPAWNED';
@@ -1985,6 +2025,117 @@ function updateJungle(t) {
 
 initCmdSkills();
 loadVoiceSettings();
+
+function saveTimerState() {
+  try {
+    var s = {
+      remaining: running ? calcRemaining() : remaining,
+      running: running,
+      warStarted: warStarted,
+      warEnded: warEnded,
+      jungleSpawned: jungleSpawned,
+      jungleWarned1: jungleWarned1,
+      jungleWarned2: jungleWarned2,
+      bossActive: bossActive,
+      bossDone: bossDone,
+      bossWarned: bossWarned,
+      bossTickFired: bossTickFired,
+      bossPreWarnFired: bossPreWarnFired,
+      bossRumorWarned: bossRumorWarned,
+      bossRumorFired: bossRumorFired,
+      cmdState: {},
+      zealUsed: zealUsed,
+      rumorActive: rumorActive,
+      rumorFired: rumorFired,
+      rumorWarned: rumorWarned,
+      rumorRemaining: rumorRemaining,
+      eventHistory: eventHistory,
+      savedAt: Date.now()
+    };
+    for (var i = 0; i < cmdSkills.length; i++) {
+      var sk = cmdSkills[i];
+      var st = cmdState[sk.id];
+      s.cmdState[sk.id] = { remaining: st.remaining, ready: st.ready, warned: st.warned };
+    }
+    s.zealTimer = zealTimer;
+    s.zealStarted = zealStarted;
+    localStorage.setItem('gw-timer-state', JSON.stringify(s));
+  } catch(e) {}
+}
+
+function restoreTimerState() {
+  try {
+    var raw = localStorage.getItem('gw-timer-state');
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    remaining = s.remaining;
+    warStarted = s.warStarted || false;
+    warEnded = s.warEnded || false;
+    jungleSpawned = s.jungleSpawned || [false,false,false,false,false];
+    jungleWarned1 = s.jungleWarned1 || [false,false,false,false,false];
+    jungleWarned2 = s.jungleWarned2 || [false,false,false,false,false];
+    bossActive = s.bossActive || [false,false];
+    bossDone = s.bossDone || [false,false];
+    bossWarned = s.bossWarned || [false,false];
+    bossTickFired = s.bossTickFired || {};
+    bossPreWarnFired = s.bossPreWarnFired || {};
+    bossRumorWarned = s.bossRumorWarned || {};
+    bossRumorFired = s.bossRumorFired || {};
+    zealUsed = s.zealUsed || 0;
+    rumorActive = s.rumorActive || false;
+    rumorFired = s.rumorFired || false;
+    rumorWarned = s.rumorWarned || false;
+    rumorRemaining = s.rumorRemaining || 0;
+    eventHistory = s.eventHistory || [];
+    if (s.cmdState) {
+      var secsAgo = Math.round((Date.now() - s.savedAt) / 1000);
+      for (var i = 0; i < cmdSkills.length; i++) {
+        var sk = cmdSkills[i];
+        if (s.cmdState[sk.id]) {
+          var saved = s.cmdState[sk.id];
+          if (saved.ready) {
+            cmdState[sk.id].remaining = 0;
+            cmdState[sk.id].ready = true;
+            cmdState[sk.id].warned = false;
+          } else {
+            var newRemaining = Math.max(0, saved.remaining - secsAgo);
+            cmdState[sk.id].remaining = newRemaining;
+            cmdState[sk.id].ready = newRemaining <= 0;
+            cmdState[sk.id].warned = newRemaining <= 10 && newRemaining > 0 ? true : false;
+          }
+        }
+      }
+      if (s.zealUsed < ZEAL_MAX && warStarted) {
+        var zealSecs = s.zealTimer + secsAgo;
+        var zealAdds = Math.floor(zealSecs / ZEAL_INTERVAL);
+        zealUsed = Math.min(ZEAL_MAX, (s.zealUsed || 0) + zealAdds);
+        zealTimer = zealSecs % ZEAL_INTERVAL;
+      }
+    }
+    if (s.running && remaining > 0) {
+      var secsAgo = (Date.now() - s.savedAt) / 1000;
+      remaining = Math.max(0, remaining - secsAgo);
+      catchingUp = true;
+      startTimer();
+      setTimeout(function() { catchingUp = false; }, 500);
+    } else {
+      if (remaining <= 0) {
+        document.getElementById('btnStart').textContent = '▶ Start';
+      } else if (remaining < TOTAL_SECONDS) {
+        document.getElementById('btnStart').textContent = '▶ Resume';
+      }
+    }
+    if (zealUsed >= ZEAL_MAX) {
+      zealUsed = ZEAL_MAX;
+    }
+    updateZealDisplay();
+    updateCmdDisplay();
+    updateHistory();
+    updateDisplay();
+  } catch(e) {}
+}
+
+restoreTimerState();
 updateRumorDisplay();
 updateDisplay();
 
