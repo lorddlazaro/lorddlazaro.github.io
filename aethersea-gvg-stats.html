@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aethersea — GvG Stats</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+}
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+@keyframes marquee { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+@keyframes glow {
+  0%,100%{text-shadow:0 0 5px #3399cc,0 0 10px #3399cc}
+  50%{text-shadow:0 0 15px #66ccff,0 0 25px #3399cc,0 0 35px #0066aa}
+}
+.top-bar {
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 5px 0;
+  overflow: hidden;
+}
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+  font-size: 14px;
+  color: #66ccff;
+  text-shadow: 1px 1px 2px #000;
+}
+.header {
+  background: linear-gradient(180deg, #000d1a 0%, #002244 30%, #003d6b 60%, #002244 100%);
+  border: 4px outset #3399cc;
+  margin: 10px;
+  padding: 20px;
+  text-align: center;
+}
+.header h1 {
+  font-size: 28px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366, 0 0 15px #3399cc;
+  animation: glow 3s ease-in-out infinite;
+  letter-spacing: 4px;
+}
+.header .subtitle {
+  font-size: 13px;
+  color: #99ccee;
+  margin-top: 6px;
+  letter-spacing: 2px;
+}
+.content {
+  max-width: 900px;
+  margin: 10px auto;
+  padding: 0 10px;
+  text-align: center;
+}
+.card {
+  background: linear-gradient(180deg, rgba(0,20,40,0.8) 0%, rgba(0,10,25,0.6) 100%);
+  border: 2px inset #336699;
+  padding: 40px 20px;
+  margin: 30px auto;
+  max-width: 500px;
+}
+.card p {
+  color: #88bbdd;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.login-btn {
+  display: inline-block;
+  background: linear-gradient(180deg, #1a1a44 0%, #0a0a2e 100%);
+  border: 3px outset #445577;
+  color: #88aacc;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 14px 40px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.login-btn:hover { background: linear-gradient(180deg, #222266 0%, #111144 100%); color: #aaccdd; }
+.login-btn:active { border-style: inset; }
+.loading-text { color: #66ccff; font-size: 16px; margin: 30px; animation: blink 1.5s step-end infinite; }
+.info-text { color: #667799; font-size: 12px; margin-top: 15px; }
+.back-link {
+  display: inline-block;
+  color: #88aacc;
+  text-decoration: none;
+  padding: 8px 16px;
+  margin: 5px;
+  border: 2px outset #336699;
+  background: linear-gradient(180deg, #001a33 0%, #002244 100%);
+  font-size: 13px;
+}
+.back-link:hover { background: linear-gradient(180deg, #004488, #002244); }
+.footer { text-align: center; padding: 20px; color: #446688; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <marquee class="marquee-text">🌊 AETHERSEA — GvG STATS 🌊 Where Winds Meet 🌊 GvG Statistics &amp; Analytics 🌊</marquee>
+</div>
+
+<div class="header">
+  <h1>🌊 AETHERSEA GvG STATS 🌊</h1>
+  <div class="subtitle">╠ Guild War Statistics &amp; Analytics ╣</div>
+</div>
+
+<div class="content">
+  <div class="card">
+    <p>This page displays Aethersea's GvG war statistics.<br>You must log in with Discord and have the required role in the Aethersea guild to access it.</p>
+    <a class="login-btn" id="loginBtn" href="#">🔗 Login with Discord</a>
+    <div id="status" class="loading-text" style="display:none;">⏳ Redirecting to Discord…</div>
+    <div class="info-text">Your login is valid for 24 hours.</div>
+  </div>
+
+  <a class="back-link" href="jayus-calc.html">← jayus calculator</a>
+  <a class="back-link" href="gvg-stats.html">GvG War Stats (OCR)</a>
+</div>
+
+<div class="footer">
+  <p>🌊 🌊 🌊</p>
+  <p>AETHERSEA — Where Winds Meet</p>
+  <p style="margin-top:5px;">Est. 2025</p>
+</div>
+
+<script>
+(function() {
+  // Point this to your deployed worker URL
+  var WORKER_URL = 'https://gvg-stats-worker.lorddy.workers.dev';
+  document.getElementById('loginBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('status').style.display = '';
+    document.getElementById('loginBtn').textContent = '⏳ Redirecting…';
+    window.location.href = WORKER_URL;
+  });
+})();
+</script>
+
+</body>
+</html>
