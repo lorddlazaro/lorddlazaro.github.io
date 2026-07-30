@@ -16,9 +16,9 @@ async function unsignCookie(signed, secret) {
   var value = signed.substring(0, dot);
   var sig = signed.substring(dot + 1);
   var key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
-  var expectedSig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value));
-  var expectedStr = btoa(String.fromCharCode.apply(null, new Uint8Array(expectedSig))).replace(/=/g, '');
-  return sig === expectedStr ? value : null;
+  var sigBytes = Uint8Array.from(atob(sig), function(c) { return c.charCodeAt(0); });
+  var valid = await crypto.subtle.verify('HMAC', key, sigBytes, new TextEncoder().encode(value));
+  return valid ? value : null;
 }
 
 function htmlPage(body, title) {
@@ -122,7 +122,7 @@ export default {
         status: 302,
         headers: {
           Location: env.BASE_URL + '/',
-          'Set-Cookie': 'session=' + signed + '; HttpOnly; Secure; SameSite=Lax; Max-Age=86400; Path=/'
+          'Set-Cookie': 'session=' + signed + '; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000; Path=/'
         }
       });
     }
