@@ -1,8 +1,0 @@
-name = "gvg-stats-worker"
-main = "worker.js"
-compatibility_date = "2026-07-30"
-
-[vars]
-GUILD_ID = "1490874847612502119"
-REQUIRED_ROLE_ID = "1490875743712973063"
-SHEET_EMBED_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQb7VQoMYxRFZI6SPGcUCIC7nqjuO4-rElhfpKKaEZ81EuoEjpjk8vsv9Bbq3gwzk6on2BjUuCQF5nm/pubhtml"
