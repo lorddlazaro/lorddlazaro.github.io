@@ -1752,7 +1752,7 @@ a, button, .btn-calc, .btn-reset, .ctrl-btn, .claim-btn, .shape-btn, .myspace-bt
     <span style="color:#666;font-size:10px;margin-left:8px;">(trusted by millions™)</span>
   </div>
   <div class="countdown-box" style="margin-top:8px;">
-    <span class="label">TIME UNTIL </span><span style="color:#ff0000;">67</span><span class="label">: </span><span id="countdownDisplay">67:00:00</span>
+    <span class="label">TIME UNTIL </span><span style="color:#ff0000;">67</span><span class="label">: </span><span id="countdownDisplay">06:07</span>
   </div>
 </div>
 
@@ -3325,15 +3325,14 @@ function schedulePopups() {
 // ═══════════════════════════════════════════
 // 67 COUNTDOWN + SPAM
 // ═══════════════════════════════════════════
-let countdownSeconds = 67 * 60;
+let countdownSeconds = 6 * 60 + 7;
 
 function updateCountdown() {
-  const h = Math.floor(countdownSeconds / 3600);
-  const m = Math.floor((countdownSeconds % 3600) / 60);
+  const m = Math.floor(countdownSeconds / 60);
   const s = countdownSeconds % 60;
   const display = document.getElementById('countdownDisplay');
   if (display) {
-    display.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    display.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
   }
   if (countdownSeconds <= 0) {
     triggerSpam67();
