@@ -438,6 +438,9 @@ body {
   var SKIP_KEY = 'wwm_check_skip';
   var skips = loadSkips();
 
+  // Server reset timezone: GMT+8 (game server). Shifts clock math into that frame.
+  var GMT8_MS = (8 + new Date().getTimezoneOffset() / 60) * 3600000;
+
   function pad(n) { return String(n).padStart(2, '0'); }
 
   function loadSkips() {
@@ -455,16 +458,16 @@ body {
     localStorage.setItem(SKIP_KEY, JSON.stringify(skips));
   }
 
-  // Reset day = the day that started at the last 5:00 AM.
+  // Reset day = the day that started at the last 5:00 AM (GMT+8 server time).
   function getDailyKey() {
-    var d = new Date();
+    var d = new Date(Date.now() + GMT8_MS);
     if (d.getHours() < 5) d.setDate(d.getDate() - 1);
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
 
-  // Reset week = ISO-ish week number for the Monday (5:00 AM) of this week.
+  // Reset week = ISO-ish week number for the Monday (5:00 AM GMT+8) of this week.
   function getWeekKey() {
-    var d = new Date();
+    var d = new Date(Date.now() + GMT8_MS);
     if (d.getHours() < 5) d.setDate(d.getDate() - 1);
     var day = d.getDay();
     var diffToMon = (day + 6) % 7;
