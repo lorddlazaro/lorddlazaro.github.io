@@ -398,7 +398,18 @@ body {
   <!-- RECOMMENDED WEEKLY PURCHASES -->
   <div class="checklist-box" id="purchaseBox">
     <h2>🛒 RECOMMENDED WEEKLY PURCHASES</h2>
-    <p class="box-note">Don't forget to grab these this week.</p>
+    <p class="box-note">Resets every Monday at 5:00 AM. Don't forget to grab these this week!</p>
+    <button class="reset-link" onclick="resetCategory('purchase')">[ reset purchases ]</button>
+    <div class="progress-row">
+      <div class="progress-track">
+        <div class="progress-fill" id="purchaseFill"></div>
+        <div class="progress-text" id="purchaseText">0 / 1</div>
+      </div>
+    </div>
+    <label class="check-item" data-cat="purchase" data-idx="0">
+      <input type="checkbox"><span class="item-text">🛒 Done with recommended weekly purchases</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'purchase',0)">SKIP</button>
+    </label>
     <div class="purchase-grid">
       <figure class="purchase-item">
         <img src="media/daily1.png" alt="Weekly purchase guide 1" onclick="openLightbox('media/daily1.png','Weekly guide #1')">
@@ -431,8 +442,9 @@ body {
 <script>
 (function() {
   var CATEGORIES = {
-    daily:  { count: 3, storageKey: 'wwm_check_daily' },
-    weekly: { count: 5, storageKey: 'wwm_check_weekly' }
+    daily:    { count: 3, storageKey: 'wwm_check_daily' },
+    weekly:   { count: 5, storageKey: 'wwm_check_weekly' },
+    purchase: { count: 1, storageKey: 'wwm_check_purchase' }
   };
 
   var SKIP_KEY = 'wwm_check_skip';
@@ -448,10 +460,16 @@ body {
       var raw = localStorage.getItem(SKIP_KEY);
       if (raw) {
         var data = JSON.parse(raw);
-        if (data && data.daily && data.weekly) return { daily: data.daily, weekly: data.weekly };
+        if (data) {
+          return {
+            daily: data.daily || [],
+            weekly: data.weekly || [],
+            purchase: data.purchase || []
+          };
+        }
       }
     } catch (e) {}
-    return { daily: [], weekly: [] };
+    return { daily: [], weekly: [], purchase: [] };
   }
 
   function saveSkips() {
