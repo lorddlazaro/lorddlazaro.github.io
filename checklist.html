@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily &amp; Weekly Checklist — Aethersea</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+}
+
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+@keyframes marquee { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+@keyframes glow { 0%,100%{text-shadow:0 0 5px #3399cc,0 0 10px #3399cc} 50%{text-shadow:0 0 15px #66ccff,0 0 25px #3399cc} }
+@keyframes barstripe { 0%{background-position:0 0} 100%{background-position:28px 0} }
+
+.top-bar {
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 5px 0;
+  overflow: hidden;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+  font-size: 14px;
+  color: #66ccff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.header {
+  background: linear-gradient(180deg, #000d1a 0%, #002244 30%, #003d6b 60%, #002244 100%);
+  border: 4px outset #3399cc;
+  margin: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 26px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366, 0 0 15px #3399cc;
+  animation: glow 3s ease-in-out infinite;
+  letter-spacing: 3px;
+}
+
+.header .subtitle {
+  font-size: 12px;
+  color: #99ccee;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+.content {
+  max-width: 900px;
+  margin: 10px auto;
+  padding: 0 10px;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 15px 10px;
+  padding: 6px 16px;
+  background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+  border: 2px outset #3399cc;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  background: linear-gradient(180deg, #004488 0%, #002244 100%);
+  color: #99ddff;
+}
+
+.checklist-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0 20px 0;
+  padding: 18px 20px;
+}
+
+.checklist-box h2 {
+  color: #66ccff;
+  font-size: 18px;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 0 #003366;
+  margin-bottom: 6px;
+}
+
+.checklist-box .box-note {
+  font-size: 11px;
+  color: #7799bb;
+  margin-bottom: 12px;
+}
+
+.check-item {
+  display: block;
+  padding: 9px 12px;
+  margin: 4px 0;
+  border: 1px solid #224466;
+  background: rgba(0, 20, 40, 0.5);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.check-item:hover { background: rgba(0, 60, 120, 0.4); }
+
+.check-item.done {
+  background: rgba(0, 60, 40, 0.35);
+  border-color: #339966;
+}
+
+.check-item.done .item-text { text-decoration: line-through; color: #8899aa; }
+
+.check-item input[type="checkbox"] {
+  margin-right: 10px;
+  transform: scale(1.3);
+  vertical-align: middle;
+  cursor: pointer;
+  accent-color: #3399cc;
+}
+
+.check-item.skipped {
+  background: rgba(60, 60, 90, 0.35);
+  border-color: #555577;
+}
+
+.check-item.skipped .item-text { color: #8899bb; font-style: italic; }
+
+.skip-btn {
+  float: right;
+  font-size: 10px;
+  font-weight: bold;
+  font-family: 'Comic Sans MS', cursive;
+  color: #aabbdd;
+  background: linear-gradient(180deg, #333355 0%, #222244 100%);
+  border: 2px outset #556688;
+  border-radius: 3px;
+  padding: 2px 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  vertical-align: middle;
+  letter-spacing: 1px;
+}
+
+.skip-btn:hover { color: #ffffaa; background: linear-gradient(180deg, #444477 0%, #333366 100%); }
+
+.skip-btn.on { color: #ffcc66; border-color: #aa8833; background: linear-gradient(180deg, #554411, #443311); }
+
+.skip-btn.on:hover { color: #ffdd88; }
+
+.item-text { vertical-align: middle; }
+
+.day-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: bold;
+  color: #001122;
+  background: #66ccff;
+  border: 1px outset #3399cc;
+  border-radius: 3px;
+  padding: 1px 6px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.reset-link {
+  float: right;
+  font-size: 11px;
+  color: #5588bb;
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  font-family: 'Comic Sans MS', cursive;
+  padding: 2px;
+}
+
+.reset-link:hover { color: #ff6666; }
+
+.progress-row {
+  margin: 8px 0 14px 0;
+}
+
+.progress-track {
+  position: relative;
+  height: 16px;
+  background: #001122;
+  border: 2px inset #336699;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: repeating-linear-gradient(45deg, #66ccff 0 14px, #3399cc 14px 28px);
+  animation: barstripe 1s linear infinite;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  line-height: 16px;
+  text-align: center;
+  font-size: 11px;
+  color: #0a0a2e;
+  font-weight: bold;
+  text-shadow: 0 0 3px #ffffff;
+}
+
+.purchase-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin: 10px 0 4px 0;
+}
+
+.purchase-item {
+  border: 2px outset #3399cc;
+  background: #001122;
+  padding: 8px;
+  max-width: 250px;
+  text-align: center;
+}
+
+.purchase-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px inset #336699;
+  cursor: zoom-in;
+}
+
+.lightbox {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1000;
+  background: rgba(5, 5, 20, 0.92);
+  text-align: center;
+  padding: 30px;
+  cursor: zoom-out;
+}
+
+.lightbox.on { display: block; }
+
+.lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  border: 3px outset #3399cc;
+  background: #001122;
+  box-shadow: 0 0 40px rgba(51, 153, 204, 0.4);
+}
+
+.lightbox-caption {
+  margin-top: 12px;
+  color: #66ccff;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.purchase-item .item-text {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.purchase-item.done { border-color: #339966; background: rgba(0, 60, 40, 0.35); }
+
+.footer {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border-top: 3px outset #3399cc;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #336699;
+}
+
+.footer .hearts {
+  color: #3399cc;
+  font-size: 14px;
+  animation: blink 1.5s step-end infinite;
+}
+
+@media (max-width: 600px) {
+  .back-link { margin: 8px 5px; padding: 5px 10px; font-size: 10px; }
+  .check-item { font-size: 13px; }
+  .purchase-item { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="marquee-text">
+    🌊 AETHERSEA GUILD — Daily &amp; Weekly Checklist — Stay on top of your duties 🌊 — Rewards await the diligent 🌊
+  </div>
+</div>
+
+<div class="header">
+  <span style="color:#3399cc;font-size:18px;">✦ ✦ ✦</span>
+  <br>
+  <h1>📋 DAILY &amp; WEEKLY CHECKLIST 📋</h1>
+  <div class="subtitle">AETHERSEA — Where Winds Meet</div>
+  <br>
+  <span style="color:#3399cc;font-size:18px;">✧ ✧ ✧</span>
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+<a class="back-link" href="gw-timer.html">⏱ GW Timer</a>
+<a class="back-link" href="gw-strategy.html">🗺 GW Strategy</a>
+<a class="back-link" href="gvg-roster.html">⚔ GvG Roster</a>
+<a class="back-link" href="gvg-stats.html">📊 War Stats (OCR)</a>
+
+<div class="content">
+
+  <!-- DAILIES -->
+  <div class="checklist-box" id="dailyBox">
+    <h2>🌞 DAILIES</h2>
+    <p class="box-note">Resets every day at 5:00 AM. Don't leave your rewards unclaimed!</p>
+    <button class="reset-link" onclick="resetCategory('daily')">[ reset dailies ]</button>
+    <div class="progress-row">
+      <div class="progress-track">
+        <div class="progress-fill" id="dailyFill"></div>
+        <div class="progress-text" id="dailyText">0 / 3</div>
+      </div>
+    </div>
+    <label class="check-item" data-cat="daily" data-idx="0">
+      <input type="checkbox"><span class="item-text">🐗 Killing overworld mobs for drops until they stop dropping valuable loot (coins, gear, food, etc.)</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'daily',0)">SKIP</button>
+    </label>
+    <label class="check-item" data-cat="daily" data-idx="1">
+      <input type="checkbox"><span class="item-text">⛏ Picking STONE / Flowers / Hunting</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'daily',1)">SKIP</button>
+    </label>
+    <label class="check-item" data-cat="daily" data-idx="2">
+      <input type="checkbox"><span class="item-text">🀄 Chinese Chest for commission coins</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'daily',2)">SKIP</button>
+    </label>
+  </div>
+
+  <!-- WEEKLIES -->
+  <div class="checklist-box" id="weeklyBox">
+    <h2>📅 WEEKLIES</h2>
+    <p class="box-note">Resets every Monday at 5:00 AM. Plan your week ahead!</p>
+    <button class="reset-link" onclick="resetCategory('weekly')">[ reset weeklies ]</button>
+    <div class="progress-row">
+      <div class="progress-track">
+        <div class="progress-fill" id="weeklyFill"></div>
+        <div class="progress-text" id="weeklyText">0 / 5</div>
+      </div>
+    </div>
+    <label class="check-item" data-cat="weekly" data-idx="0">
+      <input type="checkbox"><span class="item-text">🪿 Goose Spar (5 Innerway boxes)</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'weekly',0)">SKIP</button>
+    </label>
+    <label class="check-item" data-cat="weekly" data-idx="1">
+      <input type="checkbox"><span class="item-text">🏡 Homestead Master Routine (Homestead +5 jades)</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'weekly',1)">SKIP</button>
+    </label>
+    <label class="check-item" data-cat="weekly" data-idx="2">
+      <input type="checkbox"><span class="item-text">
+        <span class="day-badge">Wed–Fri</span> Market trading &nbsp;&nbsp;
+        <span class="day-badge">Sat–Sun</span> Restocking
+      </span>
+      <button class="skip-btn" onclick="toggleSkip(event,'weekly',2)">SKIP</button>
+    </label>
+    <label class="check-item" data-cat="weekly" data-idx="3">
+      <input type="checkbox"><span class="item-text">🐾 Companion — Windtrail (30 Jades) / Companion Wish (25 Jade)</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'weekly',3)">SKIP</button>
+    </label>
+    <label class="check-item" data-cat="weekly" data-idx="4">
+      <input type="checkbox"><span class="item-text">🚩 Velvet Shade voting Flags (for helping guild members)</span>
+      <button class="skip-btn" onclick="toggleSkip(event,'weekly',4)">SKIP</button>
+    </label>
+  </div>
+
+  <!-- RECOMMENDED WEEKLY PURCHASES -->
+  <div class="checklist-box" id="purchaseBox">
+    <h2>🛒 RECOMMENDED WEEKLY PURCHASES</h2>
+    <p class="box-note">Don't forget to grab these this week.</p>
+    <div class="purchase-grid">
+      <figure class="purchase-item">
+        <img src="media/daily1.png" alt="Weekly purchase guide 1" onclick="openLightbox('media/daily1.png','Weekly guide #1')">
+        <figcaption class="item-text">Weekly guide #1</figcaption>
+      </figure>
+      <figure class="purchase-item">
+        <img src="media/daily2.png" alt="Weekly purchase guide 2" onclick="openLightbox('media/daily2.png','Weekly guide #2')">
+        <figcaption class="item-text">Weekly guide #2</figcaption>
+      </figure>
+      <figure class="purchase-item">
+        <img src="media/daily3.png" alt="Weekly purchase guide 3" onclick="openLightbox('media/daily3.png','Weekly guide #3')">
+        <figcaption class="item-text">Weekly guide #3</figcaption>
+      </figure>
+    </div>
+  </div>
+
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg" alt="Enlarged view">
+  <div class="lightbox-caption" id="lightboxCap"></div>
+</div>
+
+<div class="footer">
+  <div class="hearts">🌊 🌊 🌊</div>
+  <p>AETHERSEA — Where Winds Meet</p>
+  <p style="margin-top:5px;">Est. 2025 — Made by lorddy</p>
+</div>
+
+<script>
+(function() {
+  var CATEGORIES = {
+    daily:  { count: 3, storageKey: 'wwm_check_daily' },
+    weekly: { count: 5, storageKey: 'wwm_check_weekly' }
+  };
+
+  var SKIP_KEY = 'wwm_check_skip';
+  var skips = loadSkips();
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function loadSkips() {
+    try {
+      var raw = localStorage.getItem(SKIP_KEY);
+      if (raw) {
+        var data = JSON.parse(raw);
+        if (data && data.daily && data.weekly) return { daily: data.daily, weekly: data.weekly };
+      }
+    } catch (e) {}
+    return { daily: [], weekly: [] };
+  }
+
+  function saveSkips() {
+    localStorage.setItem(SKIP_KEY, JSON.stringify(skips));
+  }
+
+  // Reset day = the day that started at the last 5:00 AM.
+  function getDailyKey() {
+    var d = new Date();
+    if (d.getHours() < 5) d.setDate(d.getDate() - 1);
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  // Reset week = ISO-ish week number for the Monday (5:00 AM) of this week.
+  function getWeekKey() {
+    var d = new Date();
+    if (d.getHours() < 5) d.setDate(d.getDate() - 1);
+    var day = d.getDay();
+    var diffToMon = (day + 6) % 7;
+    d.setDate(d.getDate() - diffToMon);
+    var yearStart = new Date(d.getFullYear(), 0, 1);
+    var week = Math.floor(Math.round((d - yearStart) / 86400000) / 7) + 1;
+    if (d.getMonth() === 11 && week === 1) { d.setDate(d.getDate() - 7); var yearStart2 = new Date(d.getFullYear(), 0, 1); week = Math.floor(Math.round((d - yearStart2) / 86400000) / 7) + 1; }
+    return d.getFullYear() + '-W' + pad(week);
+  }
+
+  function expectedKey(cat) {
+    return cat === 'daily' ? getDailyKey() : getWeekKey();
+  }
+
+  function items(cat) {
+    return document.querySelectorAll('[data-cat="' + cat + '"]');
+  }
+
+  function isSkipped(cat, idx) {
+    return !!(skips[cat] && skips[cat][idx]);
+  }
+
+  function loadState(cat) {
+    var cfg = CATEGORIES[cat];
+    try {
+      var raw = localStorage.getItem(cfg.storageKey);
+      if (raw) {
+        var data = JSON.parse(raw);
+        if (data.key === expectedKey(cat)) return data.done;
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  function saveState(cat) {
+    var cfg = CATEGORIES[cat];
+    var done = [];
+    items(cat).forEach(function(label, i) {
+      done[i] = label.querySelector('input').checked;
+    });
+    localStorage.setItem(cfg.storageKey, JSON.stringify({ key: expectedKey(cat), done: done }));
+  }
+
+  // Reconcile visuals: skipped items stay checked + styled, badges updated.
+  function applyCategory(cat) {
+    items(cat).forEach(function(label) {
+      var idx = parseInt(label.getAttribute('data-idx'), 10);
+      var skipped = isSkipped(cat, idx);
+      var cb = label.querySelector('input');
+      if (skipped) cb.checked = true;
+      label.classList.toggle('done', cb.checked);
+      label.classList.toggle('skipped', skipped);
+      var btn = label.querySelector('.skip-btn');
+      if (btn) {
+        btn.textContent = skipped ? 'UNSKIP' : 'SKIP';
+        btn.classList.toggle('on', skipped);
+      }
+    });
+  }
+
+  function updateProgress(cat) {
+    var cfg = CATEGORIES[cat];
+    var done = 0;
+    items(cat).forEach(function(label) {
+      if (label.querySelector('input').checked) done++;
+    });
+    var fill = document.getElementById(cat + 'Fill');
+    var text = document.getElementById(cat + 'Text');
+    fill.style.width = (done / cfg.count * 100) + '%';
+    text.textContent = done + ' / ' + cfg.count;
+  }
+
+  window.toggleSkip = function(e, cat, idx) {
+    if (e) e.stopPropagation();
+    if (!skips[cat]) skips[cat] = [];
+    skips[cat][idx] = !skips[cat][idx];
+    saveSkips();
+    applyCategory(cat);
+    updateProgress(cat);
+    saveState(cat);
+    if (e) e.preventDefault();
+  };
+
+  function init() {
+    Object.keys(CATEGORIES).forEach(function(cat) {
+      var done = loadState(cat);
+      items(cat).forEach(function(label, i) {
+        var cb = label.querySelector('input');
+        cb.checked = isSkipped(cat, i) || !!(done && done[i]);
+        label.addEventListener('click', function() {
+          var idx = parseInt(label.getAttribute('data-idx'), 10);
+          // Manually unchecking a skipped item clears its skip.
+          if (isSkipped(cat, idx) && !cb.checked) {
+            skips[cat][idx] = false;
+            saveSkips();
+          }
+          applyCategory(cat);
+          updateProgress(cat);
+          saveState(cat);
+        });
+      });
+      applyCategory(cat);
+      updateProgress(cat);
+    });
+  }
+
+  window.resetCategory = function(cat) {
+    items(cat).forEach(function(label) {
+      label.querySelector('input').checked = false;
+    });
+    applyCategory(cat);
+    updateProgress(cat);
+    saveState(cat);
+  };
+
+  window.openLightbox = function(src, cap) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightboxCap').textContent = cap;
+    document.getElementById('lightbox').classList.add('on');
+  };
+
+  window.closeLightbox = function() {
+    document.getElementById('lightbox').classList.remove('on');
+  };
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>
