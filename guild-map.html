@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guild History Map — Aethersea</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  background-color: #0a0a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,50,120,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,40,100,0.3) 0%, transparent 60%);
+  color: #ccddff;
+  min-height: 100vh;
+}
+
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+@keyframes marquee { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+@keyframes glow { 0%,100%{text-shadow:0 0 5px #3399cc,0 0 10px #3399cc} 50%{text-shadow:0 0 15px #66ccff,0 0 25px #3399cc} }
+
+.top-bar {
+  background: linear-gradient(180deg, #001a33 0%, #003366 100%);
+  border-bottom: 3px outset #3399cc;
+  padding: 5px 0;
+  overflow: hidden;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+  font-size: 14px;
+  color: #66ccff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.header {
+  background: linear-gradient(180deg, #000d1a 0%, #002244 30%, #003d6b 60%, #002244 100%);
+  border: 4px outset #3399cc;
+  margin: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 26px;
+  color: #66ccff;
+  text-shadow: 2px 2px 0 #003366, 0 0 15px #3399cc;
+  animation: glow 3s ease-in-out infinite;
+  letter-spacing: 3px;
+}
+
+.header .subtitle {
+  font-size: 12px;
+  color: #99ccee;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 10px auto;
+  padding: 0 10px;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 15px 10px;
+  padding: 6px 16px;
+  background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+  border: 2px outset #3399cc;
+  color: #66ccff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  background: linear-gradient(180deg, #004488 0%, #002244 100%);
+  color: #99ddff;
+}
+
+.input-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  padding: 15px 20px;
+}
+
+.input-box h2 {
+  color: #66ccff;
+  font-size: 17px;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.input-box p {
+  font-size: 12px;
+  color: #99bbdd;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.input-box textarea {
+  width: 100%;
+  height: 150px;
+  background: #0a0a1a;
+  border: 2px inset #336699;
+  color: #aaddff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.input-box textarea:focus { outline: none; border-color: #66ccff; }
+
+.btn-row {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.gen-btn {
+  background: linear-gradient(180deg, #005588 0%, #003366 100%);
+  border: 2px outset #3399cc;
+  color: #99ddff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 8px 20px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.gen-btn:hover { background: linear-gradient(180deg, #006699 0%, #004477 100%); color: #ccffff; }
+.gen-btn:active { border-style: inset; }
+.gen-btn.clear { background: linear-gradient(180deg, #552222 0%, #331111 100%); border-color: #aa4444; color: #ffaaaa; }
+.gen-btn.clear:hover { background: linear-gradient(180deg, #773333 0%, #441818 100%); }
+
+.map-box {
+  position: relative;
+  background: radial-gradient(ellipse at 50% 50%, #001a33 0%, #050510 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  height: 640px;
+  overflow: hidden;
+}
+
+.map-box canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.map-box canvas.dragging { cursor: grabbing; }
+
+.tune-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 2px outset #336699;
+  padding: 8px 12px;
+  margin: 0 0 10px 0;
+}
+
+.tune-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: #88bbdd;
+}
+
+.tune-row label { white-space: nowrap; }
+
+.tune-row .val {
+  color: #ffcc44;
+  font-weight: bold;
+  min-width: 34px;
+  display: inline-block;
+  text-align: right;
+}
+
+.tune-row input[type="range"] {
+  width: 120px;
+  accent-color: #3399cc;
+  cursor: pointer;
+}
+
+.tune-reset {
+  background: linear-gradient(180deg, #552222 0%, #331111 100%);
+  border: 2px outset #aa4444;
+  color: #ffaaaa;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 11px;
+  padding: 3px 12px;
+  cursor: pointer;
+}
+
+.tune-reset:hover { background: linear-gradient(180deg, #773333 0%, #441818 100%); }
+
+.quiz-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 2000;
+  background: rgba(5, 5, 20, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.quiz-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  padding: 20px;
+  max-width: 440px;
+  width: 100%;
+}
+
+.quiz-box h3 { color: #66ccff; font-size: 18px; margin-bottom: 8px; letter-spacing: 1px; }
+.quiz-box p { color: #99bbdd; font-size: 13px; margin-bottom: 8px; }
+.quiz-box .quiz-q { color: #ffe9a8; font-size: 15px; font-weight: bold; margin: 10px 0; }
+.quiz-box input { width: 100%; background: #0a0a1a; border: 2px inset #336699; color: #aaddff; font-family: 'Courier New', monospace; font-size: 14px; padding: 8px; }
+.quiz-error { color: #ff6666; font-size: 12px; min-height: 16px; margin: 6px 0; }
+.quiz-actions { display: flex; gap: 8px; }
+
+.mode-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.mode-btn {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 2px outset #336699;
+  color: #88bbdd;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.mode-btn:hover { background: linear-gradient(180deg, #003355 0%, #001a33 100%); color: #cceeff; }
+
+.mode-btn.active {
+  background: linear-gradient(180deg, #006699 0%, #004477 100%);
+  border-color: #66ccff;
+  color: #eafaff;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(102,204,255,0.35);
+}
+
+.list-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  padding: 15px 20px;
+  max-height: 720px;
+  overflow: auto;
+}
+
+.list-guild {
+  border-bottom: 1px solid #224466;
+  padding: 10px 0;
+}
+
+.list-guild:last-child { border-bottom: none; }
+
+.list-guild h3 {
+  color: #ffcc44;
+  font-size: 15px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.list-count { color: #88aacc; font-size: 12px; font-weight: normal; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  display: inline-block;
+  background: rgba(0,60,120,0.45);
+  border: 1px solid #336699;
+  color: #aaddff;
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 10px;
+}
+
+.chip.empty { color: #667799; border-style: dashed; background: transparent; }
+
+.history-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid #16263c;
+}
+
+.history-row:last-child { border-bottom: none; }
+
+.history-name {
+  color: #66ccff;
+  font-weight: bold;
+  font-size: 13px;
+  min-width: 130px;
+}
+
+.history-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.arrow { color: #557799; font-size: 13px; }
+
+.map-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: #557799;
+  pointer-events: none;
+}
+
+.map-empty {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  color: #446688;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  display: none;
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 2px outset #3399cc;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #cceeff;
+  pointer-events: none;
+  z-index: 20;
+  max-width: 260px;
+  line-height: 1.4;
+}
+
+.tooltip .tt-name { color: #66ccff; font-weight: bold; }
+.tooltip .tt-sub { color: #88aacc; font-size: 11px; }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 2px outset #3399cc;
+  padding: 8px 12px;
+  margin: 10px 0;
+  font-size: 12px;
+  color: #99bbdd;
+}
+
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-swatch { display: inline-block; }
+.legend-circle { width: 14px; height: 14px; border-radius: 50%; background: #66ccff; border: 2px solid #003366; }
+.legend-diamond { width: 12px; height: 12px; background: #ffcc44; border: 2px solid #aa7700; transform: rotate(45deg); }
+.legend-line { width: 22px; height: 2px; background: rgba(102,204,255,0.5); }
+
+.stats-box {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border: 3px outset #3399cc;
+  margin: 10px 0;
+  padding: 15px 20px;
+  font-size: 13px;
+}
+
+.stats-box h2 {
+  color: #66ccff;
+  font-size: 16px;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.stats-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.stats-col { flex: 1 1 260px; }
+.stats-col h3 { color: #88bbdd; font-size: 13px; margin-bottom: 6px; letter-spacing: 1px; }
+
+.stats-col ol { margin-left: 20px; }
+.stats-col li { margin: 3px 0; color: #aaccdd; }
+.stats-col li .cnt { color: #ffcc44; font-weight: bold; }
+.stats-col li .dim { color: #667799; font-size: 11px; }
+
+.stats-total { color: #66ccff; font-size: 14px; margin-bottom: 12px; }
+
+.footer {
+  background: linear-gradient(180deg, #001a33 0%, #001122 100%);
+  border-top: 3px outset #3399cc;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #336699;
+}
+
+.footer .hearts {
+  color: #3399cc;
+  font-size: 14px;
+  animation: blink 1.5s step-end infinite;
+}
+
+@media (max-width: 700px) {
+  .back-link { margin: 8px 5px; padding: 5px 10px; font-size: 10px; }
+  .map-box { height: 440px; }
+  .header h1 { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="marquee-text">
+    🌊 AETHERSEA GUILD — Guild History Map — Trace where everyone came from 🌊 — Every origin tells a story 🌊
+  </div>
+</div>
+
+<div class="header">
+  <span style="color:#3399cc;font-size:18px;">✦ ✦ ✦</span>
+  <br>
+  <h1>🌐 GUILD HISTORY MAP 🌐</h1>
+  <div class="subtitle">AETHERSEA — Where Winds Meet</div>
+  <br>
+  <span style="color:#3399cc;font-size:18px;">✧ ✧ ✧</span>
+</div>
+
+<a class="back-link" href="jayus-calc.html">← Back to jayus calculator</a>
+<a class="back-link" href="gw-timer.html">⏱ GW Timer</a>
+<a class="back-link" href="gw-strategy.html">🗺 GW Strategy</a>
+<a class="back-link" href="gvg-roster.html">⚔ GvG Roster</a>
+<a class="back-link" href="gvg-stats.html">📊 War Stats (OCR)</a>
+<a class="back-link" href="checklist.html">📋 Checklist</a>
+
+<div class="content">
+
+  <div class="input-box">
+    <h2>📋 Roster Input</h2>
+    <p>Paste one member per line: <strong>Name&lt;TAB&gt;Guild1, Guild2, ...</strong> — the guild list is that member's origin (guild history).</p>
+    <textarea id="rosterInput" placeholder="Adeep	Guild 1, Guild 3
+lorddy	Guild 2, Guild 1, Guild 3
+Cheon	Guild 3"></textarea>
+    <div class="btn-row">
+      <button class="gen-btn" onclick="generateMap()">🌐 Generate Map</button>
+      <button class="gen-btn" onclick="openAetherseaQuiz()">🌊 Load Aethersea</button>
+      <button class="gen-btn clear" onclick="clearAll()">🗑 Clear</button>
+      <span style="font-size:11px;color:#667799;" id="parseInfo"></span>
+    </div>
+  </div>
+
+  <div class="mode-bar">
+    <button class="mode-btn active" data-mode="ordered" onclick="setMode('ordered')">🧭 Ordered</button>
+    <button class="mode-btn" data-mode="network" onclick="setMode('network')">🕸 Network</button>
+    <button class="mode-btn" data-mode="clusters" onclick="setMode('clusters')">🫧 Clusters</button>
+    <button class="mode-btn" data-mode="radial" onclick="setMode('radial')">🎯 Radial</button>
+    <button class="mode-btn" data-mode="flow" onclick="setMode('flow')">🌊 Flow</button>
+    <button class="mode-btn" data-mode="matrix" onclick="setMode('matrix')">🔲 Matrix</button>
+    <button class="mode-btn" data-mode="list" onclick="setMode('list')">📜 List</button>
+    <button class="mode-btn" data-mode="history" onclick="setMode('history')">🕘 History</button>
+  </div>
+
+  <div class="tune-panel" id="tunePanel">
+    <div class="tune-row">
+      <label>Spread</label>
+      <input type="range" id="tuneRep" min="2000" max="14000" step="250" value="7000" oninput="applyTuning()">
+      <span class="val" id="tuneRepVal">7000</span>
+    </div>
+    <div class="tune-row">
+      <label>Join pull</label>
+      <input type="range" id="tuneJoin" min="0" max="6" step="0.1" value="2.0" oninput="applyTuning()">
+      <span class="val" id="tuneJoinVal">2.0</span>
+    </div>
+    <div class="tune-row">
+      <label>Leave pull</label>
+      <input type="range" id="tuneLeave" min="0" max="1" step="0.05" value="0.1" oninput="applyTuning()">
+      <span class="val" id="tuneLeaveVal">0.1</span>
+    </div>
+    <div class="tune-row">
+      <label>Ring strength</label>
+      <input type="range" id="tuneRadial" min="0" max="0.12" step="0.005" value="0.005" oninput="applyTuning()">
+      <span class="val" id="tuneRadialVal">0.005</span>
+    </div>
+    <div class="tune-row">
+      <label>Ring gap</label>
+      <input type="range" id="tuneGap" min="18" max="90" step="2" value="40" oninput="applyTuning()">
+      <span class="val" id="tuneGapVal">40</span>
+    </div>
+    <button class="tune-reset" onclick="resetTuning()">Reset</button>
+  </div>
+
+  <div class="map-box" id="mapBox">
+    <canvas id="mapCanvas"></canvas>
+    <div class="map-empty" id="mapEmpty">Paste a roster above and hit Generate Map 🌐</div>
+    <div class="map-hint" id="mapHint">Drag nodes to rearrange · hover for details · click a guild to highlight its members</div>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+
+  <div class="list-box" id="listBox" style="display:none;"></div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch legend-circle"></span> Member</span>
+    <span class="legend-item"><span class="legend-swatch legend-diamond"></span> Origin Guild</span>
+    <span class="legend-item"><span class="legend-swatch legend-line"></span> Member → Guild</span>
+  </div>
+
+  <div class="stats-box" id="statsBox" style="display:none;"></div>
+
+</div>
+
+<div class="quiz-modal" id="quizModal" style="display:none;">
+  <div class="quiz-box">
+    <h3>🌊 Guild Secret</h3>
+    <p>Answer correctly to load the Aethersea roster:</p>
+    <p class="quiz-q" id="quizQuestion"></p>
+    <input type="text" id="quizAnswer" autocomplete="off" onkeydown="if(event.key==='Enter')submitQuiz()">
+    <div class="quiz-error" id="quizError"></div>
+    <div class="quiz-actions">
+      <button class="gen-btn" onclick="submitQuiz()">Submit</button>
+      <button class="gen-btn clear" onclick="closeQuiz()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="hearts">🌊 🌊 🌊</div>
+  <p>AETHERSEA — Where Winds Meet</p>
+  <p style="margin-top:5px;">Est. 2025 — Made by lorddy</p>
+</div>
+
+<script>
+(function() {
+  var canvas = document.getElementById('mapCanvas');
+  var ctx = canvas.getContext('2d');
+  var mapBox = document.getElementById('mapBox');
+  var listBox = document.getElementById('listBox');
+  var tooltip = document.getElementById('tooltip');
+  var mapEmpty = document.getElementById('mapEmpty');
+  var mapHint = document.getElementById('mapHint');
+
+  var dpr = window.devicePixelRatio || 1;
+  var W = 0, H = 0;
+
+  var state = {
+    players: [],
+    graph: null,
+    guildList: [],
+    guildOrder: {},
+    playerGuilds: {},
+    selectedGuildName: null,
+    selectedPlayerName: null,
+    mode: 'ordered'
+  };
+
+  var nodes = [];
+  var links = [];
+  var view = { scale: 1, ox: 0, oy: 0, zoom: 1, panX: 0, panY: 0 };
+  var matrixData = null;
+  var matrixGeom = null;
+  var flowData = null;
+  var orderedData = null;
+  var running = false;
+  var rafId = null;
+
+  var dragging = null;
+  var dragMoved = false;
+  var panning = null;
+  var mouse = { x: 0, y: 0, over: null };
+
+  var COL_PLAYER = '#66ccff';
+  var COL_PLAYER_STROKE = '#003366';
+  var COL_GUILD = '#ffcc44';
+  var COL_GUILD_STROKE = '#aa7700';
+  var COL_LINK = 'rgba(102,204,255,0.16)';
+  var COL_LINK_HI = 'rgba(255,204,68,0.65)';
+
+  function resize() {
+    var rect = mapBox.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+  }
+
+  function parseRoster(text) {
+    var players = [];
+    var lines = text.split('\n');
+    lines.forEach(function(raw) {
+      var line = raw.replace(/\r$/, '').trim();
+      if (!line) return;
+      var parts = line.split('\t');
+      var name = (parts[0] || '').trim();
+      if (!name) return;
+      var lower = name.toLowerCase();
+      if (lower === 'nickname' || lower === 'nickname(do not change)' || lower === 'name') return;
+      // Primary format: 2 columns (name, guild list).
+      // Fallback: full roster paste -> origin is column 8 (index 7).
+      var guildRaw;
+      if (parts.length >= 8) guildRaw = parts[7] || '';
+      else guildRaw = parts[1] || '';
+      var guilds = guildRaw.split(',').map(function(g) { return g.trim(); }).filter(function(g) { return g.length > 0; });
+      players.push({ name: name, guilds: guilds });
+    });
+    return players;
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function buildGraph(players) {
+    var ns = [];
+    var ls = [];
+    var guildMap = {};
+    var playerMap = {};
+
+    players.forEach(function(p) {
+      var pnode = {
+        id: 'p:' + p.name,
+        type: 'player',
+        label: p.name,
+        guilds: p.guilds,
+        x: rand(-200, 200),
+        y: rand(-200, 200),
+        vx: 0, vy: 0,
+        r: 6
+      };
+      playerMap[p.name] = pnode;
+      ns.push(pnode);
+    });
+
+    players.forEach(function(p) {
+      var pnode = playerMap[p.name];
+      p.guilds.forEach(function(g) {
+        if (!guildMap[g]) {
+          guildMap[g] = {
+            id: 'g:' + g,
+            type: 'guild',
+            name: g,
+            label: g,
+            x: rand(-200, 200),
+            y: rand(-200, 200),
+            vx: 0, vy: 0,
+            count: 0,
+            members: [],
+            r: 9
+          };
+          ns.push(guildMap[g]);
+        }
+        guildMap[g].count++;
+        guildMap[g].members.push(p.name);
+        ls.push({ s: pnode, t: guildMap[g] });
+      });
+    });
+
+    ns.forEach(function(n) {
+      if (n.type === 'guild') n.r = 8 + Math.min(n.count, 14) * 1.4;
+    });
+
+    return { nodes: ns, links: ls, guildMap: guildMap, playerMap: playerMap };
+  }
+
+  function simulate(cfg) {
+    cfg = cfg || {};
+    var REPULSION = cfg.rep || 5200;
+    var SPRING = cfg.spring || 0.012;
+    var REST = cfg.rest || 70;
+    var CENTER = (cfg.center === undefined) ? 0.0016 : cfg.center;
+    var MAXDX = (cfg.maxDx === undefined) ? Infinity : cfg.maxDx;
+    var DAMP = 0.86;
+    var MAXV = 12;
+
+    var n = nodes.length;
+    var i, j, a, b, dx, dy, d2, d, f;
+
+    for (i = 0; i < n; i++) {
+      a = nodes[i];
+      for (j = i + 1; j < n; j++) {
+        b = nodes[j];
+        dx = a.x - b.x;
+        if (dx > MAXDX || dx < -MAXDX) continue;
+        dy = a.y - b.y;
+        d2 = dx * dx + dy * dy;
+        if (d2 < 0.01) { dx = rand(-1, 1); dy = rand(-1, 1); d2 = dx * dx + dy * dy; }
+        d = Math.sqrt(d2);
+        f = REPULSION / d2;
+        if (f > 60) f = 60;
+        var fx = (dx / d) * f;
+        var fy = (dy / d) * f;
+        if (!a.pinned) { a.vx += fx; a.vy += fy; }
+        if (!b.pinned) { b.vx -= fx; b.vy -= fy; }
+      }
+    }
+
+    for (i = 0; i < links.length; i++) {
+      var l = links[i];
+      a = l.s; b = l.t;
+      dx = b.x - a.x;
+      dy = b.y - a.y;
+      d = Math.sqrt(dx * dx + dy * dy) || 0.01;
+      var restLen = (l.rest !== undefined) ? l.rest : REST;
+      var spr = SPRING * ((l.springMul !== undefined) ? l.springMul : 1);
+      f = (d - restLen) * spr;
+      var ux = dx / d, uy = dy / d;
+      if (!a.pinned) { a.vx += ux * f; a.vy += uy * f; }
+      if (!b.pinned) { b.vx -= ux * f; b.vy -= uy * f; }
+    }
+
+    // Radial ring constraint (ordered mode): hold each node near its step radius.
+    if (cfg.radial) {
+      for (i = 0; i < n; i++) {
+        a = nodes[i];
+        if (a.pinned || a.targetR === undefined) continue;
+        var rr = Math.sqrt(a.x * a.x + a.y * a.y);
+        if (rr > 0.01) {
+          var rf = (a.targetR - rr) * cfg.radial;
+          a.vx += (a.x / rr) * rf;
+          a.vy += (a.y / rr) * rf;
+        } else if (a.targetR > 0) {
+          a.vx += rand(-1, 1);
+          a.vy += rand(-1, 1);
+        }
+      }
+    }
+
+    for (i = 0; i < n; i++) {
+      a = nodes[i];
+      if (a.pinned) { a.x = a.px; a.y = a.py; a.vx = 0; a.vy = 0; continue; }
+      a.vx -= a.x * CENTER;
+      a.vy -= a.y * CENTER;
+      if (a === dragging) { a.vx = 0; a.vy = 0; continue; }
+      if (a.pinX) {
+        a.x = a.px;
+        a.vx = 0;
+        a.vy *= DAMP;
+        if (a.vy > MAXV) a.vy = MAXV;
+        if (a.vy < -MAXV) a.vy = -MAXV;
+        a.y += a.vy;
+      } else {
+        a.vx *= DAMP;
+        a.vy *= DAMP;
+        var sp = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
+        if (sp > MAXV) { a.vx = a.vx / sp * MAXV; a.vy = a.vy / sp * MAXV; }
+        a.x += a.vx;
+        a.y += a.vy;
+      }
+    }
+  }
+
+  function computeView(snap) {
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+    if (state.mode === 'ordered' && orderedData && orderedData.centerNode && nodes.length) {
+      var c = orderedData.centerNode;
+      var maxR = 1;
+      for (var oi = 0; oi < nodes.length; oi++) {
+        var on = nodes[oi];
+        var ox = Math.abs(on.x - c.x);
+        var oy = Math.abs(on.y - c.y);
+        var orr = Math.max(ox, oy) + (on.r || 0);
+        if (orr > maxR) maxR = orr;
+      }
+      minX = c.x - maxR; maxX = c.x + maxR;
+      minY = c.y - maxR; maxY = c.y + maxR;
+    } else if (state.mode === 'flow' && flowData && flowData.bounds) {
+      minX = flowData.bounds.minX; minY = flowData.bounds.minY;
+      maxX = flowData.bounds.maxX; maxY = flowData.bounds.maxY;
+    } else {
+      if (nodes.length === 0) return;
+      nodes.forEach(function(n) {
+        var rr = n.r || 0;
+        if (n.x - rr < minX) minX = n.x - rr;
+        if (n.y - rr < minY) minY = n.y - rr;
+        if (n.x + rr > maxX) maxX = n.x + rr;
+        if (n.y + rr > maxY) maxY = n.y + rr;
+      });
+    }
+
+    var bw = Math.max(maxX - minX, 1);
+    var bh = Math.max(maxY - minY, 1);
+    var pad = 80;
+    var target = Math.min((W - pad * 2) / bw, (H - pad * 2) / bh, 2.4);
+    if (!isFinite(target) || target <= 0) target = 1;
+    var pz = isPanZoomMode();
+    target *= pz ? view.zoom : 1;
+    var cx = (minX + maxX) / 2;
+    var cy = (minY + maxY) / 2;
+    var tox = W / 2 - cx * target + (pz ? view.panX : 0);
+    var toy = H / 2 - cy * target + (pz ? view.panY : 0);
+
+    // smooth toward target so it doesn't jitter while settling
+    var k = snap ? 1 : 0.15;
+    view.scale += (target - view.scale) * k;
+    view.ox += (tox - view.ox) * k;
+    view.oy += (toy - view.oy) * k;
+  }
+
+  function toWorld(mx, my) {
+    return { x: (mx - view.ox) / view.scale, y: (my - view.oy) / view.scale };
+  }
+
+  function isHighlighted(node) {
+    var sel = state.selectedGuildName;
+    if (!sel) return true;
+    if (node.type === 'guild') return node.label === sel;
+    var gs = node.guilds || [];
+    return gs.indexOf(sel) !== -1;
+  }
+
+  function drawNodes() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.save();
+    ctx.translate(view.ox, view.oy);
+    ctx.scale(view.scale, view.scale);
+
+    var i, l, a, b;
+
+    // links
+    for (i = 0; i < links.length; i++) {
+      l = links[i];
+      var hi = state.selectedGuildName && (l.t.label === state.selectedGuildName);
+      ctx.strokeStyle = hi ? COL_LINK_HI : COL_LINK;
+      ctx.lineWidth = (hi ? 1.6 : 0.8) / view.scale;
+      ctx.beginPath();
+      ctx.moveTo(l.s.x, l.s.y);
+      ctx.lineTo(l.t.x, l.t.y);
+      ctx.stroke();
+    }
+
+    var labelSize = Math.max(9 / view.scale, 1);
+
+    // nodes
+    for (i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      var dim = !isHighlighted(n);
+      ctx.globalAlpha = dim ? 0.22 : 1;
+
+      if (n.type === 'guild') {
+        var r = n.r;
+        ctx.save();
+        ctx.translate(n.x, n.y);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = COL_GUILD;
+        ctx.strokeStyle = COL_GUILD_STROKE;
+        ctx.lineWidth = 2 / view.scale;
+        ctx.fillRect(-r / 1.4, -r / 1.4, (r / 1.4) * 2, (r / 1.4) * 2);
+        ctx.strokeRect(-r / 1.4, -r / 1.4, (r / 1.4) * 2, (r / 1.4) * 2);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = COL_PLAYER;
+        ctx.strokeStyle = COL_PLAYER_STROKE;
+        ctx.lineWidth = 2 / view.scale;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    // labels
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (i = 0; i < nodes.length; i++) {
+      var nn = nodes[i];
+      if (!isHighlighted(nn)) continue;
+      if (nn.type === 'player' && state.mode !== 'network') continue;
+      ctx.font = (nn.type === 'guild' ? 'bold ' : '') + labelSize + 'px "Comic Sans MS", sans-serif';
+      ctx.fillStyle = nn.type === 'guild' ? '#ffe9a8' : '#dff3ff';
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 3 / view.scale;
+      var ly = nn.y + (nn.type === 'guild' ? nn.r * 1.05 + labelSize : nn.r + labelSize * 0.9);
+      ctx.fillText(nn.label, nn.x, ly);
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function draw() {
+    if (state.mode === 'matrix') { drawMatrix(); return; }
+    if (state.mode === 'flow') { drawFlow(); return; }
+    if (state.mode === 'ordered') { drawOrdered(); return; }
+    drawNodes();
+  }
+
+  function tick() {
+    if (!running) return;
+    if (state.mode === 'network') simulate();
+    else if (state.mode === 'ordered') simulate(ORDERED_SIM);
+    computeView();
+    draw();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    tick();
+  }
+
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  function pickNode(mx, my) {
+    var wp = toWorld(mx, my);
+    var best = null;
+    var bestD = Infinity;
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      var dx = n.x - wp.x;
+      var dy = n.y - wp.y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      var hitR = n.r + 6 / view.scale;
+      if (d < hitR && d < bestD) { bestD = d; best = n; }
+    }
+    return best;
+  }
+
+  function showTooltip(n, mx, my) {
+    if (!n) { tooltip.style.display = 'none'; return; }
+    var html;
+    if (n.type === 'guild') {
+      html = '<div class="tt-name">🏰 ' + esc(n.label) + '</div>' +
+             '<div class="tt-sub">' + n.count + ' member' + (n.count === 1 ? '' : 's') + '</div>' +
+             '<div class="tt-sub">' + esc(n.members.slice(0, 12).join(', ')) + (n.members.length > 12 ? '…' : '') + '</div>';
+    } else {
+      html = '<div class="tt-name">👤 ' + esc(n.label) + '</div>' +
+             '<div class="tt-sub">' + (n.guilds.length ? 'Origin: ' + esc(n.guilds.join(', ')) : 'No origin recorded') + '</div>';
+    }
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    var bx = mapBox.getBoundingClientRect();
+    var tx = mx + 14;
+    var ty = my + 14;
+    if (tx + tooltip.offsetWidth > bx.width - 6) tx = mx - tooltip.offsetWidth - 14;
+    if (ty + tooltip.offsetHeight > bx.height - 6) ty = my - tooltip.offsetHeight - 14;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top = ty + 'px';
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function showMatrixTooltip(cell, mx, my) {
+    if (!matrixData) { tooltip.style.display = 'none'; return; }
+    var m = matrixData;
+    var a = m.guilds[cell.row];
+    var b = m.guilds[cell.col];
+    var v = m.shared[cell.row][cell.col];
+    var html;
+    if (cell.row === cell.col) {
+      html = '<div class="tt-name">🏰 ' + esc(a.label) + '</div>' +
+             '<div class="tt-sub">' + v + ' member' + (v === 1 ? '' : 's') + '</div>';
+    } else {
+      html = '<div class="tt-name">🏰 ' + esc(a.label) + ' × ' + esc(b.label) + '</div>' +
+             '<div class="tt-sub">' + v + ' shared member' + (v === 1 ? '' : 's') + '</div>';
+    }
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    var bx = mapBox.getBoundingClientRect();
+    var tx = mx + 14;
+    var ty = my + 14;
+    if (tx + tooltip.offsetWidth > bx.width - 6) tx = mx - tooltip.offsetWidth - 14;
+    if (ty + tooltip.offsetHeight > bx.height - 6) ty = my - tooltip.offsetHeight - 14;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top = ty + 'px';
+  }
+
+  function renderStats(players, graph) {
+    var box = document.getElementById('statsBox');
+    var guilds = [];
+    for (var k in graph.guildMap) {
+      if (Object.prototype.hasOwnProperty.call(graph.guildMap, k)) guilds.push(graph.guildMap[k]);
+    }
+    guilds.sort(function(a, b) { return b.count - a.count; });
+
+    var travelers = players.slice().sort(function(a, b) { return b.guilds.length - a.guilds.length; });
+
+    var topGuilds = guilds.slice(0, 8).map(function(g) {
+      return '<li>' + esc(g.label) + ' <span class="cnt">' + g.count + '</span></li>';
+    }).join('');
+
+    var topTravelers = travelers.slice(0, 8).map(function(p) {
+      return '<li>' + esc(p.name) + ' <span class="cnt">' + p.guilds.length + '</span>' +
+        (p.guilds.length ? ' <span class="dim">(' + esc(p.guilds.join(', ')) + ')</span>' : '') + '</li>';
+    }).join('');
+
+    box.innerHTML =
+      '<h2>📊 Map Stats</h2>' +
+      '<div class="stats-total">👥 ' + players.length + ' members &nbsp;·&nbsp; 🏰 ' + guilds.length + ' origin guilds</div>' +
+      '<div class="stats-cols">' +
+        '<div class="stats-col"><h3>Top Origin Guilds</h3><ol>' + (topGuilds || '<li>None</li>') + '</ol></div>' +
+        '<div class="stats-col"><h3>Most Traveled Members</h3><ol>' + (topTravelers || '<li>None</li>') + '</ol></div>' +
+      '</div>';
+    box.style.display = '';
+  }
+
+  // ---------- layouts ----------
+  function guildListFromGraph(graph) {
+    var arr = [];
+    for (var k in graph.guildMap) {
+      if (Object.prototype.hasOwnProperty.call(graph.guildMap, k)) arr.push(graph.guildMap[k]);
+    }
+    arr.sort(function(a, b) { return b.count - a.count; });
+    return arr;
+  }
+
+  // Origin lists are chronological (left = first guild joined, right = latest).
+  // Average position of each guild across its members = its "join order" (lower = earlier).
+  function computeGuildOrder(players) {
+    var sum = {}, cnt = {};
+    players.forEach(function(p) {
+      var list = p.guilds || [];
+      list.forEach(function(g, i) {
+        if (sum[g] === undefined) { sum[g] = 0; cnt[g] = 0; }
+        sum[g] += i;
+        cnt[g]++;
+      });
+    });
+    var out = {};
+    Object.keys(sum).forEach(function(g) { out[g] = sum[g] / cnt[g]; });
+    return out;
+  }
+
+  function joinOrderOf(g) {
+    var v = state.guildOrder[g.name];
+    return (v === undefined) ? 9999 : v;
+  }
+
+  function orderedGuilds() {
+    return state.guildList.slice().sort(function(a, b) {
+      var d = joinOrderOf(a) - joinOrderOf(b);
+      if (d !== 0) return d;
+      return b.count - a.count;
+    });
+  }
+
+  function layoutClusters() {
+    var gs = orderedGuilds();
+    var unaff = state.players.filter(function(p) { return !p.guilds || p.guilds.length === 0; });
+    if (unaff.length) {
+      gs = gs.concat([{
+        name: '(no origin)', label: '(no origin)', count: unaff.length,
+        members: unaff.map(function(p) { return p.name; })
+      }]);
+    }
+
+    var arr = [];
+    var ROW_MAX = 1500, GAP = 34;
+    var cursorX = 0, y = 0, rowH = 0;
+
+    gs.forEach(function(g) {
+      var R = 24 + Math.sqrt(g.count) * 10;
+      var d = R * 2;
+      if (cursorX + d > ROW_MAX && cursorX > 0) {
+        cursorX = 0; y += rowH + GAP; rowH = 0;
+      }
+      var cx = cursorX + R;
+      var cy = y + R;
+      cursorX += d + GAP;
+      if (d > rowH) rowH = d;
+
+      arr.push({
+        id: 'g:' + g.name, type: 'guild', label: g.name,
+        x: cx, y: cy, vx: 0, vy: 0, r: R,
+        count: g.count, members: g.members, guilds: []
+      });
+
+      var total = g.members.length || 1;
+      g.members.forEach(function(name, i) {
+        var ang = i * 2.399963229728653;
+        var rad = Math.sqrt((i + 0.5) / total) * (R - 8);
+        arr.push({
+          id: 'p:' + name + '@' + g.name, type: 'player', label: name,
+          x: cx + Math.cos(ang) * rad, y: cy + Math.sin(ang) * rad,
+          vx: 0, vy: 0, r: 3.5, guilds: state.playerGuilds[name] || []
+        });
+      });
+    });
+
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    arr.forEach(function(n) {
+      minX = Math.min(minX, n.x - n.r); minY = Math.min(minY, n.y - n.r);
+      maxX = Math.max(maxX, n.x + n.r); maxY = Math.max(maxY, n.y + n.r);
+    });
+    var mx = (minX + maxX) / 2, my = (minY + maxY) / 2;
+    arr.forEach(function(n) { n.x -= mx; n.y -= my; });
+
+    nodes = arr;
+    links = [];
+  }
+
+  function layoutRadial() {
+    var gs = orderedGuilds();
+    var R = Math.max(260, gs.length * 8);
+    nodes = [];
+    links = [];
+    var gmap = {};
+
+    gs.forEach(function(g, i) {
+      var ang = (i / gs.length) * Math.PI * 2 - Math.PI / 2;
+      var x = Math.cos(ang) * R;
+      var y = Math.sin(ang) * R;
+      var n = {
+        id: 'g:' + g.name, type: 'guild', label: g.name,
+        x: x, y: y, vx: 0, vy: 0, r: 10 + Math.sqrt(g.count) * 2.2,
+        count: g.count, members: g.members, guilds: [],
+        pinned: true, px: x, py: y
+      };
+      gmap[g.name] = n;
+      nodes.push(n);
+    });
+
+    var unaff = [];
+    state.players.forEach(function(p) {
+      var has = p.guilds && p.guilds.some(function(g) { return !!gmap[g]; });
+      if (!has) { unaff.push(p); return; }
+      var n = {
+        id: 'p:' + p.name, type: 'player', label: p.name,
+        x: rand(-50, 50), y: rand(-50, 50), vx: 0, vy: 0, r: 5,
+        guilds: p.guilds
+      };
+      nodes.push(n);
+      p.guilds.forEach(function(g) { if (gmap[g]) links.push({ s: n, t: gmap[g] }); });
+    });
+
+    unaff.forEach(function(p, i) {
+      var ang = (i / Math.max(unaff.length, 1)) * Math.PI * 2;
+      var rr = 30 + (i % 3) * 16;
+      var x = Math.cos(ang) * rr;
+      var y = Math.sin(ang) * rr;
+      nodes.push({
+        id: 'p:' + p.name, type: 'player', label: p.name,
+        x: x, y: y, vx: 0, vy: 0, r: 5, guilds: p.guilds || [],
+        pinned: true, px: x, py: y
+      });
+    });
+
+    for (var i = 0; i < 500; i++) simulate({ rep: 3000, spring: 0.03, rest: 90, center: 0.0002 });
+  }
+
+  function layoutMatrix() {
+    var gs = state.guildList.slice(0, 24);
+    gs.sort(function(a, b) {
+      var d = joinOrderOf(a) - joinOrderOf(b);
+      if (d !== 0) return d;
+      return b.count - a.count;
+    });
+    var n = gs.length;
+    var idx = {};
+    gs.forEach(function(g, i) { idx[g.name] = i; });
+
+    var shared = [];
+    for (var i = 0; i < n; i++) {
+      shared.push([]);
+      for (var j = 0; j < n; j++) shared[i].push(0);
+    }
+    for (i = 0; i < n; i++) shared[i][i] = gs[i].count;
+
+    state.players.forEach(function(p) {
+      var ids = [];
+      (p.guilds || []).forEach(function(g) {
+        if (idx[g] !== undefined) ids.push(idx[g]);
+      });
+      for (var a = 0; a < ids.length; a++) {
+        for (var b = a + 1; b < ids.length; b++) {
+          shared[ids[a]][ids[b]]++;
+          shared[ids[b]][ids[a]]++;
+        }
+      }
+    });
+
+    var max = 1;
+    for (i = 0; i < n; i++) {
+      for (var j2 = 0; j2 < n; j2++) if (shared[i][j2] > max) max = shared[i][j2];
+    }
+
+    matrixData = { guilds: gs, shared: shared, max: max, totalGuilds: state.guildList.length };
+    nodes = [];
+    links = [];
+  }
+
+  function heatColor(t) {
+    if (t <= 0) return 'rgba(12,20,36,0.9)';
+    var r = Math.round(20 + t * 235);
+    var g = Math.round(40 + t * 164);
+    var b = Math.round(70 + t * (68 - 70));
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  function trimLabel(s, max) {
+    s = String(s);
+    return s.length > max ? s.slice(0, max - 1) + '…' : s;
+  }
+
+  function drawMatrix() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    if (!matrixData || matrixData.guilds.length === 0) {
+      ctx.fillStyle = '#446688';
+      ctx.font = '14px "Comic Sans MS", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('No guilds to display', W / 2, H / 2);
+      return;
+    }
+
+    var m = matrixData;
+    var n = m.guilds.length;
+    var left = 150, top = 130, right = 24, bottom = 24;
+    var availW = Math.max(W - left - right, 10);
+    var availH = Math.max(H - top - bottom, 10);
+    var cell = Math.min(availW / n, availH / n);
+    var ox = left + (availW - cell * n) / 2;
+    var oy = top + (availH - cell * n) / 2;
+    matrixGeom = { cell: cell, ox: ox, oy: oy, n: n };
+
+    var i, j, v, t;
+    for (i = 0; i < n; i++) {
+      for (j = 0; j < n; j++) {
+        v = m.shared[i][j];
+        t = m.max > 0 ? v / m.max : 0;
+        if (i === j) t = Math.max(t, 0.12);
+        ctx.fillStyle = heatColor(t);
+        ctx.fillRect(ox + j * cell, oy + i * cell, Math.max(cell - 1, 1), Math.max(cell - 1, 1));
+        if (v > 0 && cell >= 20) {
+          ctx.fillStyle = t > 0.5 ? '#1a1200' : '#cfe6ff';
+          ctx.font = Math.round(Math.min(cell * 0.4, 11)) + 'px "Comic Sans MS", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(String(v), ox + j * cell + cell / 2, oy + i * cell + cell / 2);
+        }
+      }
+    }
+
+    ctx.fillStyle = '#cceeff';
+    ctx.font = '11px "Comic Sans MS", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (i = 0; i < n; i++) {
+      ctx.fillText(trimLabel(m.guilds[i].label, 18), ox - 6, oy + i * cell + cell / 2);
+    }
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    for (j = 0; j < n; j++) {
+      ctx.save();
+      ctx.translate(ox + j * cell + cell / 2, oy - 6);
+      ctx.rotate(-Math.PI / 3);
+      ctx.fillText(trimLabel(m.guilds[j].label, 18), 0, 0);
+      ctx.restore();
+    }
+
+    if (m.totalGuilds > n) {
+      ctx.fillStyle = '#557799';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('Showing top ' + n + ' of ' + m.totalGuilds + ' guilds by member count', 10, 8);
+    }
+  }
+
+  function matrixCellAt(mx, my) {
+    if (!matrixGeom) return null;
+    var g = matrixGeom;
+    var col = Math.floor((mx - g.ox) / g.cell);
+    var row = Math.floor((my - g.oy) / g.cell);
+    if (col < 0 || row < 0 || col >= g.n || row >= g.n) return null;
+    return { row: row, col: col };
+  }
+
+  function ordinal(n) {
+    var s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  function guildHue(name) {
+    var h = 0;
+    for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 360;
+    return h;
+  }
+
+  function layoutFlow() {
+    var players = state.players;
+    var maxLen = 0;
+    players.forEach(function(p) { maxLen = Math.max(maxLen, (p.guilds || []).length); });
+
+    if (maxLen === 0) {
+      flowData = { columns: [], ribbons: [], empty: true };
+      nodes = [];
+      links = [];
+      return;
+    }
+
+    var columns = [];
+    for (var k = 0; k < maxLen; k++) columns.push({ nodes: [], map: {} });
+
+    players.forEach(function(p) {
+      (p.guilds || []).forEach(function(g, idx) {
+        var col = columns[idx];
+        if (!col.map[g]) {
+          col.map[g] = { name: g, count: 0, col: idx, hue: guildHue(g) };
+          col.nodes.push(col.map[g]);
+        }
+        col.map[g].count++;
+      });
+    });
+
+    var trans = [];
+    for (k = 0; k < maxLen - 1; k++) trans.push({});
+    players.forEach(function(p) {
+      var gs = p.guilds || [];
+      for (var t = 0; t < gs.length - 1; t++) {
+        var key = gs[t] + '\u0001' + gs[t + 1];
+        if (!trans[t][key]) trans[t][key] = { a: gs[t], b: gs[t + 1], count: 0 };
+        trans[t][key].count++;
+      }
+    });
+
+    var COL_W = 26, COL_GAP = 200, NODE_GAP = 8, AVAIL_H = 1000, MIN_H = 8;
+    var maxTotal = 1, maxNodes = 1;
+    columns.forEach(function(col) {
+      var tot = 0;
+      col.nodes.forEach(function(nd) { tot += nd.count; });
+      col.total = tot;
+      if (tot > maxTotal) maxTotal = tot;
+      if (col.nodes.length > maxNodes) maxNodes = col.nodes.length;
+    });
+
+    var usable = AVAIL_H - NODE_GAP * Math.max(maxNodes - 1, 0);
+    var scale = usable / maxTotal;
+
+    columns.forEach(function(col, ci) {
+      col.x = ci * COL_GAP;
+      col.nodes.sort(function(a, b) { return b.count - a.count; });
+      var totalH = 0;
+      col.nodes.forEach(function(nd) {
+        nd.h = Math.max(nd.count * scale, MIN_H);
+        nd.w = COL_W;
+        totalH += nd.h;
+      });
+      totalH += NODE_GAP * Math.max(col.nodes.length - 1, 0);
+      var y = (AVAIL_H - totalH) / 2;
+      col.topY = y;
+      col.nodes.forEach(function(nd) {
+        nd.x = col.x;
+        nd.y = y;
+        nd.cx = nd.x + nd.w / 2;
+        nd.cy = nd.y + nd.h / 2;
+        y += nd.h + NODE_GAP;
+      });
+    });
+
+    var ribbons = [];
+    for (k = 0; k < maxLen - 1; k++) {
+      var colA = columns[k], colB = columns[k + 1];
+      var outBy = {}, inBy = {};
+      Object.keys(trans[k]).forEach(function(key) {
+        var t = trans[k][key];
+        (outBy[t.a] = outBy[t.a] || []).push(t);
+        (inBy[t.b] = inBy[t.b] || []).push(t);
+      });
+
+      colA.nodes.forEach(function(nd) {
+        var list = outBy[nd.name] || [];
+        list.sort(function(x, y) {
+          var p = colB.map[x.b], q = colB.map[y.b];
+          return (p ? p.cy : 0) - (q ? q.cy : 0);
+        });
+        var cur = nd.y;
+        list.forEach(function(t) {
+          t.sy0 = cur;
+          t.sy1 = cur + t.count * scale;
+          cur += t.count * scale;
+        });
+      });
+
+      colB.nodes.forEach(function(nd) {
+        var list = inBy[nd.name] || [];
+        list.sort(function(x, y) {
+          var p = colA.map[x.a], q = colA.map[y.a];
+          return (p ? p.cy : 0) - (q ? q.cy : 0);
+        });
+        var cur = nd.y;
+        list.forEach(function(t) {
+          t.ty0 = cur;
+          t.ty1 = cur + t.count * scale;
+          cur += t.count * scale;
+        });
+      });
+
+      Object.keys(trans[k]).forEach(function(key) {
+        var t = trans[k][key];
+        var A = colA.map[t.a], B = colB.map[t.b];
+        if (!A || !B) return;
+        ribbons.push({
+          a: t.a, b: t.b, count: t.count, hue: A.hue,
+          x0: A.x + A.w, y0a: t.sy0, y0b: t.sy1,
+          x1: B.x, y1a: t.ty0, y1b: t.ty1
+        });
+      });
+    }
+
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    columns.forEach(function(col) {
+      col.nodes.forEach(function(nd) {
+        if (nd.x < minX) minX = nd.x;
+        if (nd.y < minY) minY = nd.y;
+        if (nd.x + nd.w > maxX) maxX = nd.x + nd.w;
+        if (nd.y + nd.h > maxY) maxY = nd.y + nd.h;
+      });
+    });
+
+    flowData = {
+      columns: columns, ribbons: ribbons, scale: scale, colW: COL_W,
+      bounds: { minX: minX, minY: minY, maxX: maxX, maxY: maxY },
+      empty: false
+    };
+
+    nodes = [];
+    links = [];
+  }
+
+  function drawFlow() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    if (!flowData || flowData.empty) {
+      ctx.fillStyle = '#446688';
+      ctx.font = '14px "Comic Sans MS", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('No join order to display', W / 2, H / 2);
+      return;
+    }
+
+    var sel = state.selectedGuildName;
+
+    ctx.save();
+    ctx.translate(view.ox, view.oy);
+    ctx.scale(view.scale, view.scale);
+
+    var i, r, mx;
+
+    for (i = 0; i < flowData.ribbons.length; i++) {
+      r = flowData.ribbons[i];
+      var related = !sel || r.a === sel || r.b === sel;
+      ctx.globalAlpha = related ? (sel ? 0.85 : 0.4) : 0.05;
+      ctx.fillStyle = 'hsl(' + r.hue + ', 65%, 58%)';
+      mx = (r.x0 + r.x1) / 2;
+      ctx.beginPath();
+      ctx.moveTo(r.x0, r.y0a);
+      ctx.bezierCurveTo(mx, r.y0a, mx, r.y1a, r.x1, r.y1a);
+      ctx.lineTo(r.x1, r.y1b);
+      ctx.bezierCurveTo(mx, r.y1b, mx, r.y0b, r.x0, r.y0b);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+
+    var labelSize = Math.max(10 / view.scale, 1);
+    flowData.columns.forEach(function(col, ci) {
+      col.nodes.forEach(function(nd) {
+        var dim = sel && nd.name !== sel;
+        ctx.globalAlpha = dim ? 0.25 : 1;
+        ctx.fillStyle = 'hsl(' + nd.hue + ', 65%, 58%)';
+        ctx.fillRect(nd.x, nd.y, nd.w, nd.h);
+        ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+        ctx.lineWidth = 1 / view.scale;
+        ctx.strokeRect(nd.x, nd.y, nd.w, nd.h);
+
+        ctx.fillStyle = dim ? '#7d8fa6' : '#eaf6ff';
+        ctx.font = labelSize + 'px "Comic Sans MS", sans-serif';
+        ctx.textBaseline = 'middle';
+        if (nd.h * view.scale >= 9) {
+          var label = nd.name + ' (' + nd.count + ')';
+          if (ci === 0) {
+            ctx.textAlign = 'right';
+            ctx.fillText(label, nd.x - 6 / view.scale, nd.cy);
+          } else {
+            ctx.textAlign = 'left';
+            ctx.fillText(label, nd.x + nd.w + 6 / view.scale, nd.cy);
+          }
+        }
+      });
+    });
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#557799';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.font = (11 / view.scale) + 'px "Comic Sans MS", sans-serif';
+    flowData.columns.forEach(function(col, ci) {
+      ctx.fillText(ordinal(ci + 1) + ' guild', col.x + flowData.colW / 2, col.topY - 10 / view.scale);
+    });
+
+    ctx.restore();
+  }
+
+  function pickFlowNode(wp) {
+    if (!flowData || flowData.empty) return null;
+    var tol = 4 / view.scale;
+    for (var ci = 0; ci < flowData.columns.length; ci++) {
+      var col = flowData.columns[ci];
+      for (var i = 0; i < col.nodes.length; i++) {
+        var nd = col.nodes[i];
+        if (wp.x >= nd.x - tol && wp.x <= nd.x + nd.w + tol &&
+            wp.y >= nd.y - tol && wp.y <= nd.y + nd.h + tol) {
+          return nd;
+        }
+      }
+    }
+    return null;
+  }
+
+  function showFlowTooltip(nd, mx, my) {
+    var html = '<div class="tt-name">🏰 ' + esc(nd.name) + '</div>' +
+      '<div class="tt-sub">' + nd.count + ' member' + (nd.count === 1 ? '' : 's') +
+      ' at ' + ordinal(nd.col + 1) + ' guild</div>';
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    var bx = mapBox.getBoundingClientRect();
+    var tx = mx + 14, ty = my + 14;
+    if (tx + tooltip.offsetWidth > bx.width - 6) tx = mx - tooltip.offsetWidth - 14;
+    if (ty + tooltip.offsetHeight > bx.height - 6) ty = my - tooltip.offsetHeight - 14;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top = ty + 'px';
+  }
+
+  var ORDERED_SIM = { rep: 7000, spring: 0.006, rest: 85, center: 0, radial: 0.005 };
+  var TUNE = { rep: 7000, join: 2.0, leave: 0.1, radial: 0.005, gap: 40 };
+
+  function layoutOrdered() {
+    if (orderedData && orderedData.nodes) {
+      nodes = orderedData.nodes;
+      links = orderedData.links;
+      return;
+    }
+
+    var guildMap = {};
+    var ns = [];
+    var ls = [];
+
+    state.players.forEach(function(p) {
+      var gs = p.guilds || [];
+
+      if (gs.length === 0) {
+        ns.push({
+          id: 'p:' + p.name + ':0', type: 'player', label: p.name, name: p.name,
+          step: 0, guild: null, r: 5,
+          x: 0, y: 0, vx: 0, vy: 0
+        });
+        return;
+      }
+
+      gs.forEach(function(g, step) {
+        if (!guildMap[g]) {
+          guildMap[g] = {
+            id: 'g:' + g, type: 'guild', name: g, label: g,
+            count: 0, members: [], sumStep: 0, r: 9,
+            x: 0, y: 0, vx: 0, vy: 0
+          };
+          ns.push(guildMap[g]);
+        }
+        var G = guildMap[g];
+        G.count++;
+        G.members.push(p.name);
+        G.sumStep += step;
+
+        var pn = {
+          id: 'p:' + p.name + ':' + step, type: 'player', label: p.name, name: p.name,
+          step: step, guild: g, r: 5,
+          x: 0, y: 0, vx: 0, vy: 0
+        };
+        ns.push(pn);
+
+        // Player nodes connect only to guilds (never to other players):
+        //  - first guild: 1 edge (join)
+        //  - every later step: 2 edges (leave previous guild + join this one)
+        // Join edge is short & strong; leave edge is long & weak, so the
+        // player node naturally settles closer to the NEXT guild.
+        ls.push({ s: pn, t: G, kind: 'member', rest: 30, springMul: TUNE.join });
+        if (step > 0) {
+          var prevGuild = guildMap[gs[step - 1]];
+          if (prevGuild && prevGuild !== G) {
+            ls.push({ s: pn, t: prevGuild, kind: 'leave', rest: 220, springMul: TUNE.leave });
+          }
+        }
+      });
+    });
+
+    var maxStep = 0;
+    ns.forEach(function(n) {
+      if (n.type === 'player' && n.step > maxStep) maxStep = n.step;
+    });
+
+    var R_OUTER = 520, R_INNER = 140;
+    function radiusForStep(step) {
+      var denom = maxStep + 1;
+      return R_INNER + (R_OUTER - R_INNER) * (1 - step / denom);
+    }
+
+    var biggest = null;
+    ns.forEach(function(n) {
+      if (n.type === 'guild') {
+        n.r = 9 + Math.min(n.count, 16) * 1.3;
+        n.avgStep = n.count ? (n.sumStep / n.count) : 0;
+        if (!biggest || n.count > biggest.count) biggest = n;
+      }
+    });
+
+    // Guilds sit on concentric rings by average join step (biggest guild centered).
+    ns.forEach(function(n) {
+      if (n === biggest) return;
+      if (n.type === 'guild') {
+        var gRad = Math.max(0, radiusForStep(n.avgStep) - 70);
+        n.targetR = gRad;
+        var gang = rand(0, Math.PI * 2);
+        n.x = Math.cos(gang) * gRad;
+        n.y = Math.sin(gang) * gRad;
+        n.vx = 0;
+        n.vy = 0;
+      }
+    });
+
+    // Players sit on concentric rings by their join step (step 0 outermost),
+    // spread across lanes so dense rings aren't cramped.
+    var byStep = {};
+    ns.forEach(function(n) {
+      if (n.type !== 'player') return;
+      if (!byStep[n.step]) byStep[n.step] = [];
+      byStep[n.step].push(n);
+    });
+    Object.keys(byStep).forEach(function(k) {
+      var arr = byStep[k];
+      arr.sort(function(a, b) { return String(a.name).localeCompare(String(b.name)); });
+      var lanes = Math.max(1, Math.ceil(arr.length / 18));
+      var laneGap = TUNE.gap;
+      var base = radiusForStep(parseFloat(k));
+      arr.forEach(function(n, idx) {
+        var lane = idx % lanes;
+        n.baseR = base;
+        n.lane = lane;
+        n.lanes = lanes;
+        n.targetR = base + (lane - (lanes - 1) / 2) * laneGap;
+        n.labelAbove = (idx % 2 === 1);
+        var ang = rand(0, Math.PI * 2);
+        n.x = Math.cos(ang) * n.targetR;
+        n.y = Math.sin(ang) * n.targetR;
+        n.vx = 0;
+        n.vy = 0;
+      });
+    });
+
+    // Anchor the biggest guild at the center.
+    if (biggest) {
+      biggest.x = 0;
+      biggest.y = 0;
+      biggest.pinned = true;
+      biggest.px = 0;
+      biggest.py = 0;
+      biggest.targetR = 0;
+    }
+
+    orderedData = { guildMap: guildMap, centerNode: biggest, nodes: ns, links: ls, maxStep: maxStep };
+    nodes = ns;
+    links = ls;
+
+    ORDERED_SIM.rep = TUNE.rep;
+    ORDERED_SIM.radial = TUNE.radial;
+    for (var i = 0; i < 60; i++) simulate(ORDERED_SIM);
+  }
+
+  function applyTuning() {
+    var rep = document.getElementById('tuneRep');
+    var join = document.getElementById('tuneJoin');
+    var leave = document.getElementById('tuneLeave');
+    var radial = document.getElementById('tuneRadial');
+    var gap = document.getElementById('tuneGap');
+    if (!rep) return;
+
+    TUNE.rep = parseFloat(rep.value);
+    TUNE.join = parseFloat(join.value);
+    TUNE.leave = parseFloat(leave.value);
+    TUNE.radial = parseFloat(radial.value);
+    TUNE.gap = parseFloat(gap.value);
+
+    document.getElementById('tuneRepVal').textContent = TUNE.rep;
+    document.getElementById('tuneJoinVal').textContent = TUNE.join.toFixed(1);
+    document.getElementById('tuneLeaveVal').textContent = TUNE.leave.toFixed(2);
+    document.getElementById('tuneRadialVal').textContent = TUNE.radial.toFixed(3);
+    document.getElementById('tuneGapVal').textContent = TUNE.gap;
+
+    ORDERED_SIM.rep = TUNE.rep;
+    ORDERED_SIM.radial = TUNE.radial;
+
+    if (state.mode === 'ordered' && links.length) {
+      for (var i = 0; i < links.length; i++) {
+        var l = links[i];
+        if (l.kind === 'member') l.springMul = TUNE.join;
+        else if (l.kind === 'leave') l.springMul = TUNE.leave;
+      }
+      for (var j = 0; j < nodes.length; j++) {
+        var n = nodes[j];
+        if (n.type === 'player' && n.lane !== undefined) {
+          n.targetR = n.baseR + (n.lane - (n.lanes - 1) / 2) * TUNE.gap;
+        }
+      }
+      if (!running) { computeView(true); draw(); }
+    }
+  }
+
+  function resetTuning() {
+    document.getElementById('tuneRep').value = 7000;
+    document.getElementById('tuneJoin').value = 2.0;
+    document.getElementById('tuneLeave').value = 0.1;
+    document.getElementById('tuneRadial').value = 0.005;
+    document.getElementById('tuneGap').value = 40;
+    applyTuning();
+  }
+
+  window.applyTuning = applyTuning;
+  window.resetTuning = resetTuning;
+
+  // ---- Aethersea preset (gated by a quiz) ----
+  var AETHERSEA_DATA =
+    'Adeep\tHiddenGrass, 天国, Aethersea\n' +
+    'Bacunawa\t天国, Aethersea\n' +
+    'Cheon\t天国, Aethersea\n' +
+    'Etri\tBakunawa, 天国, Aethersea\n' +
+    'Jaeus\tEinsof, Wysteria, 天国, Aethersea\n' +
+    'Josh\tWysteria, 天国, Aethersea\n' +
+    'Kay\tWysteria, 天国, Aethersea\n' +
+    'Kazuno\tAssassinsPH, 天国, Aethersea\n' +
+    'lorddy\tEndfield, Wysteria, 天国, Aethersea\n' +
+    'Smoke\t天国, Aethersea\n' +
+    'Using\tHiddenGrass, 天国, Aethersea\n' +
+    'Mimazhr\t, Aethersea\n' +
+    'Entice\tWysteria, 天国, Aethersea\n' +
+    'Surdz\t, Aethersea\n' +
+    'HanBaoBao\tLunarcrest, YAKUZA, Aethersea\n' +
+    'Neifile\tLunarcrest, YAKUZA, Aethersea\n' +
+    'Augustus\tHeavenlySeas, Aethersea\n' +
+    'Chrizzie\tHeavenlySeas, Aethersea\n' +
+    'JadedC\tHeavenlySeas, Aethersea\n' +
+    'Randolloneus\tHeavenlySeas, Aethersea\n' +
+    'Starly\tHeavenlySeas, Aethersea\n' +
+    'Vaiz\tHeavenlySeas, Aethersea\n' +
+    'Lamy\tLunarcrest, YAKUZA, Aethersea\n' +
+    'Jshen\tDriftingclouds, Aethersea\n' +
+    'Sunther\tLunarcrest, YAKUZA, Aethersea\n' +
+    'meowkaera\tfamilyfriendly, 老不死们, Leafside, Aethersea\n' +
+    'Feng\tLeafside, Aethersea\n' +
+    'Shenyue\tChillaxing, Syntax, Aethersea\n' +
+    'Daf\tEinsof, Aethersea\n' +
+    'Yushou\tOrchid, Aethersea\n' +
+    'Xue\tAbaddon, 天国, Wysteria, Aethersea\n' +
+    '沈yuan\tMelonsPier, Aethersea\n' +
+    'The-Voidz\tKHAOTIC (EU Top 7), Aethersea\n' +
+    'barurut\tBakunawa, Whitefox, Aethersea\n' +
+    'Freyer\tBakunawa, Whitefox, Aethersea\n' +
+    'Hoon\tBakunawa, Whitefox, Aethersea\n' +
+    'Kush\tBakunawa, Whitefox, Aethersea\n' +
+    'Lexzy\tBakunawa, Whitefox, Aethersea\n' +
+    'Lunaerys\tBakunawa, Aethersea\n' +
+    'Omu\tBakunawa, Whitefox, Aethersea\n' +
+    'Ribin\tBakunawa, Whitefox, Aethersea\n' +
+    'Vinci\tBakunawa, Whitefox, Aethersea\n' +
+    'Xyruvial\tBakunawa, Whitefox, Aethersea\n' +
+    'XieHart\tBakunawa, Whitefox, Aethersea\n' +
+    'Xolenn\tBakunawa, Whitefox, Aethersea\n' +
+    'Arilles\tSG Kopitiam, Aethersea\n' +
+    'Froggy\tSG Kopitiam, Aethersea\n' +
+    'Jesoiur\tSG Kopitiam, Aethersea\n' +
+    'Linsanity\tSG Kopitiam, Aethersea\n' +
+    'onething\tSG Kopitiam, Aethersea\n' +
+    'Rynn\tSG Kopitiam, Aethersea\n' +
+    'shalltear\tEndfield, Orchid, Aethersea\n' +
+    'XDizzy\tSG Kopitiam, Aethersea\n' +
+    'Allistaer\tEndfield, Orchid, Aethersea\n' +
+    'mao\tEndfield, Orchid, Aethersea\n' +
+    'mong\tEndfield, Orchid, Aethersea\n' +
+    'Syvr\tEndfield, Orchid, Aethersea\n' +
+    'jQuann\tHAVOK (NA Top 20), Aethersea\n' +
+    'Gjallarhorn\tLunar, Aethersea\n' +
+    'aesgir\tGunzai, Bakunawa, NERFUS, Aethersea\n' +
+    'dreifon\tGunzai, Bakunawa, NERFUS, Aethersea\n' +
+    'SiobhanOG\tGunzai, Bakunawa, NERFUS, Aethersea\n' +
+    'Juno\tOrchid, Aethersea\n' +
+    'vaustinee\tStarbound, Aethersea\n' +
+    'Patrokhlus\tAstralZephyr, CASTLE, Aethersea\n' +
+    'Velvet\tBHT, Aethersea\n' +
+    'Law\tFairyTails, Aethersea\n' +
+    'Miruruku\tLunarcrest, YAKUZA, Lollipop, Aethersea\n' +
+    'Yami花\tLollipop, Aethersea\n' +
+    'Jiho\tTiramisu, Aethersea\n' +
+    'Michiru\tParagon, Crimson Reverie, Aethersea\n' +
+    'Qifrey\tAlcatraz, Aethersea\n' +
+    'sharkypie\tTangMen, Aethersea\n' +
+    'ZhangSiran\tHighheavensect, Shadowlily, Aethersea\n' +
+    'Lelouch\tHalari, Aethersea\n' +
+    'NamsuXVII\tHalari, Aethersea\n' +
+    'Fatalbern\tNaldies, Aethersea\n' +
+    'SmallApple\tNaldies, Aethersea\n' +
+    'Yianni\tSaints, Aethersea\n' +
+    'Ei\tECL,Paragon, Saints, Aethersea\n' +
+    'yumi\tAbaddon, Saints, Aethersea\n' +
+    'WinterMoon\tStargazer, Aethersea\n' +
+    'veli\tVoidHarvestID, NightbornID, Abaddon, Havoc, Sushi, LittleVillains, Aethersea\n' +
+    'Nabby\tJynari, Moondrop, Endfield, Orchid, Sushi, LittleVillains, Aethersea';
+
+  var AETHERSEA_QUIZ = [
+    { q: 'Using why you ____', a: 'here' },
+    { q: "bitch that's my ____", a: 'chicken' },
+    { q: 'kill that ____', a: 'kid' }
+  ];
+  var activeQuiz = null;
+
+  window.openAetherseaQuiz = function() {
+    activeQuiz = AETHERSEA_QUIZ[Math.floor(Math.random() * AETHERSEA_QUIZ.length)];
+    document.getElementById('quizQuestion').textContent = activeQuiz.q;
+    document.getElementById('quizAnswer').value = '';
+    document.getElementById('quizError').textContent = '';
+    document.getElementById('quizModal').style.display = 'flex';
+    setTimeout(function() { document.getElementById('quizAnswer').focus(); }, 30);
+  };
+
+  window.closeQuiz = function() {
+    document.getElementById('quizModal').style.display = 'none';
+    activeQuiz = null;
+  };
+
+  window.submitQuiz = function() {
+    if (!activeQuiz) return;
+    var val = String(document.getElementById('quizAnswer').value || '').trim().toLowerCase();
+    if (val === activeQuiz.a.toLowerCase()) {
+      window.closeQuiz();
+      document.getElementById('rosterInput').value = AETHERSEA_DATA;
+      window.generateMap();
+    } else {
+      document.getElementById('quizError').textContent = 'Wrong answer — try again.';
+    }
+  };
+
+  function orderedNodeHi(n) {
+    if (state.selectedPlayerName) {
+      if (n.type === 'player') return n.name === state.selectedPlayerName;
+      return n.members.indexOf(state.selectedPlayerName) !== -1;
+    }
+    if (state.selectedGuildName) {
+      if (n.type === 'guild') return n.name === state.selectedGuildName;
+      return n.guild === state.selectedGuildName;
+    }
+    return true;
+  }
+
+  function orderedLinkHi(l) {
+    if (state.selectedPlayerName) return l.s.name === state.selectedPlayerName;
+    if (state.selectedGuildName) return l.t.name === state.selectedGuildName;
+    return true;
+  }
+
+  function drawOrdered() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    if (!orderedData || nodes.length === 0) {
+      ctx.fillStyle = '#446688';
+      ctx.font = '14px "Comic Sans MS", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('No join order to display', W / 2, H / 2);
+      return;
+    }
+
+    var selecting = !!(state.selectedPlayerName || state.selectedGuildName);
+
+    ctx.save();
+    ctx.translate(view.ox, view.oy);
+    ctx.scale(view.scale, view.scale);
+
+    var i, n;
+
+    // edges: join a guild (solid cyan) + leave previous guild (dashed orange)
+    for (i = 0; i < links.length; i++) {
+      var l = links[i];
+      var hi = orderedLinkHi(l);
+      ctx.globalAlpha = selecting ? (hi ? 0.85 : 0.05) : (l.kind === 'leave' ? 0.3 : 0.2);
+
+      if (l.kind === 'leave') {
+        ctx.strokeStyle = '#ff9944';
+        ctx.setLineDash([7 / view.scale, 5 / view.scale]);
+        ctx.lineWidth = (hi && selecting ? 1.6 : 1) / view.scale;
+      } else {
+        ctx.strokeStyle = '#66ccff';
+        ctx.setLineDash([]);
+        ctx.lineWidth = (hi && selecting ? 1.3 : 0.7) / view.scale;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(l.s.x, l.s.y);
+      ctx.lineTo(l.t.x, l.t.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    ctx.globalAlpha = 1;
+
+    // nodes
+    var labelSize = Math.max(10 / view.scale, 1);
+    var labelPlayers = true;
+
+    for (i = 0; i < nodes.length; i++) {
+      n = nodes[i];
+      var hiN = orderedNodeHi(n);
+      ctx.globalAlpha = selecting ? (hiN ? 1 : 0.2) : 1;
+
+      if (n.type === 'guild') {
+        var r = n.r;
+        ctx.save();
+        ctx.translate(n.x, n.y);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = COL_GUILD;
+        ctx.strokeStyle = COL_GUILD_STROKE;
+        ctx.lineWidth = 2 / view.scale;
+        ctx.fillRect(-r / 1.4, -r / 1.4, (r / 1.4) * 2, (r / 1.4) * 2);
+        ctx.strokeRect(-r / 1.4, -r / 1.4, (r / 1.4) * 2, (r / 1.4) * 2);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = COL_PLAYER;
+        ctx.strokeStyle = COL_PLAYER_STROKE;
+        ctx.lineWidth = 2 / view.scale;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (i = 0; i < nodes.length; i++) {
+      n = nodes[i];
+      if (!orderedNodeHi(n)) continue;
+      if (n.type === 'player' && !labelPlayers) continue;
+      if (n.type === 'player' && state.selectedPlayerName && n.name !== state.selectedPlayerName) continue;
+
+      ctx.font = (n.type === 'guild' ? 'bold ' : '') +
+        (n.type === 'guild' ? labelSize : labelSize * 0.7) + 'px "Comic Sans MS", sans-serif';
+      ctx.fillStyle = n.type === 'guild' ? '#ffe9a8' : '#dff3ff';
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 3 / view.scale;
+      var ly;
+      if (n.type === 'guild') {
+        ly = n.y + n.r * 1.05 + labelSize;
+      } else {
+        ly = n.labelAbove
+          ? n.y - (n.r + labelSize * 0.7)
+          : n.y + n.r + labelSize * 0.9;
+      }
+      ctx.lineWidth = 3 / view.scale;
+      ctx.strokeStyle = 'rgba(3,8,20,0.9)';
+      ctx.strokeText(n.label, n.x, ly);
+      ctx.fillText(n.label, n.x, ly);
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function showOrderedTooltip(n, mx, my) {
+    var html;
+    if (n.type === 'guild') {
+      html = '<div class="tt-name">🏰 ' + esc(n.label) + '</div>' +
+        '<div class="tt-sub">' + n.count + ' visit' + (n.count === 1 ? '' : 's') +
+        ' · avg step ' + (n.avgStep !== undefined ? (n.avgStep + 1).toFixed(1) : '?') + '</div>';
+    } else {
+      html = '<div class="tt-name">👤 ' + esc(n.label) + '</div>' +
+        '<div class="tt-sub">' + ordinal(n.step + 1) + ' guild' +
+        (n.guild ? ' · ' + esc(n.guild) : ' · no origin') + '</div>';
+    }
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    var bx = mapBox.getBoundingClientRect();
+    var tx = mx + 14, ty = my + 14;
+    if (tx + tooltip.offsetWidth > bx.width - 6) tx = mx - tooltip.offsetWidth - 14;
+    if (ty + tooltip.offsetHeight > bx.height - 6) ty = my - tooltip.offsetHeight - 14;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top = ty + 'px';
+  }
+
+  function renderList() {
+    var html = '';
+    state.guildList.forEach(function(g) {
+      var chips = g.members.map(function(nm) { return '<span class="chip">' + esc(nm) + '</span>'; }).join('');
+      html += '<div class="list-guild"><h3>🏰 ' + esc(g.label) +
+        ' <span class="list-count">' + g.count + ' member' + (g.count === 1 ? '' : 's') + '</span></h3>' +
+        '<div class="chips">' + chips + '</div></div>';
+    });
+    var unaff = state.players.filter(function(p) { return !p.guilds || p.guilds.length === 0; });
+    if (unaff.length) {
+      html += '<div class="list-guild"><h3>❓ No Origin Recorded <span class="list-count">' +
+        unaff.length + ' member' + (unaff.length === 1 ? '' : 's') + '</span></h3><div class="chips">' +
+        unaff.map(function(p) { return '<span class="chip">' + esc(p.name) + '</span>'; }).join('') +
+        '</div></div>';
+    }
+    listBox.innerHTML = html || '<p style="color:#667799;padding:20px;">No data.</p>';
+  }
+
+  function renderHistory() {
+    var html = '';
+    var members = state.players.slice().sort(function(a, b) {
+      return String(a.name).localeCompare(String(b.name));
+    });
+    members.forEach(function(p) {
+      var chain = (p.guilds && p.guilds.length)
+        ? p.guilds.map(function(g) { return '<span class="chip">' + esc(g) + '</span>'; }).join('<span class="arrow">→</span>')
+        : '<span class="chip empty">no origin</span>';
+      html += '<div class="history-row"><span class="history-name">' + esc(p.name) +
+        '</span><span class="history-chain">' + chain + '</span></div>';
+    });
+    listBox.innerHTML = html || '<p style="color:#667799;padding:20px;">No data.</p>';
+  }
+
+  function relayout() {
+    if (!state.graph) return;
+    if (state.mode === 'network') {
+      nodes = state.graph.nodes;
+      links = state.graph.links;
+      computeView(true);
+    } else if (state.mode === 'clusters') {
+      layoutClusters();
+      computeView(true);
+    } else if (state.mode === 'radial') {
+      layoutRadial();
+      computeView(true);
+    } else if (state.mode === 'matrix') {
+      layoutMatrix();
+    } else if (state.mode === 'flow') {
+      layoutFlow();
+      computeView(true);
+    } else if (state.mode === 'ordered') {
+      layoutOrdered();
+      computeView(true);
+    }
+  }
+
+  window.setMode = function(m) {
+    state.mode = m;
+    var btns = document.querySelectorAll('.mode-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('active', btns[i].getAttribute('data-mode') === m);
+    }
+
+    var tunePanel = document.getElementById('tunePanel');
+    if (tunePanel) tunePanel.style.display = (m === 'ordered') ? '' : 'none';
+
+    tooltip.style.display = 'none';
+
+    if (m === 'list' || m === 'history') {
+      stop();
+      mapBox.style.display = 'none';
+      listBox.style.display = '';
+      if (state.graph) { if (m === 'history') renderHistory(); else renderList(); }
+      return;
+    }
+
+    listBox.style.display = 'none';
+    mapBox.style.display = '';
+
+    if (!state.graph) { mapEmpty.style.display = ''; return; }
+
+    mapEmpty.style.display = 'none';
+    resize();
+    relayout();
+
+    if (m === 'network' || m === 'ordered') { start(); draw(); }
+    else { stop(); draw(); }
+
+    if (m === 'matrix') {
+      mapHint.textContent = 'Hover a cell to see how many members two guilds share';
+    } else if (m === 'flow') {
+      mapHint.textContent = 'Join-order flow · left → right is time · hover a guild bar · click to highlight its journeys';
+    } else if (m === 'ordered') {
+      mapHint.textContent = 'Guilds shown once · solid cyan = joined, dashed orange = left · scroll to zoom · drag background to pan · double-click to reset';
+    } else if (m === 'clusters') {
+      mapHint.textContent = 'Guilds ordered left → right by join order · scroll to zoom · drag background to pan · double-click to reset';
+    } else if (m === 'radial') {
+      mapHint.textContent = 'Guilds ordered clockwise by join order · scroll to zoom · drag background to pan · double-click to reset';
+    } else {
+      mapHint.textContent = 'Drag nodes to rearrange · scroll to zoom · drag background to pan · double-click to reset';
+    }
+  };
+
+  window.generateMap = function() {
+    var text = document.getElementById('rosterInput').value;
+    var players = parseRoster(text);
+
+    if (players.length === 0) {
+      document.getElementById('parseInfo').textContent = '⚠ No valid lines found — use Name<TAB>Guild1, Guild2';
+      return;
+    }
+
+    state.players = players;
+    state.graph = buildGraph(players);
+    state.guildList = guildListFromGraph(state.graph);
+    state.guildOrder = computeGuildOrder(players);
+    state.playerGuilds = {};
+    players.forEach(function(p) { state.playerGuilds[p.name] = p.guilds; });
+    state.selectedGuildName = null;
+    state.selectedPlayerName = null;
+    orderedData = null;
+    view.zoom = 1;
+    view.panX = 0;
+    view.panY = 0;
+
+    document.getElementById('parseInfo').textContent =
+      '✓ ' + players.length + ' members · ' + state.guildList.length + ' guilds';
+
+    // pre-warm network layout
+    nodes = state.graph.nodes;
+    links = state.graph.links;
+    for (var i = 0; i < 320; i++) simulate();
+
+    renderStats(players, state.graph);
+
+    if (state.mode === 'list' || state.mode === 'history') {
+      stop();
+      mapBox.style.display = 'none';
+      listBox.style.display = '';
+      if (state.mode === 'history') renderHistory(); else renderList();
+      return;
+    }
+
+    listBox.style.display = 'none';
+    mapBox.style.display = '';
+    mapEmpty.style.display = 'none';
+    resize();
+    relayout();
+
+    if (state.mode === 'network' || state.mode === 'ordered') { start(); draw(); }
+    else { stop(); draw(); }
+  };
+
+  window.clearAll = function() {
+    document.getElementById('rosterInput').value = '';
+    document.getElementById('parseInfo').textContent = '';
+    document.getElementById('statsBox').style.display = 'none';
+    mapEmpty.style.display = '';
+    tooltip.style.display = 'none';
+    state.players = [];
+    state.graph = null;
+    state.guildList = [];
+    state.playerGuilds = {};
+    state.selectedGuildName = null;
+    state.selectedPlayerName = null;
+    matrixData = null;
+    matrixGeom = null;
+    flowData = null;
+    orderedData = null;
+    view.zoom = 1;
+    view.panX = 0;
+    view.panY = 0;
+    stop();
+    nodes = [];
+    links = [];
+    listBox.innerHTML = '';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+  };
+
+  // ---- interaction ----
+  function isPanZoomMode() {
+    return state.mode === 'network' || state.mode === 'ordered' ||
+           state.mode === 'clusters' || state.mode === 'radial';
+  }
+
+  canvas.addEventListener('mousedown', function(e) {
+    if (!isPanZoomMode()) return;
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var n = pickNode(mx, my);
+    if (n) {
+      dragging = n;
+      dragMoved = false;
+      canvas.classList.add('dragging');
+      n.vx = 0; n.vy = 0;
+    } else {
+      panning = { x: mx, y: my, ox: view.panX, oy: view.panY };
+      dragMoved = false;
+      canvas.classList.add('dragging');
+    }
+  });
+
+  canvas.addEventListener('wheel', function(e) {
+    if (!isPanZoomMode() || nodes.length === 0) return;
+    e.preventDefault();
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var wp = toWorld(mx, my);
+    var factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+    view.zoom = Math.max(0.4, Math.min(6, view.zoom * factor));
+    computeView(true);
+    view.panX += mx - (view.ox + wp.x * view.scale);
+    view.panY += my - (view.oy + wp.y * view.scale);
+    computeView(true);
+    if (!running) draw();
+  }, { passive: false });
+
+  canvas.addEventListener('dblclick', function() {
+    if (!isPanZoomMode()) return;
+    view.zoom = 1;
+    view.panX = 0;
+    view.panY = 0;
+    computeView(true);
+    if (!running) draw();
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var inside = mx >= 0 && my >= 0 && mx <= rect.width && my <= rect.height;
+
+    if (panning) {
+      view.panX = panning.ox + (mx - panning.x);
+      view.panY = panning.oy + (my - panning.y);
+      dragMoved = true;
+      tooltip.style.display = 'none';
+      if (!running) { computeView(true); draw(); }
+      return;
+    }
+
+    if (dragging) {
+      var wp = toWorld(mx, my);
+      dragging.x = wp.x;
+      dragging.y = wp.y;
+      if (dragging.pinned) { dragging.px = wp.x; dragging.py = wp.y; }
+      dragging.vx = 0; dragging.vy = 0;
+      dragMoved = true;
+      tooltip.style.display = 'none';
+      return;
+    }
+
+    if (state.mode === 'list' || state.mode === 'history') return;
+
+    if (state.mode === 'flow') {
+      if (!inside) { tooltip.style.display = 'none'; canvas.style.cursor = 'default'; return; }
+      var fnd = pickFlowNode(toWorld(mx, my));
+      if (fnd) { showFlowTooltip(fnd, mx, my); canvas.style.cursor = 'pointer'; }
+      else { tooltip.style.display = 'none'; canvas.style.cursor = 'default'; }
+      return;
+    }
+
+    if (state.mode === 'ordered') {
+      if (!inside || nodes.length === 0) { tooltip.style.display = 'none'; canvas.style.cursor = 'default'; return; }
+      var on = pickNode(mx, my);
+      if (on) { showOrderedTooltip(on, mx, my); canvas.style.cursor = 'pointer'; }
+      else { tooltip.style.display = 'none'; canvas.style.cursor = 'default'; }
+      return;
+    }
+
+    if (state.mode === 'matrix') {
+      if (!inside) { tooltip.style.display = 'none'; canvas.style.cursor = 'default'; return; }
+      var cell = matrixCellAt(mx, my);
+      if (cell) {
+        showMatrixTooltip(cell, mx, my);
+        canvas.style.cursor = 'pointer';
+      } else {
+        tooltip.style.display = 'none';
+        canvas.style.cursor = 'default';
+      }
+      return;
+    }
+
+    if (!inside || nodes.length === 0) { tooltip.style.display = 'none'; return; }
+    var n = pickNode(mx, my);
+    showTooltip(n, mx, my);
+    canvas.style.cursor = n ? 'pointer' : 'grab';
+  });
+
+  window.addEventListener('mouseup', function() {
+    if (dragging) {
+      dragging = null;
+      canvas.classList.remove('dragging');
+    }
+    if (panning) {
+      panning = null;
+      canvas.classList.remove('dragging');
+    }
+  });
+
+  canvas.addEventListener('click', function(e) {
+    if (dragMoved) { dragMoved = false; return; }
+    if (state.mode === 'matrix' || state.mode === 'list' || state.mode === 'history') return;
+    var rect = canvas.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    if (state.mode === 'flow') {
+      var fnd = pickFlowNode(toWorld(mx, my));
+      if (fnd) {
+        state.selectedGuildName = (state.selectedGuildName === fnd.name) ? null : fnd.name;
+      } else {
+        state.selectedGuildName = null;
+      }
+      draw();
+      return;
+    }
+    if (state.mode === 'ordered') {
+      var on = pickNode(mx, my);
+      if (on && on.type === 'guild') {
+        state.selectedGuildName = (state.selectedGuildName === on.name) ? null : on.name;
+        state.selectedPlayerName = null;
+      } else if (on && on.type === 'player') {
+        state.selectedPlayerName = (state.selectedPlayerName === on.name) ? null : on.name;
+        state.selectedGuildName = null;
+      } else {
+        state.selectedGuildName = null;
+        state.selectedPlayerName = null;
+      }
+      draw();
+      return;
+    }
+    var n = pickNode(mx, my);
+    if (n && n.type === 'guild') {
+      state.selectedGuildName = (state.selectedGuildName === n.label) ? null : n.label;
+    } else if (!n) {
+      state.selectedGuildName = null;
+    }
+    draw();
+  });
+
+  window.addEventListener('resize', function() {
+    if (state.mode === 'list' || state.mode === 'history') return;
+    resize();
+    if (state.mode === 'matrix') { drawMatrix(); return; }
+    if (state.mode === 'flow') { computeView(true); drawFlow(); return; }
+    if (state.mode === 'ordered') { computeView(true); drawOrdered(); return; }
+    if (nodes.length) { computeView(true); draw(); }
+  });
+
+  resize();
+})();
+</script>
+
+</body>
+</html>
